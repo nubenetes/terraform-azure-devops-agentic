@@ -1,0 +1,76 @@
+# File: templates/terraform-destroy.yaml
+
+parameters:
+- name: 'environment'
+  type: string
+- name: 'SERVICE_CONNECTION_NAME'
+  type: string
+- name: 'SERVICE_CONNECTION_NAME_TFSTATE'
+  type: string
+
+jobs:
+- deployment: DestroyInfra
+  dependsOn: TerraformValidateJob
+  displayName: Destroy ${{ upper(parameters.environment) }} App-Core-Users
+  environment: ${{ parameters.environment }}
+  variables:
+    - template: ../configuration/variable-group.yaml
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        ######################################################
+        # Terraform Install
+        ######################################################
+        - task: TerraformInstaller@0
+          displayName: Terraform Install
+          inputs:
+            terraformVersion: $(TERRAFORM_VERSION)
+        ######################################################
+        # Terraform Init
+        ######################################################
+        - task: TerraformTaskV3@3
+          displayName: Terraform Init
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            backendServiceArm: ${{ PARAMETERS.SERVICE_CONNECTION_NAME_TFSTATE }}
+            backendAzureRmResourceGroupName: $(RESOURCE_GROUP_NAME_TERRAFORM_STATE)
+            backendAzureRmStorageAccountName: $(STORAGE_ACCOUNT_NAME)
+            backendAzureRmContainerName: $(CONTAINER_NAME)
+            backendAzureRmKey: '$(INFRA_NAME)-$(GIT_BRANCH)branch-${{ parameters.environment }}.tfstate'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+        ######################################################
+        # Terraform Destroy
+        ######################################################
+        - task: TerraformTaskV3@3
+          condition: ne(variables['Build.SourceBranchName'],'main')
+          # develop & other development branches
+          displayName: Terraform Destroy Develop(s) Dev/QA/UAT/Pre/Dem/Pro/Res (Enterprise DevOps Subscr)
+          inputs:
+            provider: 'azurerm'
+            command: 'destroy'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            commandOptions: >
+              -var gitbranch=$(GIT_BRANCH)
+        - task: TerraformTaskV3@3
+          condition: and(and(ne(variables['TERRAFORM_ENV'], 'pro'),ne(variables['TERRAFORM_ENV'], 'dem')),eq(variables['Build.SourceBranchName'],'main'))
+          displayName: Terraform Destroy Main Dev/QA/UAT/Pre (Enterprise DevTest Subscr)
+          inputs:
+            provider: 'azurerm'
+            command: 'destroy'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            commandOptions: >
+              -var gitbranch=$(GIT_BRANCH)
+        - task: TerraformTaskV3@3
+          displayName: Terraform Destroy Main Dem/Pro/Res (Enterprise Core Subscr)
+          condition: and(or(eq(variables['TERRAFORM_ENV'], 'pro'),eq(variables['TERRAFORM_ENV'], 'dem'),eq(variables['TERRAFORM_ENV'], 'res')),eq(variables['Build.SourceBranchName'],'main'))
+          inputs:
+            provider: 'azurerm'
+            command: 'destroy'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            commandOptions: >
+              -var gitbranch=$(GIT_BRANCH)

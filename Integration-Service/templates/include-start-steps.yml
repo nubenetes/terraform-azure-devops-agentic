@@ -1,0 +1,22 @@
+# File: templates/include-start-steps.yml
+
+steps:
+- powershell: 'ls env:'
+  displayName: 'Show env'
+- task: AzureCLI@2
+  displayName: 'run scripts/04-getkeysFromVault.ps1'   
+  name: ProduceVarStorageAccount
+  inputs:
+    azureSubscription: $(serviceConnection)
+    scriptType: 'ps'
+    scriptLocation: 'scriptPath'
+    scriptPath: 'scripts/04-getkeysFromVault.ps1'
+    arguments: '$(centerName) $(environment)'        
+- task: AzureCLI@2
+  displayName: 'run scripts/06-storageMessage-START.ps1'   
+  inputs:
+    azureSubscription: $(serviceConnection)
+    scriptType: 'ps'
+    scriptLocation: 'scriptPath'
+    scriptPath: 'scripts/06-storageMessage-START.ps1'
+    arguments: '$(resourceGroup) $(rgLocation) $(storageAccount) $(storageAccountTags) $(upnName) $(centerName)'  

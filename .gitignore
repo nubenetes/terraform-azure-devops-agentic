@@ -1,0 +1,56 @@
+# Global patterns
+.DS_Store
+*.bak
+*.tmp
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Project specific backups and internal scripts
+*BACKUP*
+*SAFE*
+*RESTORED*
+*FINAL*
+enrich_finops_strategic.py
+expand_finops.py
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfplan
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+_override.tf
+_override.tf.json
+.terraformrc
+terraform.rc
+
+# Media, Binaries and Infographics exclusion (Lightweight Repository Mandate)
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.ico
+*.pdf
+*.mp4
+*.mp3
+*.wav
+*.zip
+*.tar
+*.gz
+*.jar
+*.war
+*.ear
+*.exe
+videos/
+audio/
+slides/
+infographic/

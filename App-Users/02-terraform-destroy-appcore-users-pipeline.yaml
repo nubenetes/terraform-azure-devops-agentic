@@ -1,0 +1,27 @@
+trigger:
+- manual
+
+pool:
+  vmImage: 'ubuntu-latest' #'ubuntu-20.04'
+  # https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted
+
+# Define Variables for Environments
+variables:
+- template: configuration/shared-azure-devops-pipeline-vars.yaml
+- template: configuration/developbranch-service-connections.yaml
+- ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+  - template: configuration/mainbranch-service-connections.yaml
+- template: configuration/variable-group.yaml
+
+stages:
+- stage: TerraformDestroy
+  displayName: TerraformDestroy
+  jobs:
+    - template: templates/terraform-validate.yaml
+      parameters:
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+    - template: templates/terraform-destroy.yaml
+      parameters:
+        environment: ${{ variables.ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_DEV }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}

@@ -1,0 +1,50 @@
+# configuration/core.yml
+
+parameters:
+  - name: upn
+    displayName: User Principal Name (upn)
+    type: string
+    default: 'cloud-admin@example.com'     # 'cloud-admin@example.com' , 'cloud-admin@example.com' , 'cloud-admin@example.com' , etc
+  - name: AETitle     # Should NOT CONTAIN special symbols such as <>\'&    ---> Due to automatic character escape feature of ConvertTo-Json in 08-assign-customSecurityAttributes.ps1
+    displayName: Center Name - AETitle Custom Security Attribute
+    type: string
+    default: 'client-example'     # 'enterprise' , 'client-example' , etc
+
+# Define Variables for Environments
+variables:
+  MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
+  MAVEN_JVM_OPTS: "-Xmx3072m" # maven jvm params
+  MAVEN_OPTIONS: "-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -Denvironment=core"
+  POM_FILE: "pom.xml"
+  # WinSW Version:
+  winswRelease: '2.12.0'
+  # Java Version. The below settings override "java.version" property in pom.xml. https://www.baeldung.com/maven-java-version
+  javaRelease: '11.0.14'
+  task_maven3_jdkVersionOption: '1.11' # Java 17 = '1.17' , Java 11 = '1.11' , etc
+  # Maven Version:
+  mavenRelease: '3.9.3'
+  # Maven Profile with Azure Artifacts Settings:
+  azureArtifactsMavenProfile: 'azureDevOps'  # 'azureDevOps' maven profile defined in pom.xml with artifactory settings. Activated within maven options with the '-PazureDevOps' parameter
+  # Download URLs of Public Artifacts:
+  WINSW_DOWNLOAD_URL: 'https://github.com/winsw/winsw/releases/download/v2.12.0/WinSW-x64.exe'
+  JRE_DOWNLOAD_URL: 'https://github.com/adoptium/temurin11-binaries/releases/download/jdk-127.0.0.1%2B1/OpenJDK11U-jre_x64_windows_hotspot_11.0.14.1_1.zip'
+  MAVEN_DOWNLOAD_URL: "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.3/apache-maven-3.9.3-bin.zip"
+  # Conditional Flags:
+  enableConditionAzureArtifacts: 'true' # enable Azure Artifacts instead of downloading artifacts from Internet. Do we download public artifacts from internet instead of azure artifact repo ?
+  enableConditionGitCloneSrcFromBitBucket: 'true' # true/false  - do we enable a git clone from bitbucket repo with integration-service source code obtained from there?
+  enableConditionCopyPomFileFromBitBucket: 'true'
+  enableConditionSonarQubeRunAnalysis: 'false' # true/false - do we enable SonarQubeRunAnalysis in Azure Task Maven@3 ?
+  # integration-service On-Premise App Security:
+  serviceConnection: "svccon-integration-service-pro"  # Example: 'enterprise Example-Dev-Subscription' with RG 'dev-appcResourceGroup' (app-core DevTest environment)
+  resourceGroup: "coreResourceGroup"  # 'dev-appcResourceGroup' , 'test-appcResourceGroup' , 'coreResourceGroup' , etc
+  rgLocation: 'northeurope'
+  appName: "appr-integration-service-onprem-${{ lower(parameters.AETitle) }}-core"  # Application Name in AAD - Based on AETitle and Environment
+  storageContainerName: "co-integration-service-onprem-${{ lower(parameters.AETitle) }}-core"
+  blobName: "blob_integration-service_${{ lower(parameters.AETitle) }}_core"
+  storageAccountTags: "env=core"
+  upnName: ${{ lower(parameters.upn) }}    # lower() -> change to lowercase (capital letters can arise errors when creating azure resources)
+  centerName: ${{ lower(parameters.AETitle) }}
+  # $centerName should NOT CONTAIN special symbols such as <>\'&    ---> Due to automatic character escape feature of ConvertTo-Json in 08-assign-customSecurityAttributes.ps1
+  environment: core
+  # Bitbucket repo:
+  tools.ref: $[ resources.repositories['integration-service-Bitbucket-Repo'].ref ]   # https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/multi-repo-checkout

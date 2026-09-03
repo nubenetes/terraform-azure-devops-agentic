@@ -1,0 +1,3 @@
+# Same license than DCM4CHE
+exclude gaPattern com\.sun\.media.*
+exclude scope test

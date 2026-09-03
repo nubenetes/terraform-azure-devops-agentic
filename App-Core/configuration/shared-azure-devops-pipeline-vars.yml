@@ -1,0 +1,69 @@
+# configuration/shared-azure-devops-pipeline-vars.yml
+
+# Define Variables for Environments
+variables:
+  TERRAFORM_VERSION: '1.5.2' #'latest'
+  INFRA_NAME: 'appcore'
+  RESOURCE_GROUP_NAME_TERRAFORM_STATE: 'rg-azuredevops-pro'
+  STORAGE_ACCOUNT_NAME: 'sttfstateEnterprisepro'
+    # Applied settings in Azure Portal - Create a storage account:
+    # Standard
+    # Geo-zone-redundant storage (GZRS): Optimal data protection solution that includes the offering of both GRS and ZRS. Recommended for critical data scenarios.
+    # Make read access to data available in the event of regional unavailability.
+    # Security:
+    #   Require secure transfer for REST API operations
+    #   Allow enabling public access on containers
+    #   Enable storage account key access
+    #   Default to Azure Active Directory authorization in the Azure portal (When this property is enabled, the Azure portal authorizes requests to blobs, queues, and tables with Azure Active Directory by default)
+    #   Minimum TLS version: Version 1.2
+    #   Permitted scope for copy opertions (preview): From storage accounts in the same Azure AD tenant (Restrict copy operations from source storage accounts that are within the same Azure AD tenant or that have a private link to the same
+    #     virtual network as this storage account)
+    # Blob storage:
+    #   Allow cross-tenant replication
+    #   Access tier: Hot (Frequently accessed data and day-to-day usage scenarios).
+    # Network connectivity:
+    #   Network access: Enable public access from all networks
+    #   Network routing: Routing preference - Microsoft network routing
+    # Data protection:
+    #   Enable soft delete for blobs: Soft delete enables you tu recover blobs that were previously marked for deletion, including blobs that were overwritten.
+    #     Days to retain deleted blobs: 7
+    #   Enable soft delete for containers: Soft delete enables you to recover containers that were previously marked for deletion.
+    #     Days to retain deleted containers: 7
+    #   Enable soft delete for file shares
+    #     Days to retain deleted file shares: 7
+    # Tracking:
+    #   Enable versioning for blobs: Use versioning to automatically maintain previous versions of your blobs.
+    #     Consider your workloads, their impact on the number of versions created, and the resulting costs. Optimize costs by automatically managing the data lifecycle.
+    #   Enable blob change feed: Keep track of create, modification, and delete changes to blobs in your account.
+    #     Delete change feed logs after (in days): 7
+    # Access control:
+    #   Disable version-level immutability support: Allows you to set time-based retention policy on the account-level that will apply to all blob versions. Enable this feature to set a default policy at the account level.
+    #   Without enabling this, you can still set a default policy at the container level or set policies for specific blob versions. Versioning is required for this property to be enabled
+    # Encryption:
+    #   Encryption type: Microsoft-managed keys (MMK)
+    #   Enable support for customer-managed keys: Blobs and files only
+    #   Disable infrastructure encryption: By default, Azure encrypts storage account data at rest. Infrastructure encryption adds a second layer of encryption to your storage account's data.
+    # Tags:
+    #   env: pro
+    #   Environment: production
+  CONTAINER_NAME: 'citfstatefilespro'
+    # Applied settings in Azure Portal - New container:
+    # Public access level: Private (no anonymous access)
+    # Enable version-level immutability support: Specify whether to enable version-level immutability for this container. Version-level immutability can be applied to specific blobs (any or all) in the container.
+    #     For blobs with version-level immutability set, blob overwrites will still be allowed, but Azure will maintain immutable versions of each blob. Once enabled, this setting cannot be removed.
+    #     Versioning is required for this feature, and cannot be disabled on a storage account while version-level policies are in place.
+  FOLDER_WITH_TERRAFORM_FILES: '$(System.DefaultWorkingDirectory)/App-Core/terraform-manifests'
+  ARTIFACTS_FOLDER_WITH_TERRAFORM_FILES: 'terraform-manifests-out'
+  FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE: '$(Pipeline.Workspace)/$(ARTIFACTS_FOLDER_WITH_TERRAFORM_FILES)'
+  ARTIFACTS_FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN: 'generated-terraform-plan'
+  FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE: '$(Pipeline.Workspace)/$(ARTIFACTS_FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN)'
+  DEV_ENVIRONMENT: 'dev'  # Development & Development Test
+  QA_ENVIRONMENT: 'qa'    # Integration Test
+  UAT_ENVIRONMENT: 'uat'  # User Acceptance Test
+  PRE_ENVIRONMENT: 'pre'  # aka Staging
+  PRO_ENVIRONMENT: 'pro'  # Production
+  DEMO_ENVIRONMENT: 'dem' # Demo
+  RESEARCH_ENVIRONMENT: 'res' # Research & Development (Discovery)
+  tools.ref: $[ resources.repositories['MongoDB-Bitbucket-Repo'].ref ]   # https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/multi-repo-checkout
+  ARTIFACTS_FOLDER_WITH_MONGODB_DATA: 'mongodb-out'
+  KUBELOGIN_DOWNLOAD_URL: 'https://github.com/Azure/kubelogin/releases/download/v0.0.30/kubelogin-linux-amd64.zip'

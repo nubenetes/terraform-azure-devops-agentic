@@ -1,0 +1,12 @@
+# configuration/mainbranch-service-connections.yml
+
+# Define Azure DevOps Service Connections applied on this repo's main branch
+variables:
+  SERVICE_CONNECTION_NAME_TFSTATE:  'svccon-appcore-devops'  # Azure Subscription with TFSTATE - Enterprise Example-DevOps-Subscription
+  SERVICE_CONNECTION_NAME_DEV:      'svccon-appcore-dev'     # Enterprise Example-Dev-Subscription
+  SERVICE_CONNECTION_NAME_QA:       'svccon-appcore-dev'     # Enterprise Example-Dev-Subscription
+  SERVICE_CONNECTION_NAME_UAT:      'svccon-appcore-dev'     # Enterprise Example-Dev-Subscription
+  SERVICE_CONNECTION_NAME_PRE:      'svccon-appcore-dev'     # Enterprise Example-Dev-Subscription
+  SERVICE_CONNECTION_NAME_PRO:      'svccon-appcore-pro'     # Enterprise Example-Prod-Subscription
+  SERVICE_CONNECTION_NAME_DEMO:     'svccon-appcore-pro'     # Enterprise Example-Prod-Subscription
+  SERVICE_CONNECTION_NAME_RESEARCH: 'svccon-appcore-pro'     # Enterprise Example-Prod-Subscription

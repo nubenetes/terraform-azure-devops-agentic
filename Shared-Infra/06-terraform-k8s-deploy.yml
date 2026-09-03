@@ -1,0 +1,100 @@
+# https://learn.microsoft.com/en-us/azure/aks/devops-pipeline?pivots=pipelines-yaml
+# https://learn.microsoft.com/en-us/azure/devops/pipelines/ecosystems/kubernetes/deploy?view=azure-devops
+# https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/kubernetes-manifest-v0?view=azure-pipelines
+# https://learn.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml#kubernetes-service-connection
+    # https://www.youtube.com/watch?v=ORFWrBFwlps
+    # AKS with Kubernetes Service Connection returns "Could not find any secrets associated with the Service Account." error in Azure Pipelines: https://learn.microsoft.com/en-us/answers/questions/1051970/aks-with-kubernetes-service-connection-returns-cou
+      # https://developercommunity.visualstudio.com/t/New-Kubernetes-service-connection-causes/10138123#T-N10138393
+      # 
+# https://learnk8s.io/templating-yaml-with-code
+# https://github.com/learnk8s/templating-kubernetes/blob/master/java/README.md
+
+trigger:
+- manual
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+parameters:
+- name: 'aksENGday2'
+  displayName: 'Run kubernetes manifests against AKS ENG North Europe'
+  type: boolean
+  default: false
+- name: 'aksPROday2' 
+  displayName: 'Run kubernetes manifests against AKS PRO North Europe'
+  type: boolean
+  default: false
+
+# Define Variables for Environments
+variables:
+- template: configuration/shared-azure-devops-pipeline-vars.yml
+- template: configuration/developbranch-service-connections.yml
+- ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+  - template: configuration/mainbranch-service-connections.yml
+
+stages:
+- stage: Build
+  displayName: Build stage
+  jobs:  
+  - job: Build
+    displayName: Build job
+    # pool:
+    #   vmImage: $(vmImageName)
+    steps:
+    - task: PublishPipelineArtifact@1
+      inputs:
+        artifactName: 'manifests'
+        path: 'manifests'
+- stage: aksENG
+  displayName: Deploy stage aks ENG
+  condition: ${{parameters.aksENGday2}}
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy job
+    # pool:
+    #   vmImage: 'ubuntu-latest'
+    environment: ${{ variables.ENG_ENVIRONMENT }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifactName: 'manifests'
+              downloadPath: '$(System.ArtifactsDirectory)/manifests'
+          - task: KubernetesManifest@0
+            displayName: Deploy to Kubernetes cluster
+            inputs:
+              kubernetesServiceConnection: 'aks-neeng'
+              action: deploy
+              #namespace: "Enterprise2" #$(k8sNamespace)
+              manifests: |
+                $(System.ArtifactsDirectory)/manifests/namespace.yml
+                $(System.ArtifactsDirectory)/manifests/job.yml
+- stage: aksPRO
+  dependsOn: Build    # this removes the implicit dependency on previous stage and causes this to run in parallel
+  displayName: Deploy stage aks PRO
+  condition: ${{parameters.aksPROday2}}
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy job
+    # pool:
+    #   vmImage: 'ubuntu-latest'
+    environment: ${{ variables.ENG_ENVIRONMENT }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifactName: 'manifests'
+              downloadPath: '$(System.ArtifactsDirectory)/manifests'
+          - task: KubernetesManifest@0
+            displayName: Deploy to Kubernetes cluster
+            inputs:
+              kubernetesServiceConnection: 'aks-nepro'
+              action: deploy
+              #namespace: "Enterprise2" #$(k8sNamespace)
+              manifests: |
+                $(System.ArtifactsDirectory)/manifests/namespace.yml                
+                $(System.ArtifactsDirectory)/manifests/job.yml

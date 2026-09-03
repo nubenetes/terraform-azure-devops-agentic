@@ -1,0 +1,7 @@
+# configuration/mainbranch-service-connections.yml
+
+# Define Azure DevOps Service Connections applied on this repo's main branch
+variables:
+  SERVICE_CONNECTION_NAME_TFSTATE: 'svccon-sharedinfra-devops'  # Azure Subscription with TFSTATE - Enterprise Example-DevOps-Subscription  
+  SERVICE_CONNECTION_NAME_ENG:     'svccon-sharedinfra-devops'  # Enterprise Example-DevOps-Subscription
+  SERVICE_CONNECTION_NAME_PRO:     'svccon-sharedinfra-devops'  # Enterprise Example-DevOps-Subscription

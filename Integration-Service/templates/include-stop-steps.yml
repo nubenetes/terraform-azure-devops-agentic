@@ -1,0 +1,14 @@
+# File: templates/include-stop-steps.yml
+
+steps:
+- powershell: 'ls env:'
+  displayName: 'Show env'
+- task: AzureCLI@2
+  displayName: 'run scripts/10-storageMessage-END-URL.ps1'
+  inputs:
+    azureSubscription: $(serviceConnection)
+    scriptType: 'ps'
+    scriptLocation: 'scriptPath'
+    scriptPath: 'scripts/10-storageMessage-END-URL.ps1'
+    arguments: $(resourceGroup) $(storageAccount) $(upnName) $(centerName) '$(BlobFileDownloadUrl)'  
+    # Be core_FULL_PLACEHOLDER with the above line! BlobFileDownloadUrl var needs to be quoted like this, otherwise special chars might arise errors

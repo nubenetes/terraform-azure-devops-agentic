@@ -1,0 +1,314 @@
+{
+  "consumer": {
+    "name": "applink-onpremise"
+  },
+  "interactions": [
+    {
+      "description": "Get configuration",
+      "providerStates": [
+        {
+          "name": "MP is KNOWN"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Accept": "application/vnd.mp.v1+json",
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2NTUyMjU3NDIsIm5iZiI6MTY1NTIyNTc0MiwiZXhwIjoxNjU1MjI1ODAyLCJpc3MiOiJRQSIsImF1ZCI6IlFBIiwic3ViIjoiS0g3MFE3Rkc2NyIsIm9pZCI6IktINzBRN0ZHNjciLCJhcHBpZCI6IktINzBRN0ZHNjcifQ.hiEgJ_va_-Bxxo0hBTI-42PJpIUOt-Wd_55BqdDRq8c"
+        },
+        "matchingRules": {
+          "path": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "regex",
+                "regex": "/mp/(?<mpId>.*)/configuration"
+              }
+            ]
+          }
+        },
+        "method": "GET",
+        "path": "/mp/KH70Q7FG67/configuration"
+      },
+      "response": {
+        "body": {
+          "allowedSenders": [
+            "trustedSender"
+          ],
+          "Core-DataNode": {
+            "aeTitle": "myMP",
+            "port": "8000"
+          },
+          "id": "KH70Q7FG67",
+          "keystorePassword": "00000000-0000-0000-0000-000000000000",
+          "returnStorage-Node": {
+            "aeTitle": "myStorage-Node",
+            "host": "host",
+            "port": "8000"
+          }
+        },
+        "headers": {
+          "Content-type": "application/vnd.mp.v1+json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.allowedSenders[0]": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^[a-zA-Z0-9_-]{3,15}$"
+                }
+              ]
+            },
+            "$.Core-DataNode.aeTitle": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^[a-zA-Z0-9_-]{3,15}$"
+                }
+              ]
+            },
+            "$.Core-DataNode.port": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": ".*"
+                }
+              ]
+            },
+            "$.keystorePassword": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}$"
+                }
+              ]
+            },
+            "$.returnStorage-Node.aeTitle": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^[a-zA-Z0-9_-]{3,15}$"
+                }
+              ]
+            },
+            "$.returnStorage-Node.host": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": ".*"
+                }
+              ]
+            },
+            "$.returnStorage-Node.port": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "Report installation",
+      "providerStates": [
+        {
+          "name": "MP is KNOWN"
+        }
+      ],
+      "request": {
+        "body": {
+          "id": "KH70Q7FG67",
+          "keystorePassword": "00000000-0000-0000-0000-000000000000"
+        },
+        "headers": {
+          "Accept": "application/vnd.mp.v1+json",
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2NTUyMjU3NDUsIm5iZiI6MTY1NTIyNTc0NSwiZXhwIjoxNjU1MjI1ODA1LCJpc3MiOiJRQSIsImF1ZCI6IlFBIiwic3ViIjoiS0g3MFE3Rkc2NyIsIm9pZCI6IktINzBRN0ZHNjciLCJhcHBpZCI6IktINzBRN0ZHNjcifQ.1ixotOosADh1GETCyxfQHhW7F7kxfVsWh1UvSuUNuxk",
+          "Content-type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": ".*"
+                }
+              ]
+            },
+            "$.keystorePassword": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}$"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/mp/installation"
+      },
+      "response": {
+        "status": 409
+      }
+    },
+    {
+      "description": "Get configuration",
+      "providerStates": [
+        {
+          "name": "MP is UNKNOWN"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Accept": "application/vnd.mp.v1+json",
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2NTUyMjU3NDIsIm5iZiI6MTY1NTIyNTc0MiwiZXhwIjoxNjU1MjI1ODAyLCJpc3MiOiJRQSIsImF1ZCI6IlFBIiwic3ViIjoiS0g3MFE3Rkc2NyIsIm9pZCI6IktINzBRN0ZHNjciLCJhcHBpZCI6IktINzBRN0ZHNjcifQ.hiEgJ_va_-Bxxo0hBTI-42PJpIUOt-Wd_55BqdDRq8c"
+        },
+        "matchingRules": {
+          "path": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "regex",
+                "regex": "/mp/(?<mpId>.*)/configuration"
+              }
+            ]
+          }
+        },
+        "method": "GET",
+        "path": "/mp/KH70Q7FG67/configuration"
+      },
+      "response": {
+        "status": 404
+      }
+    },
+    {
+      "description": "Report installation",
+      "providerStates": [
+        {
+          "name": "MP is UNKNOWN"
+        }
+      ],
+      "request": {
+        "body": {
+          "id": "KH70Q7FG67",
+          "keystorePassword": "00000000-0000-0000-0000-000000000000"
+        },
+        "headers": {
+          "Accept": "application/vnd.mp.v1+json",
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2NTUyMjU3NDUsIm5iZiI6MTY1NTIyNTc0NSwiZXhwIjoxNjU1MjI1ODA1LCJpc3MiOiJRQSIsImF1ZCI6IlFBIiwic3ViIjoiS0g3MFE3Rkc2NyIsIm9pZCI6IktINzBRN0ZHNjciLCJhcHBpZCI6IktINzBRN0ZHNjcifQ.1ixotOosADh1GETCyxfQHhW7F7kxfVsWh1UvSuUNuxk",
+          "Content-type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": ".*"
+                }
+              ]
+            },
+            "$.keystorePassword": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}$"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/mp/installation"
+      },
+      "response": {
+        "status": 201
+      }
+    },
+    {
+      "description": "Report Storage-Node Health status",
+      "request": {
+        "body": {
+          "status": "DOWN",
+          "timestamp": "2000-01-01T00:00:00Z"
+        },
+        "headers": {
+          "Accept": "application/vnd.mp.v1+json",
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2NTUyMjU3NDUsIm5iZiI6MTY1NTIyNTc0NSwiZXhwIjoxNjU1MjI1ODA1LCJpc3MiOiJRQSIsImF1ZCI6IlFBIiwic3ViIjoiS0g3MFE3Rkc2NyIsIm9pZCI6IktINzBRN0ZHNjciLCJhcHBpZCI6IktINzBRN0ZHNjcifQ.1ixotOosADh1GETCyxfQHhW7F7kxfVsWh1UvSuUNuxk",
+          "Content-type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.timestamp": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "timestamp",
+                  "timestamp": "YYYY-MM-dd'T'HH:mm:ss.SSS'Z'"
+                }
+              ]
+            }
+          },
+          "path": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "regex",
+                "regex": "/mp/(?<mpId>.*)/health"
+              }
+            ]
+          }
+        },
+        "method": "POST",
+        "path": "/mp/KH70Q7FG67/health"
+      },
+      "response": {
+        "status": 201
+      }
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.3.7"
+    },
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  },
+  "provider": {
+    "name": "applink-cloud"
+  }
+}

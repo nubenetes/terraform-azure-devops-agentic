@@ -1,0 +1,78 @@
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/containers/build-image
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/containers/push-image
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/containers/acr-template
+
+# Docker Registry service connection:
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml#docker-registry-service-connection
+
+# https://github.com/microsoft/azure-pipelines-yaml
+# https://github.com/microsoft/azure-pipelines-yaml/blob/master/templates/docker-container-to-acr.yml
+
+# https://github.com/amake/innosetup-docker
+
+# ACR Tasks
+# https://docs.microsoft.com/en-us/azure/container-registry/container-registry-tasks-overview
+# https://docs.microsoft.com/en-us/azure/container-registry/container-registry-tasks-samples
+
+# Docker Tasks
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/build/docker
+
+trigger:
+- manual
+
+variables:
+  vmImageName: 'ubuntu-latest'   # Agent VM image name
+  imageName: 'innosetup'
+  dockerfilePath: 'app/Dockerfile'
+  tag: '$(Build.BuildId)'
+  dockerRegistryServiceConnection: 'svccon-acr-dev'
+  imageRepository: 'innosetup'
+  containerRegisty: 'containerregistryenterprise1.azurecr.io'
+
+stages:
+- stage: RunTest
+  displayName: RunTest stage
+  jobs:
+  - job: RunTest
+    workspace:
+      clean: all
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: Docker@2
+      displayName: Login to ACR
+      inputs:
+        command: login
+        containerRegistry: $(dockerRegistryServiceConnection)
+    - script: |
+        docker pull $(containerRegisty)/$(imageRepository)
+        docker image ls 
+        ls -la
+        pwd
+        mkdir winsw
+        chmod 777 winsw
+        cp resources/innoSetupScript_2opt.iss winsw/
+        cp resources/integration-service-onpremise-0.0.1-service.xml winsw/
+        cp resources/favicon_traans_square.ico winsw/
+        cp resources/integration-service-onpremise-1.0.0-SNAPSHOT.jar winsw/
+        echo "ls -la"
+        ls -la
+        echo "ls -la winsw/"
+        ls -la winsw/
+        echo "wget"
+        wget https://github.com/AdoptOpenJDK/openjdk15-binaries/releases/download/jdk-15.0.2%2B7/OpenJDK15U-jre_x86-32_windows_hotspot_15.0.2_7.zip
+        echo "unzip"
+        unzip OpenJDK15U-jre_x86-32_windows_hotspot_15.0.2_7.zip -d resources/
+        ln -s resources/jdk-15.0.2+7-jre resources/jdk-15.0.2
+        echo "ls -l resources/jdk-15.0.2"
+        ls -l resources/jdk-15.0.2
+        echo "docker run"
+        docker run --rm -i -v $PWD/winsw:/work $(containerRegisty)/$(imageRepository) innoSetupScript_2opt.iss
+        echo "ls -la"
+        ls -la
+        echo "ls -la winsw/"
+        ls -la winsw/
+        echo "ls -la winsw/Output"
+        ls -la winsw/Output/
+
+

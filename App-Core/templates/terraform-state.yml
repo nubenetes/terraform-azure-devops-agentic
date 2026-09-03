@@ -1,0 +1,86 @@
+# File: templates/terraform-state-rm.yml
+# https://acloudguru.com/blog/engineering/the-ultimate-terraform-cheatsheet
+# https://github.com/microsoft/azure-pipelines-terraform/tree/main/Tasks/TerraformTask/TerraformTaskV3
+
+
+# PROBLEM:
+# │ Error: Retrieving members for group with object ID: "00000000-0000-0000-0000-000000000000"
+# │
+# │   with module.us[0].azuread_group_member.testadmin["client3"],
+# │   on modules/appcore_module/20-azuread-group-user.tf line 120, in resource "azuread_group_member" "testadmin":
+# │  120: resource "azuread_group_member" "testadmin" {
+# │
+# │ GroupsClient.BaseClient.Get(): unexpected status 404 with OData error:
+# │ Request_ResourceNotFound: Resource '00000000-0000-0000-0000-000000000000'
+# │ does not exist or one of its queried reference-property objects are not
+# │ present.
+#
+# SOLUTION - RUN THIS PIPELINE:
+# Removed module.us[0].azuread_group_member.testadmin["client3"]
+# Successfully removed 1 resource instance(s).
+
+
+parameters:
+- name: 'environment'
+  type: string
+  default: 'dev'
+- name: 'SERVICE_CONNECTION_NAME_TFSTATE'
+  type: string
+  default: 'svccon-appcore-dev'
+
+jobs:
+- job: TerraformState
+  displayName: Terraform output + show + state list
+  continueOnError: false
+  variables:
+    - template: ../configuration/variable-group-with-secrets.yml
+      parameters:
+        environment: ${{ lower(parameters.environment) }}
+  steps:
+  - checkout: self
+    clean: true
+  - script: git config --system -l
+    displayName: git config system wide
+  - bash: env
+    displayName: 'Show env'
+  - task: TerraformInstaller@0
+    displayName: Terraform Install
+    inputs:
+      terraformVersion: $(TERRAFORM_VERSION)
+  - task: TerraformTaskV3@3
+    displayName: Terraform Init
+    inputs:
+      provider: 'azurerm'
+      command: 'init'
+      #commandOptions: '-upgrade'
+      commandOptions: '-migrate-state'  # "-reconfigure" or "-migrate-state" flags to use the current configuration
+      backendServiceArm: ${{ PARAMETERS.SERVICE_CONNECTION_NAME_TFSTATE }}
+      backendAzureRmResourceGroupName: $(RESOURCE_GROUP_NAME_TERRAFORM_STATE)
+      backendAzureRmStorageAccountName: $(STORAGE_ACCOUNT_NAME)
+      backendAzureRmContainerName: $(CONTAINER_NAME)
+      backendAzureRmKey: '$(INFRA_NAME)-$(GIT_BRANCH)branch-${{ parameters.environment }}.tfstate'
+      workingDirectory: '$(System.DefaultWorkingDirectory)/terraform-manifests'
+  - task: TerraformTaskV3@3
+    displayName: Terraform Output
+    inputs:
+      provider: 'azurerm'
+      command: 'output'
+      workingDirectory: '$(System.DefaultWorkingDirectory)/terraform-manifests'
+      environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME_TFSTATE }}
+  - task: TerraformTaskV3@3
+    displayName: Terraform Show (current tfstate)
+    inputs:
+      provider: 'azurerm'
+      command: 'show'
+      workingDirectory: '$(System.DefaultWorkingDirectory)/terraform-manifests'
+      environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME_TFSTATE }}
+      outputTo: 'console'
+  - task: TerraformTaskV3@3
+    displayName: Terraform state list
+    inputs:
+      provider: 'azurerm'
+      command: 'custom'
+      customCommand: 'state'
+      workingDirectory: '$(System.DefaultWorkingDirectory)/terraform-manifests'
+      commandOptions: list
+      environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME_TFSTATE }}

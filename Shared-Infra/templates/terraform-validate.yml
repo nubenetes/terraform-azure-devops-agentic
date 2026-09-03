@@ -1,0 +1,57 @@
+# File: templates/terraform-validate.yml 
+
+parameters:
+- name: 'environment'
+  type: string
+  default: 'eng'
+- name: 'SERVICE_CONNECTION_NAME_TFSTATE'
+  type: string
+  default: 'svccon-sharedinfra-dev'  
+
+# Stage-1: Terraform Validate Stage
+## Step-1: Publish Artifacts to Pipeline (Pipeline artifacts provide a way to share files between stages in a pipeline or between different pipelines)
+## Step-2: Install Terraform 
+## Step-3: Validate Terraform Manifests (terraform init, terraform validate)
+
+jobs:
+- job: TerraformValidateJob
+  displayName: Validate
+  continueOnError: false
+  variables:
+    - template: ../configuration/variable-group-with-secrets.yml
+      parameters:
+        environment: ${{ lower(parameters.environment) }}
+  steps:
+  - bash: |
+      echo "Build.SourceBranchName: $(Build.SourceBranchName)"
+    displayName: 'show Build.SourceBranchName'
+  - bash: |
+      echo "GIT_BRANCH: $(GIT_BRANCH)"
+    displayName: 'show GIT_BRANCH'   
+  - task: PublishPipelineArtifact@1
+    displayName: Publish Artifacts
+    inputs:
+      targetPath: $(FOLDER_WITH_TERRAFORM_FILES)
+      artifactName: $(ARTIFACTS_FOLDER_WITH_TERRAFORM_FILES)
+      artifactType: 'pipeline'
+  - task: TerraformInstaller@0
+    displayName: Terraform Install
+    inputs:
+      terraformVersion: $(TERRAFORM_VERSION)
+  - task: TerraformTaskV3@3
+    displayName: Terraform Init
+    inputs:
+      provider: 'azurerm'
+      command: 'init'
+      backendServiceArm: ${{ PARAMETERS.SERVICE_CONNECTION_NAME_TFSTATE }}
+      backendAzureRmResourceGroupName: $(RESOURCE_GROUP_NAME_TERRAFORM_STATE)
+      backendAzureRmStorageAccountName: $(STORAGE_ACCOUNT_NAME)
+      backendAzureRmContainerName: $(CONTAINER_NAME)
+      backendAzureRmKey: '$(INFRA_NAME)-$(GIT_BRANCH)branch-base.tfstate'
+      workingDirectory: $(FOLDER_WITH_TERRAFORM_FILES)
+  - task: TerraformTaskV3@3
+    displayName: Terraform Validate
+    inputs:
+      provider: 'azurerm'
+      command: 'validate'
+      workingDirectory: $(FOLDER_WITH_TERRAFORM_FILES)

@@ -1,0 +1,254 @@
+# File: templates/terraform-apply.yaml
+# https://github.com/microsoft/azure-pipelines-terraform/tree/main/Tasks/TerraformTask/TerraformTaskV2
+# https://github.com/microsoft/azure-pipelines-terraform/tree/main/Tasks/TerraformTask/TerraformTaskV3
+
+# Define approvals and checks: https://learn.microsoft.com/en-us/azure/devops/pipelines/process/approvals
+# Manual approval in an Azure DevOps YAML-pipeline : https://erwinstaal.nl/posts/manual-approval-in-an-azure-devops-yaml-pipeline/
+
+parameters:
+- name: 'environment'
+  type: string
+- name: 'SERVICE_CONNECTION_NAME'
+  type: string
+- name: 'SERVICE_CONNECTION_NAME_TFSTATE'
+  type: string
+
+# Stage-3: Terraform Apply Stage. Deploy Stages for Dev, QA, UAT, PRE, PRO
+# Deployment-1: DeployInfra
+## Step-1: Define Variables
+## Step-2: Terraform Initialize (State Storage to store in Azure Storage Account)
+## Step-3: Terraform Plan (Create Plan)
+## Step-4: Terraform Apply (Use the plan created in previous step)
+
+jobs:
+- deployment: DeployInfra
+  dependsOn: WaitForValidationJob
+  displayName: Deploy App-Core-Users
+  environment: ${{ parameters.environment }}
+  variables:
+    - template: ../configuration/variable-group.yaml
+  timeoutInMinutes: 90 # how long to run the job before automatically cancelling
+  cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - task: Bash@3
+          name: BuildAgentIP # https://build5nines.com/what-is-ip-address-of-azure-devops-build-agent-and-set-firewall-to-allow-it/
+          inputs:
+            targetType: 'inline'
+            script: |
+              ipaddress=$(curl -s http://ipinfo.io/ip)
+              echo "##vso[task.setvariable variable=address;isOutput=true;]$ipaddress"
+              echo BuildAgentIP.address is $ipaddress
+        ######################################################
+        # Terraform Install
+        ######################################################
+        - task: TerraformInstaller@0
+          displayName: Terraform Install
+          inputs:
+            terraformVersion: $(TERRAFORM_VERSION)
+        #######################################################
+        # Terraform Init: appcore-users-<branch>-<env>.tfstate
+        ######################################################
+        - task: TerraformTaskV3@3
+          displayName: Terraform Init
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            #commandOptions: '-flag'
+            backendServiceArm: ${{ PARAMETERS.SERVICE_CONNECTION_NAME_TFSTATE }}
+            backendAzureRmResourceGroupName: $(RESOURCE_GROUP_NAME_TERRAFORM_STATE)
+            backendAzureRmStorageAccountName: $(STORAGE_ACCOUNT_NAME)
+            backendAzureRmContainerName: $(CONTAINER_NAME)
+            backendAzureRmKey: '$(INFRA_NAME)-$(GIT_BRANCH)branch-${{ parameters.environment }}.tfstate'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+        ##############################
+        # Terraform Apply
+        ##############################
+        - script: ls -la $(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}
+          displayName: Show file with generated plan
+        - task: TerraformTaskV3@3
+          displayName: Terraform apply
+          inputs:
+            provider: 'azurerm'
+            command: 'apply'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            commandOptions: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}/${{ parameters.environment }}-$(Build.BuildId).out'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+        ###################################
+        # Terraform Output - Show - Graph
+        ###################################
+        ####################################################################################################################################################################
+        # Create Outputs
+        # https://spacelift.io/blog/terraform-output
+        # "terraform ouput -json": This is quite useful when we want to pass the outputs to other tools for automation since JSON is way easier to handle programmatically.
+        # Note that Terraform does not protect sensitive output values when using the -json flag.
+        ####################################################################################################################################################################
+        - task: TerraformTaskV3@3
+          displayName: Terraform output
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            customCommand: 'output'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+        - task: TerraformTaskV3@3
+          displayName: Terraform output -json
+          inputs:
+            provider: 'azurerm'
+            command: 'output' # "terraform output -json" is implicitly triggered here!
+              # Terraform does not protect sensitive output values when using the -json flag
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+        - task: TerraformTaskV3@3
+          displayName: Terraform Show (current tfstate)
+          inputs:
+            provider: 'azurerm'
+            command: 'show'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            outputTo: 'file'
+            filename: 'myFile.json'
+        - task: TerraformTaskV3@3
+          displayName: Terraform graph
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            customCommand: 'graph'
+            #commandOptions: '-type=plan'
+            outputTo: 'console'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+        ###############################################################################
+        # Terraform Output - list_internal_users_with_custom_security_attributes
+        ###############################################################################
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output list_internal_users_with_custom_security_attributes
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            commandOptions: 'output -json list_internal_users_with_custom_security_attributes'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            outputTo: 'file'
+            filename: 'myFile1.json'
+        - script: echo "##vso[task.setvariable variable=list_internal_users_with_custom_security_attributes;isOutput=true]$(cat $(customFilePath))"
+          displayName: setup list_internal_users_with_custom_security_attributes var
+          name: passOutput1
+        ###############################################################################
+        # Terraform Output - list_external_users_with_custom_security_attributes
+        ###############################################################################
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output list_external_users_with_custom_security_attributes
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            commandOptions: 'output -json list_external_users_with_custom_security_attributes'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            outputTo: 'file'
+            filename: 'myFile2.json'
+        - script: echo "##vso[task.setvariable variable=list_external_users_with_custom_security_attributes;isOutput=true]$(cat $(customFilePath))"
+          displayName: setup list_external_users_with_custom_security_attributes var
+          name: passOutput2
+        ###############################################################################################
+        # Terraform Output - list_manually_provisioned_internal_users_with_custom_security_attributes
+        ###############################################################################################
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output list_manually_provisioned_internal_users_with_custom_security_attributes
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            commandOptions: 'output -json list_manually_provisioned_internal_users_with_custom_security_attributes'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            outputTo: 'file'
+            filename: 'myFile3.json'
+        - script: echo "##vso[task.setvariable variable=list_manually_provisioned_internal_users_with_custom_security_attributes;isOutput=true]$(cat $(customFilePath))"
+          displayName: setup list_manually_provisioned_internal_users_with_custom_security_attributes var
+          name: passOutput3
+#####################################################################
+# Assign Azure Custom Security Attributes to Internal Users
+#####################################################################
+- job: assignCustomSecurityAttributeInternalUsers
+  dependsOn: DeployInfra
+  condition: succeeded()
+  pool:
+    vmImage: 'windows-2022'
+    #vmImage: 'ubuntu-latest'
+    #vmImage: 'macOS-12'
+  variables:  # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/deployment-jobs
+    list_of_internal_users: $[ dependencies.DeployInfra.outputs['DeployInfra.passOutput1.list_internal_users_with_custom_security_attributes'] ]
+  timeoutInMinutes: 90 # how long to run the job before automatically cancelling
+  cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+  steps:
+    - pwsh: 'Write-Host "List of Internal Users (list_of_internal_users): $(list_of_internal_users)"'
+      displayName: List of Internal Users
+    - task: AzurePowerShell@5
+      displayName: 'run scripts/01-assign-customSecurityAttributes.ps1'
+      condition: ne(variables['list_of_internal_users'],'[]')
+      inputs:
+        azureSubscription: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+        scriptType: 'FilePath'
+        scriptPath: '$(System.DefaultWorkingDirectory)/scripts/01-assign-customSecurityAttributes.ps1'  # https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables
+        scriptArguments:
+          -userList '$(list_of_internal_users)'
+        azurePowerShellVersion: 'latestVersion' # Required. Options: latestVersion, otherVersion
+        pwsh: true  # true = powershell 7.x , false = powershell 5.1
+#####################################################################
+# Assign Azure Custom Security Attributes to External Users
+#####################################################################
+- job: assignCustomSecurityAttributeExternalUsers
+  dependsOn: DeployInfra
+  condition: succeeded()
+  pool:
+    vmImage: 'windows-2022'
+    #vmImage: 'ubuntu-latest'
+    #vmImage: 'macOS-12'
+  variables:  # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/deployment-jobs
+    list_of_external_users: $[ dependencies.DeployInfra.outputs['DeployInfra.passOutput2.list_external_users_with_custom_security_attributes'] ]
+  timeoutInMinutes: 90 # how long to run the job before automatically cancelling
+  cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+  steps:
+    - pwsh: 'Write-Host "List of External Users (list_of_external_users): $(list_of_external_users)"'
+      displayName: List of External Users
+    - task: AzurePowerShell@5
+      displayName: 'run scripts/01-assign-customSecurityAttributes.ps1'
+      condition: ne(variables['list_of_external_users'],'[]')
+      inputs:
+        azureSubscription: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+        scriptType: 'FilePath'
+        scriptPath: '$(System.DefaultWorkingDirectory)/scripts/01-assign-customSecurityAttributes.ps1'  # https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables
+        scriptArguments:
+          -userList '$(list_of_external_users)'
+        azurePowerShellVersion: 'latestVersion' # Required. Options: latestVersion, otherVersion
+        pwsh: true  # true = powershell 7.x , false = powershell 5.1
+###################################################################################
+# Assign Azure Custom Security Attributes to Manually Provisioned Internal Users
+###################################################################################
+- job: assignCustomSecurityAttributeManuallyProvisionedInternalUsers
+  dependsOn: DeployInfra
+  condition: succeeded()
+  pool:
+    vmImage: 'windows-2022'
+    #vmImage: 'ubuntu-latest'
+    #vmImage: 'macOS-12'
+  variables:  # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/deployment-jobs
+    list_of_manually_provisioned_internal_users: $[ dependencies.DeployInfra.outputs['DeployInfra.passOutput3.list_manually_provisioned_internal_users_with_custom_security_attributes'] ]
+  timeoutInMinutes: 90 # how long to run the job before automatically cancelling
+  cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+  steps:
+    - pwsh: 'Write-Host "List of Manually Provisioned Internal Users (list_of_manually_provisioned_internal_users): $(list_of_manually_provisioned_internal_users)"'
+      displayName: List of Manually Provisioned Internal Users
+    - task: AzurePowerShell@5
+      displayName: 'run scripts/01-assign-customSecurityAttributes.ps1'
+      condition: ne(variables['list_of_manually_provisioned_internal_users'],'[]')
+      inputs:
+        azureSubscription: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+        scriptType: 'FilePath'
+        scriptPath: '$(System.DefaultWorkingDirectory)/scripts/01-assign-customSecurityAttributes.ps1'  # https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables
+        scriptArguments:
+          -userList '$(list_of_manually_provisioned_internal_users)'
+        azurePowerShellVersion: 'latestVersion' # Required. Options: latestVersion, otherVersion
+        pwsh: true  # true = powershell 7.x , false = powershell 5.1

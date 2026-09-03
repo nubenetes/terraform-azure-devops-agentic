@@ -1,0 +1,14 @@
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: high-priority 
+value: 1000000 
+globalDefault: false 
+description: "This priority class should be used for ML service pods only" 
+
+
+# https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/
+
+# An example use case is for data science workloads. A user may submit a job that they want to be prioritized above other workloads, but do not wish to discard existing work by preempting running pods. 
+# The high priority job with preemptionPolicy: Never will be scheduled ahead of other queued pods, as soon as sufficient cluster resources "naturally" become free.
+

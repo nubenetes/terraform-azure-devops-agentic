@@ -1,0 +1,49 @@
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/containers/build-image
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/containers/push-image
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/containers/acr-template
+
+# Docker Registry service connection:
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml#docker-registry-service-connection
+
+# https://github.com/microsoft/azure-pipelines-yaml
+# https://github.com/microsoft/azure-pipelines-yaml/blob/master/templates/docker-container-to-acr.yml
+
+# https://github.com/amake/innosetup-docker
+
+# ACR Tasks
+# https://docs.microsoft.com/en-us/azure/container-registry/container-registry-tasks-overview
+# https://docs.microsoft.com/en-us/azure/container-registry/container-registry-tasks-samples
+
+trigger:
+- manual
+
+variables:
+  vmImageName: 'ubuntu-latest'   # Agent VM image name
+  imageName: 'innosetup'
+  dockerfilePath: 'app/Dockerfile'
+  tag: '$(Build.BuildId)'
+  dockerRegistryServiceConnection: 'svccon-acr-dev'
+  imageRepository: 'innosetup'
+  containerRegisty: 'containerregistryenterprise1.azurecr.io'
+
+stages:
+- stage: Build
+  displayName: Build stage
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+          latest
+    #- upload: manifests
+    #  artifact: manifests

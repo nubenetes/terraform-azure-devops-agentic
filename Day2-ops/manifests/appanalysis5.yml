@@ -1,0 +1,112 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: Enterprise-Enterpriseapp-analysis-63f7dac2
+  namespace: Enterprise
+  labels:     
+    jobgroup: jobapp-analysisexample
+    app: appcore  
+spec:
+  backoffLimit: 1
+  completionMode: NonIndexed
+  completions: 1
+  parallelism: 1
+  suspend: false
+  template:
+    metadata:       
+      name: kubejob       
+      labels:         
+        jobgroup: jobexampleapp-analysis     
+    spec:
+      containers:
+      - name: app-analysis-vupdate-common-lib-fa5e687
+        #args: ["$(applink_JSON)","$(applink_TOKEN)"]
+        args:
+          - /asset/pipeline/000000000000000000000000/input.json
+          - eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ii1LSTNROW5OUjdiUm9meG1lWm9YcWJIWkdldyIsImtpZCI6Ii1LSTNROW5OUjdiUm9meG1lWm9YcWJIWkdldyJ9.eyJhdWQiOiJhcGk6Ly84OGNmM2U2Ni0wZjBjLTQ2MzAtYjYyNi0wZjhmNTU0OWJhZDYiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC9hYzFiNDhjZi1mZmRhLTRhYmYtODE3Ni04ZDVmMDBjMWE2NDMvIiwiaWF0IjoxNjc3NzY1MzQwLCJuYmYiOjE2Nzc3NjUzNDAsImV4cCI6MTY3Nzc2OTI0MCwiYWlvIjoiRTJaZ1lFZzNWZG1mNmhzcHYvdVBNYmZmOC9NQ0FBPT0iLCJhcHBpZCI6IjZiMWQxNWQxLTNlYjQtNGQzNi1iNDJmLWZjMDNjMmNhODcyYiIsImFwcGlkYWNyIjoiMSIsImlkcCI6Imh0dHBzOi8vc3RzLndpbmRvd3MubmV0L2FjMWI0OGNmLWZmZGEtNGFiZi04MTc2LThkNWYwMGMxYTY0My8iLCJvaWQiOiI0NmRmYTViNS1lNGJmLTQzNmItYjRkOS00ZjNhZTM0N2JlMzkiLCJyaCI6IjAuQVNBQXowZ2JyTnJfdjBxQmRvMWZBTUdtUTJZLXo0Z01EekJHdGlZUGoxVkp1dFlnQUFBLiIsInN1YiI6IjQ2ZGZhNWI1LWU0YmYtNDM2Yi1iNGQ5LTRmM2FlMzQ3YmUzOSIsInRpZCI6ImFjMWI0OGNmLWZmZGEtNGFiZi04MTc2LThkNWYwMGMxYTY0MyIsInV0aSI6Ik5mSDl3TVpuaUVDVFRVdmJXZ3dPQUEiLCJ2ZXIiOiIxLjAifQ.AOEftLG1yrTpASg0fy6X9F8Uqcsf7u7haNwK18K2Y4MT3F1zfdxfYb1tHfcxTfUchPNBnTjxPubS9HKHaCFkfQE48eBsVxUVHaB2JhBeRrxQRBby0v9OyU4Rd5aMe0KyE1PZRpN03IaE2hhCRJd-MJXqtWZWaNCitDxeVdvohpARc6gt1nxVviNLziPNOxCJj1L_lBpr7k06hFc-TQdYE0evIzzuUnyTrbLJKmB1HXzp_X1C7sueIoC_x5p088dF89btfZV0tsid4a1W0xy8LWIEfC_McYC3so06HGKolYVsuNSQwRlAoJSqNAvXDaiECS00BVgeu2jIjgDcYk3kEA
+        # https://stackoverflow.com/questions/31870222/how-can-i-keep-a-container-running-on-kubernetes
+        #command: ["/bin/sh", "-ec", "sleep 1000"]
+        command: ["/bin/sh", "-ec", "while :; do echo '.'; sleep 5 ; done"]
+        image: enterprisedevappcr.azurecr.io/app-analysis-service:update_common-lib-fa5e687
+        imagePullPolicy: Always
+        # env:
+        #   - name: applink_JSON
+        #     valueFrom:
+        #       configMapKeyRef:
+        #         name: ml-config
+        #         key: applink.json 
+        #   - name: applink_TOKEN
+        #     valueFrom:
+        #       configMapKeyRef:
+        #         name: ml-config
+        #         key: applink.token
+        #   - name: applink_VOLUME_SUBPATH
+        #     valueFrom:
+        #       configMapKeyRef:
+        #         name: ml-config
+        #         key: applink.assetVolumeSubPath
+        resources:
+          limits:
+            cpu: '4'
+            memory: 16000Mi
+          requests:
+            cpu: '4'
+            memory: 16000Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /asset
+          name: storage
+          #subPath: "$(applink_VOLUME_SUBPATH)"
+          subPath: client-anon/000000000000000000000000/2.25.157652569512872026365123511882323098240
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - {}
+      initContainers:
+      - image: enterprisedevappcr.azurecr.io/normalizer_job:0.2.0
+        imagePullPolicy: Always
+        name: normalizer-job-v0-2-0
+        # env:
+        #   - name: applink_VOLUME_SUBPATH
+        #     valueFrom:
+        #       configMapKeyRef:
+        #         name: ml-config
+        #         key: applink.assetVolumeSubPath
+        resources:
+          limits:
+            cpu: '1'
+            memory: 2000Mi
+          requests:
+            cpu: '1'
+            memory: 2000Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - name: storage
+          mountPath: /asset
+          #subPath: "$(applink_VOLUME_SUBPATH)"
+          subPath: client-anon/000000000000000000000000/2.25.157652569512872026365123511882323098240
+      restartPolicy: Never
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: storage
+        azureFile:
+          secretName: stappcoreclient-anon
+          shareName: fs-appcore-client-anon-client-anon
+        # - name: storage
+        #   persistentVolumeClaim:
+        #     claimName: client-anon #$(applink_CLIENT_NAME)
+  ttlSecondsAfterFinished: 86400
+  
+  
+# https://github.com/kubernetes/examples/blob/master/staging/volumes/azure_file/azure-2.yaml  
+# https://fabianlee.org/2000/01/01/kubernetes-export-a-clean-yaml-manifest-that-can-be-re-imported/
+# https://github.com/Kyrremann/kubectl-eksporter
+# kubectl eksporter job Enterprise-Enterpriseapp-analysis-63f7dac0 -n Enterprise
+
+#input.json -> para sacar los datos para analizar
+#token -> para llamar de vuelta al endpoint de App-Link Cloud
+
+# https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell

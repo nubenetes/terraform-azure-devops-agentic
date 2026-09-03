@@ -1,0 +1,9 @@
+########################################
+# List of Users:
+########################################
+---
+-
+  email: cloud-admin@example.com
+  center: &center001 client-anon # defines anchor label &center001
+  appcore-admin-role: &role001
+    - dneuat

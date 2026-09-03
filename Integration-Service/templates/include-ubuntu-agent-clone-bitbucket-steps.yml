@@ -1,0 +1,42 @@
+# File: templates/include-ubuntu-agent-clone-bitbucket-steps.yml 
+
+steps:
+- checkout: self
+  clean: true
+- checkout: integration-service-Bitbucket-Repo   
+  clean: true
+- script: git config --system -l 
+  displayName: git config system wide   
+- bash: env
+  displayName: 'Show env' 
+- bash: |    
+    echo "Bitbucket ref: $TOOLS_REF"    
+  displayName: Bitbucket ref    # https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/multi-repo-checkout
+- script: ls -la $(Build.SourcesDirectory)
+  displayName: Show folders with multi repo checkouts
+- bash: | 
+    rm -rfv $(Build.SourcesDirectory)/integration-service/src/main
+    rm -rfv $(Build.SourcesDirectory)/integration-service/src/test
+    ls -la $(Build.SourcesDirectory)/integration-service/src/
+  displayName: delete the content of integration-service/src/main and integration-service/src/test
+- bash: |
+    mv -fv $(Build.SourcesDirectory)/data_router/src/main $(Build.SourcesDirectory)/integration-service/src/
+    mv -fv $(Build.SourcesDirectory)/data_router/src/test $(Build.SourcesDirectory)/integration-service/src/
+    ls -la $(Build.SourcesDirectory)/integration-service/src/
+  displayName: Move content of src/main and src/test from Bitbucket Cloud to Azure Repo 
+- bash: | 
+    ls -l $(Build.SourcesDirectory)/data_router/
+    echo "#############################################"
+    cp -v $(Build.SourcesDirectory)/data_router/pom.xml $(Build.SourcesDirectory)/integration-service/
+    echo "#############################################"
+    ls -l $(Build.SourcesDirectory)/integration-service/
+  displayName: 'Copy pom.xml from Bitbucket Folder to integration-service Folder'
+- bash: |
+    mv -fv $(Build.SourcesDirectory)/integration-service/* $(Build.SourcesDirectory)
+    ls -la $(Build.SourcesDirectory)/integration-service/
+  displayName: Moving updated content from integration-service/ folder to current working directory (root folder)
+- bash: |
+    rm -rfv $(Build.SourcesDirectory)/integration-service 
+    rm -rfv $(Build.SourcesDirectory)/data_router
+    ls -la  
+  displayName: delete integration-service/ and data_router/ folders

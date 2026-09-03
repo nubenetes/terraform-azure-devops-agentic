@@ -1,0 +1,66 @@
+trigger:
+- manual
+
+pool:
+  vmImage: 'windows-2022'
+
+variables:
+  serviceConnection: 'svccon-integration-service-dev'
+  devopsAzurePipelineSpName: 'sp-integration-service-enterprise-dev' # Service Principal Name used by our Devops Azure Pipeline that loads this YAML file.
+  appName: 'appr-integration-service-OnPrem-test'
+  spName: $(appName)
+  #tenant: '00000000-0000-0000-0000-000000000000'
+  resourceGroup: 'rg-integration-onpremise-dev'
+  rgLocation: 'northeurope'
+  storageAccount: 'st-integration-dev'
+  storageContainerName: 'sgcontainerintegration-servicedev1'
+  blobName: 'blob1'
+  storageAccountTags: 'env=dev'
+  centerName: 'enterprise'  # AETitle
+
+stages:
+- stage: destroyRG_destroyApp
+  jobs:
+  - job: destroyRG_destroyApp
+    timeoutInMinutes: 10 # how long to run the job before automatically cancelling
+    cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+    steps:
+        - task: AzureCLI@2
+          displayName: 'run boilerplates/scripts/02-azure-pipelines-AzureAD-AppSecurity-Demo/01-destroyRG-destroyApp.ps1'
+          inputs:
+            azureSubscription: 'svccon-integration-service-dev'
+            scriptType: 'ps'
+            scriptLocation: 'scriptPath'
+            scriptPath: 'boilerplates/scripts/02-azure-pipelines-AzureAD-AppSecurity-Demo/01-destroyRG-destroyApp.ps1'
+            arguments: '$(appName) $(resourceGroup) $(rgLocation) $(storageAccountTags) $(storageAccount) $(storageContainerName)'
+- stage: workload
+  jobs:  
+  - job: registerAppWithCustomSecAttributes
+    timeoutInMinutes: 15 # how long to run the job before automatically cancelling
+    cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+    steps:      
+        - task: AzureCLI@2
+          displayName: 'run boilerplates/scripts/02-azure-pipelines-AzureAD-AppSecurity-Demo/02-createRG-createSA-createAppRegister.ps1'
+          inputs:
+            azureSubscription: $(serviceConnection)
+            scriptType: 'ps'
+            scriptLocation: 'scriptPath'
+            scriptPath: 'boilerplates/scripts/02-azure-pipelines-AzureAD-AppSecurity-Demo/02-createRG-createSA-createAppRegister.ps1'
+            arguments: '$(appName) $(spName) $(rgLocation) $(resourceGroup) $(storageAccountTags) $(storageAccount)'  
+        - task: AzurePowerShell@5
+          displayName: 'run boilerplates/scripts/02-azure-pipelines-AzureAD-AppSecurity-Demo/03-assign-customSecurityAttributes.ps1'
+          inputs:
+            azureSubscription: $(serviceConnection)
+            scriptType: 'FilePath'
+            scriptPath: 'boilerplates/scripts/02-azure-pipelines-AzureAD-AppSecurity-Demo/03-assign-customSecurityAttributes.ps1'
+            scriptArguments: '$(spName) $(centerName)'
+            azurePowerShellVersion: 'latestVersion' # Required. Options: latestVersion, otherVersion
+        - task: AzureCLI@2
+          displayName: 'run boilerplates/scripts/02-azure-pipelines-AzureAD-AppSecurity-Demo/04-createStorageContainer-createBlob-DownloadUrlFromBlob.ps1'
+          inputs:
+            azureSubscription: $(serviceConnection)
+            scriptType: 'ps'
+            scriptLocation: 'scriptPath'
+            scriptPath: 'boilerplates/scripts/02-azure-pipelines-AzureAD-AppSecurity-Demo/04-createStorageContainer-createBlob-DownloadUrlFromBlob.ps1' 
+            arguments: '$(resourceGroup) $(rgLocation) $(storageAccount) $(storageContainerName) $(blobName) $(storageAccountTags) $(spName)'
+

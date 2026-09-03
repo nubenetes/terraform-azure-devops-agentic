@@ -1,0 +1,12 @@
+########################################
+# Example list:
+########################################
+---
+- email: cloud-admin@example.com
+  center: &center001 client-anon  # defines anchor label &center001
+  env: &env001 client-anon
+  role: admin
+- email: cloud-admin@example.com
+  center: *center001
+  env: *env001
+  role: user

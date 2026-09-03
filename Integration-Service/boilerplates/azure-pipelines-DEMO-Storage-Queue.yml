@@ -1,0 +1,77 @@
+trigger:
+- manual
+
+pool:
+  vmImage: 'windows-2022'
+
+parameters:
+  - name: UPN
+    displayName: User Principal Name (UPN)
+    type: string
+    default: 'cloud-admin@example.com'
+  - name: AETitle
+    displayName: Center Name - AETitle Custom Security Attribute
+    type: string
+    default: 'enterprise'
+  - name: environment
+    displayName: Environment
+    type: string
+    default: 'dev-app'
+
+variables:
+  serviceConnection: 'svccon-integration-service-dev'
+  resourceGroup: 'rg-integration-onpremise-dev'
+  rgLocation: 'northeurope'
+  storageAccount: 'st-integration-dev'
+  storageAccountTags: "env=${{ parameters.environment }}"
+  upnName: ${{ parameters.UPN }}
+  centerName: ${{ parameters.AETitle }}
+  BlobFileDownloadUrl: 'https://st-integration-dev.blob.core.windows.net/sgcontainerintegration-servicedev1/integration-serviceinstaller?se=2022-05-12T15%3A53Z&sp=rl&sv=2021-04-10&sr=c&sig=DNe2lJRiJ3rtypZVX7mH8FR3Bn9GnWgVWQG2XHtWqic%3D'
+
+stages:
+- stage: destroyRG
+  displayName: Delete Existing Resources
+  jobs:
+  - job: destroyRG
+    timeoutInMinutes: 10 # how long to run the job before automatically cancelling
+    cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+    steps:
+      - task: AzureCLI@2
+        displayName: 'run boilerplates/scripts/03-azure-pipelines-Storage-Queue-Demo/01-destroyRG.ps1'
+        inputs:
+          azureSubscription: $(serviceConnection)
+          scriptType: 'ps'
+          scriptLocation: 'scriptPath'
+          scriptPath: 'boilerplates/scripts/03-azure-pipelines-Storage-Queue-Demo/01-destroyRG.ps1'
+          arguments: '$(resourceGroup) $(storageAccount) $(upnName) $(centerName)'
+- stage: workload
+  jobs:  
+  - job: storageQueue
+    timeoutInMinutes: 15 # how long to run the job before automatically cancelling
+    cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+    steps:      
+        - task: AzureCLI@2
+          displayName: 'run boilerplates/scripts/03-azure-pipelines-Storage-Queue-Demo/02-createRG-createSA.ps1'
+          inputs:
+            azureSubscription: $(serviceConnection)
+            scriptType: 'ps'
+            scriptLocation: 'scriptPath'
+            scriptPath: 'boilerplates/scripts/03-azure-pipelines-Storage-Queue-Demo/02-createRG-createSA.ps1'
+            arguments: '$(resourceGroup) $(rgLocation) $(storageAccount) $(storageAccountTags) $(upnName) $(centerName)'  
+        - task: AzureCLI@2
+          displayName: 'run boilerplates/scripts/03-azure-pipelines-Storage-Queue-Demo/03-createStorageQueue.ps1'
+          inputs:
+            azureSubscription: $(serviceConnection)
+            scriptType: 'ps'
+            scriptLocation: 'scriptPath'
+            scriptPath: 'boilerplates/scripts/03-azure-pipelines-Storage-Queue-Demo/03-createStorageQueue.ps1'
+            arguments: '$(resourceGroup) $(rgLocation) $(storageAccount) $(storageAccountTags) $(upnName) $(centerName)'  
+        - task: AzureCLI@2
+          displayName: 'run boilerplates/scripts/03-azure-pipelines-Storage-Queue-Demo/04-storageMessage-PUT.ps1'
+          inputs:
+            azureSubscription: $(serviceConnection)
+            scriptType: 'ps'
+            scriptLocation: 'scriptPath'
+            scriptPath: 'boilerplates/scripts/03-azure-pipelines-Storage-Queue-Demo/04-storageMessage-PUT.ps1'
+            arguments: $(resourceGroup) $(storageAccount) $(upnName) $(centerName) '$(BlobFileDownloadUrl)' 
+            # Be core_FULL_PLACEHOLDER with the above line! BlobFileDownloadUrl var needs to be quoted like this, otherwise special chars will fail

@@ -1,0 +1,11 @@
+# configuration/developbranch-service-connections.yml
+
+# Define Azure DevOps Service Connections applied on this repo's develop branch
+variables:
+  SERVICE_CONNECTION_NAME_TFSTATE: 'svccon-app-analysis-devops'  # Azure Subscription with TFSTATE - Enterprise DevOps Subscription  
+  SERVICE_CONNECTION_NAME_DEV:     'svccon-app-analysis-devops'  # Enterprise DevOps Subscription
+  SERVICE_CONNECTION_NAME_QA:      'svccon-app-analysis-devops'  # Enterprise DevOps Subscription
+  SERVICE_CONNECTION_NAME_UAT:     'svccon-app-analysis-devops'  # Enterprise DevOps Subscription
+  SERVICE_CONNECTION_NAME_PRE:     'svccon-app-analysis-devops'  # Enterprise DevOps Subscription
+  SERVICE_CONNECTION_NAME_PRO:     'svccon-app-analysis-devops'  # Enterprise DevOps Subscription
+

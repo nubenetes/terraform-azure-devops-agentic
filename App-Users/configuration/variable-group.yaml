@@ -1,0 +1,19 @@
+# configuration/variable-group.yaml
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/library/variable-groups
+
+# https://learn.microsoft.com/en-us/azure/devops/release-notes/2021/sprint-192-update#new-yaml-conditional-expressions
+
+# Define Variables for Environments
+variables:
+  - name: GIT_BRANCH
+    ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+      value: main
+    ${{ else }}:
+      value: develop
+      # set by default
+  - name: ENVIRONMENT
+    ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+      value: pro
+    ${{ else }}:
+      value: dev
+      # set by default

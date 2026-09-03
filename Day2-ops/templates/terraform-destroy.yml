@@ -1,0 +1,126 @@
+# File: templates/terraform-destroy.yml
+
+parameters:
+- name: 'environment'
+  type: string
+  default: 'eng'
+- name: 'SERVICE_CONNECTION_NAME'
+  type: string
+  default: 'svccon-day2ops-dev'
+- name: 'SERVICE_CONNECTION_NAME_TFSTATE'
+  type: string
+  default: 'svccon-day2ops-dev'
+
+jobs:
+- deployment: DestroyDay2ops
+  dependsOn: TerraformValidateJob
+  displayName: Destroy ${{ upper(parameters.environment) }} Day2ops
+  environment: ${{ parameters.environment }}
+  variables:
+    - template: ../configuration/variable-group-with-secrets.yml
+      parameters:
+        environment: ${{ lower(parameters.environment) }}
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        ######################################################
+        # Install kubelogin
+        ######################################################
+        - task: Bash@3
+          displayName: install kubelogin
+          inputs:
+            targetType: 'inline'
+            script: |
+              wget $(KUBELOGIN_DOWNLOAD_URL)
+              unzip kubelogin-linux-amd64.zip
+              sudo mv bin/linux_amd64/kubelogin /usr/bin
+        ######################################################
+        # Download SSH Key
+        ######################################################
+        - task: DownloadSecureFile@1
+          displayName: Download SSH Key
+          name: sshkey
+          inputs:
+            secureFile: '$(AZURE_DEVOPS_LIBRARY_SECURE_FILE)'
+        ######################################################
+        # Terraform Install
+        ######################################################
+        - task: TerraformInstaller@0
+          displayName: Terraform Install
+          inputs:
+            terraformVersion: $(TERRAFORM_VERSION)
+        ######################################################
+        # Terraform Init
+        ######################################################
+        - task: TerraformTaskV3@3
+          displayName: Terraform Init
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            backendServiceArm: ${{ PARAMETERS.SERVICE_CONNECTION_NAME_TFSTATE }}
+            backendAzureRmResourceGroupName: $(RESOURCE_GROUP_NAME_TERRAFORM_STATE)
+            backendAzureRmStorageAccountName: $(STORAGE_ACCOUNT_NAME)
+            backendAzureRmContainerName: $(CONTAINER_NAME)
+            backendAzureRmKey: '$(INFRA_NAME)-$(GIT_BRANCH)branch-${{ parameters.environment }}.tfstate'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+        ######################################################
+        # Terraform Destroy
+        ######################################################
+        - task: TerraformTaskV3@3
+          condition: eq(variables['Build.SourceBranchName'],'develop')
+          displayName: Terraform Destroy Develop ENG/PRO (Enterprise DevOps Subscr)
+          inputs:
+            provider: 'azurerm'
+            command: 'destroy'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            commandOptions: >
+              -var environment=${{ parameters.environment }}
+              -var gitbranch=$(GIT_BRANCH)
+              -var ssh_public_key=$(sshkey.secureFilePath)
+              -var azure_subscription_unitedstates="00000000-0000-0000-0000-000000000000"
+              -var azure_subscription_europe="00000000-0000-0000-0000-000000000000"
+              -var secret_aks_kube_config_host_europe=$(aks-deng-kube-config-host)
+              -var secret_aks_kube_config_cluster_ca_certificate_europe=$(aks-deng-kube-config-cluster-ca-certificate)
+              -var secret_aks_kube_config_host_unitedstates=$(aks-deng-kube-config-host)
+              -var secret_aks_kube_config_cluster_ca_certificate_unitedstates=$(aks-deng-kube-config-cluster-ca-certificate-usa)
+              -var secret_azure_devops_sp=$(sp-day2ops-Enterprise-devops)
+        - task: TerraformTaskV3@3
+          condition: and(eq(variables['TERRAFORM_ENV'], 'eng'),eq(variables['Build.SourceBranchName'],'main'))
+          displayName: Terraform Destroy Main ENG (Enterprise DevTest Subscr)
+          inputs:
+            provider: 'azurerm'
+            command: 'destroy'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            commandOptions: >
+              -var environment=${{ parameters.environment }}
+              -var gitbranch=$(GIT_BRANCH)
+              -var ssh_public_key=$(sshkey.secureFilePath)
+              -var azure_subscription_unitedstates="00000000-0000-0000-0000-000000000000"
+              -var azure_subscription_europe="00000000-0000-0000-0000-000000000000"
+              -var secret_aks_kube_config_host_europe=$(aks-eng-kube-config-host)
+              -var secret_aks_kube_config_cluster_ca_certificate_europe=$(aks-eng-kube-config-cluster-ca-certificate)
+              -var secret_aks_kube_config_host_unitedstates=$(aks-eng-kube-config-host)
+              -var secret_aks_kube_config_cluster_ca_certificate_unitedstates=$(aks-eng-kube-config-cluster-ca-certificate-usa)
+              -var secret_azure_devops_sp=$(sp-day2ops-Enterprise-dev)
+        - task: TerraformTaskV3@3
+          displayName: Terraform Destroy Main PRO (Enterprise Production Subscr)
+          condition: and(eq(variables['TERRAFORM_ENV'], 'pro'),eq(variables['Build.SourceBranchName'],'main'))
+          inputs:
+            provider: 'azurerm'
+            command: 'destroy'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            commandOptions: >
+              -var environment=${{ parameters.environment }}
+              -var gitbranch=$(GIT_BRANCH)
+              -var ssh_public_key=$(sshkey.secureFilePath)
+              -var azure_subscription_unitedstates="00000000-0000-0000-0000-000000000000"
+              -var azure_subscription_europe="00000000-0000-0000-0000-000000000000"
+              -var secret_aks_kube_config_host_europe=$(aks-pro-kube-config-host)
+              -var secret_aks_kube_config_cluster_ca_certificate_europe=$(aks-pro-kube-config-cluster-ca-certificate)
+              -var secret_aks_kube_config_host_unitedstates=$(aks-pro-kube-config-host)
+              -var secret_aks_kube_config_cluster_ca_certificate_unitedstates=$(aks-pro-kube-config-cluster-ca-certificate-usa)
+              -var secret_azure_devops_sp=$(sp-day2ops-Enterprise-pro)

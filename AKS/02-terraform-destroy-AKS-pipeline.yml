@@ -1,0 +1,51 @@
+trigger:
+- manual
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+parameters:
+- name: 'destroyENG'
+  displayName: 'Destroy ENG AKS (Dev, QA, UAT, Pre)'
+  type: boolean
+  default: false
+- name: 'destroyPRO'    # disabled since we don't want to create enterprise.com DNZ Zone with terraform (already deployed)
+  displayName: 'Destroy PRO AKS (Production)'
+  type: boolean
+  default: false
+
+# Define Variables for Environments
+variables:
+- template: configuration/shared-azure-devops-pipeline-vars.yml
+- template: configuration/developbranch-service-connections.yml
+- ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+  - template: configuration/mainbranch-service-connections.yml
+
+stages:
+- stage: TerraformENG
+  displayName: Terraform ENG
+  condition: ${{parameters.destroyENG}}
+  jobs:
+    - template: templates/terraform-validate.yml
+      parameters:
+        environment: ${{ variables.ENG_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+    - template: templates/terraform-destroy.yml
+      parameters:
+        environment: ${{ variables.ENG_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_ENG }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+- stage: TerraformPRO
+  dependsOn: []    # this removes the implicit dependency on previous stage and causes this to run in parallel
+  displayName: Terraform PRO
+  condition: ${{parameters.destroyPRO}}
+  jobs:
+    - template: templates/terraform-validate.yml
+      parameters:
+        environment: ${{ variables.PRO_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+    - template: templates/terraform-destroy.yml
+      parameters:
+        environment: ${{ variables.PRO_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_PRO }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}

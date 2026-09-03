@@ -1,0 +1,45 @@
+# File: templates/include-import-mongodb-collections-from-bitbucket.yml 
+
+parameters:
+- name: 'mongodb_connection_strings'  # defaults for any parameters that aren't specified
+  type: string  # '{"client-anon":"mongodb+srv://appanalysis-client-anon-dev.okv51.mongodb.net","client2":"mongodb+srv://appanalysis-client2-dev.4kx26.mongodb.net"}'
+- name: 'mongodb_atlas_dbadmin'  
+  type: string
+- name: 'secret_mongodb_atlas_dbadmin_password'  
+  type: string
+- name: 'list_of_client_names'  
+  type: string
+- name: 'Enterprise_product'
+  type: string
+
+steps:
+- checkout: self
+  clean: true
+- checkout: MongoDB-Bitbucket-Repo
+  condition: ne(variables['Build.SourceBranchName'],'main')
+  clean: true
+- script: git config --system -l 
+  displayName: git config system wide   
+- bash: env
+  displayName: 'Show env' 
+- bash: |    
+    echo "Bitbucket ref: $TOOLS_REF"    
+  displayName: Bitbucket ref    # https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/multi-repo-checkout
+- script: ls -la $(Build.SourcesDirectory)
+  displayName: Show folders with multi repo checkouts
+- task: Bash@3
+  inputs:
+    filePath: $(Build.SourcesDirectory)/App-Core/scripts/import-mongodb-collections.sh
+    workingDirectory: $(Build.SourcesDirectory)/enterprise_engine_core_database/data
+    failOnStderr: false
+  env: 
+    MONGODBCONNECTIONS: ${{ parameters.mongodb_connection_strings }}
+    MYDBADMIN: ${{ parameters.mongodb_atlas_dbadmin }}
+    MYSECRET: ${{ parameters.secret_mongodb_atlas_dbadmin_password }}
+    MYLISTOFCLIENTS: ${{ parameters.list_of_client_names }}
+    MYEnterprisePRODUCT: ${{ parameters.Enterprise_product }} 
+  displayName: 'Import mongodb collections'
+
+
+
+

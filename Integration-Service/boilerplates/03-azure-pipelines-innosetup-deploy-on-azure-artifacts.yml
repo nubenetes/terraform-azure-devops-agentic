@@ -1,0 +1,62 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  var1: 'example'
+
+stages:
+- stage: InnoSetupBuild
+  jobs:
+  - job: BuildTheCode
+    steps:
+    #- task: NuGetToolInstaller@1
+
+    - task: Installer@1  # Innosetup Installer
+      inputs:
+        version: '6.0.5'
+
+    - task: Build@1 # Innosetup Build
+      inputs:
+        version: '6.0.5'
+        file: 'resources/innoSetupScript.iss'
+
+    - task: CopyFiles@2
+      displayName: 'Copy integration-service installer'
+      inputs:
+        contents: 'resources/Output/**'
+        targetFolder: '$(Build.ArtifactStagingDirectory)'
+
+    # Publish a Universal Package
+    # https://docs.microsoft.com/en-us/azure/devops/pipelines/artifacts/universal-packages?view=azure-devops&tabs=yaml
+    - task: UniversalPackages@0
+      displayName: Universal Publish
+      inputs:
+        command: publish
+        publishDirectory: '$(Build.ArtifactStagingDirectory)/resources/Output'
+        vstsFeedPublish: 'GitOps/integration-service-Artifacts-Feed2'
+        vstsFeedPackagePublish: 'integration-service-OnPremise_installer'
+        packagePublishDescription: 'integration-service onpremise installer'
+
+- stage: test
+  dependsOn: InnoSetupBuild
+  jobs:
+  - job: run_test
+    steps:
+    - task: UniversalPackages@0
+      displayName: 'Universal download'
+      inputs:
+        command: download
+        vstsFeed: 'GitOps/integration-service-Artifacts-Feed2'
+        vstsFeedPackage: 'integration-service-OnPremise_installer'
+        vstsPackageVersion: '*' # latest
+        downloadDirectory: '$(Build.SourcesDirectory)\someFolder'
+
+    - task: CmdLine@2
+      inputs:
+        script: |
+          echo Hello world
+          ls -l
+        workingDirectory: '$(Build.SourcesDirectory)\someFolder'

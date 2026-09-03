@@ -1,0 +1,160 @@
+# File: templates/terraform-apply.yml 
+# https://github.com/microsoft/azure-pipelines-terraform/tree/main/Tasks/TerraformTask/TerraformTaskV2
+# https://github.com/microsoft/azure-pipelines-terraform/tree/main/Tasks/TerraformTask/TerraformTaskV3
+
+parameters:
+- name: 'environment'
+  type: string
+  default: 'dev'
+
+jobs: 
+- deployment: DeployInfra
+  displayName: Deploy ${{ upper(parameters.environment) }} Discovery
+  environment: ${{ parameters.environment }}
+  variables:
+    - group: CloudOpsDev-AppAnalysis3
+      # Current content (example):
+      # appGatewayListenerSecure-appanalysis-myclient-dev
+      # appGatewayListenerSecure-appanalysis-myclient-qa
+      # k8s-cluster-cert-appanalysis-myclient-2-dev
+      # k8s-user-cert-appanalysis-myclient-2-dev
+      # k8s-user-key-appanalysis-myclient-2-dev
+      # k8s-user-token-appanalysis-myclient-2-dev
+      # docker-registry-password-1
+      # appanalysis-config-key-myclient-2-dev
+  strategy:
+    runOnce:
+      deploy:
+        steps:      
+        - task: TerraformTaskV3@3
+          displayName: Terraform Init
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            #commandOptions: '-flag'
+            backendServiceArm: $(SERVICE_CONNECTION_NAME)
+            backendAzureRmResourceGroupName: $(RESOURCE_GROUP_NAME_TERRAFORM_STATE)
+            backendAzureRmStorageAccountName: $(STORAGE_ACCOUNT_NAME)
+            backendAzureRmContainerName: $(CONTAINER_NAME)
+            backendAzureRmKey: '$(INFRA_NAME)-${{ parameters.environment }}.tfstate'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+        - task: TerraformTaskV3@3
+          displayName: Terraform plan
+          inputs:
+            provider: 'azurerm'
+            command: 'plan'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
+            # CAMBIAR!: -var secret_appGatewayListenerSecure=$(appGatewayListenerSecure-appanalysis-${{ parameters.client_name }}-${{ parameters.environment }})
+            commandOptions: >
+              -var environment=${{ parameters.environment }}
+              -var-file="$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)/${{ parameters.environment }}.tfvars"
+              -out $(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)/${{ parameters.environment }}-$(Build.BuildId).out
+              -var secret_appGatewayListenerSecure=$(appGatewayListenerSecure-appanalysis-myclient-${{ parameters.environment }})
+              -var secret_k8s_cluster_certificate=$(k8s-cluster-cert-appanalysis-myclient-2-${{ parameters.environment }})
+              -var secret_k8s_user_client_certificate=$(k8s-user-cert-appanalysis-myclient-2-${{ parameters.environment }})
+              -var secret_k8s_user_client_key=$(k8s-user-key-appanalysis-myclient-2-${{ parameters.environment }})
+              -var secret_k8s_user_token=$(k8s-user-token-appanalysis-myclient-2-${{ parameters.environment }}
+              -var secret_docker_registry_server_password='$(docker-registry-password-1)'
+              -var secret_app_analysis_config_key=$(appanalysis-config-key-myclient-2-${{ parameters.environment }})
+              -var secret_mongodb_atlas_public_key=$(mongodb-atlas-Enterprise${{ parameters.environment }}test-public-key)
+              -var secret_mongodb_atlas_private_key=$(mongodb-atlas-Enterprise${{ parameters.environment }}test-private-key)
+              -var secret_mongodb_atlas_dbadmin_password=$(mongodb-atlas-Enterprise${{ parameters.environment }}test-dbuser-password)
+              -var secret_mongodb_atlas_dbuser_password=$(mongodb-atlas-Enterprise${{ parameters.environment }}test-dbuser-password)
+        - task: TerraformTaskV3@3
+          displayName: Terraform apply
+          inputs:
+            provider: 'azurerm'
+            command: 'apply'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            commandOptions: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)/${{ parameters.environment }}-$(Build.BuildId).out'
+            environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output 
+          inputs:
+            provider: 'azurerm'
+            command: 'output'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
+        - task: TerraformTaskV3@3
+          displayName: Terraform Show (current tfstate)
+          inputs:
+            provider: 'azurerm'
+            command: 'show' 
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
+            outputTo: 'file'   #'console'
+            filename: 'myFile.json'
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output mongodb_connection_strings
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            commandOptions: 'output -json mongodb_connection_strings'
+            environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
+            outputTo: 'file'   #'console'
+            filename: 'myFile2.json'
+        - script: echo "##vso[task.setvariable variable=mongodb_connection_strings;isOutput=true]$(cat $(customFilePath))"   
+          displayName: Setup mongodb_connection_strings var
+          name: passOutput1          
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output mongodb_atlas_database_name
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            commandOptions: 'output -json mongodb_atlas_database_name'
+            environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
+            outputTo: 'file'   #'console'
+            filename: 'myFile3.json'
+        - script: echo "##vso[task.setvariable variable=mongodb_atlas_database_name;isOutput=true]$(cat $(customFilePath))"   
+          displayName: Setup mongodb_atlas_database_name var
+          name: passOutput2
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output secret_mongodb_atlas_dbadmin_password
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            commandOptions: 'output -json secret_mongodb_atlas_dbadmin_password'
+            environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
+            outputTo: 'file'   #'console'
+            filename: 'myFile4.json'
+        - script: echo "##vso[task.setvariable variable=secret_mongodb_atlas_dbadmin_password;isOutput=true]$(cat $(customFilePath))"   
+          displayName: Setup secret_mongodb_atlas_dbadmin_password var
+          name: passOutput3
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output mongodb_atlas_dbadmin
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            commandOptions: 'output -json mongodb_atlas_dbadmin'
+            environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
+            outputTo: 'file'   #'console'
+            filename: 'myFile5.json'
+        - script: echo "##vso[task.setvariable variable=mongodb_atlas_dbadmin;isOutput=true]$(cat $(customFilePath))"   
+          displayName: Setup mongodb_atlas_dbadmin var
+          name: passOutput4
+
+- job: mongoImport  # Replace this with a Terraform Creation-time provisioner ! 
+  dependsOn: DeployInfra
+  condition: false    # Currently disabled since it seems like this is not finally required. We leave this here just in case we need it.
+  variables:  # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/deployment-jobs
+    mongodb_connection_strings: $[ dependencies.DeployInfra.outputs['DeployInfra.passOutput1.mongodb_connection_strings'] ]  
+    mongodb_atlas_database_name: $[ dependencies.DeployInfra.outputs['DeployInfra.passOutput2.mongodb_atlas_database_name'] ]
+    secret_mongodb_atlas_dbadmin_password: $[ dependencies.DeployInfra.outputs['DeployInfra.passOutput3.secret_mongodb_atlas_dbadmin_password'] ]
+    mongodb_atlas_dbadmin: $[ dependencies.DeployInfra.outputs['DeployInfra.passOutput4.mongodb_atlas_dbadmin'] ]
+  steps:
+    - bash: |
+        echo $(mongodb_connection_strings)
+        echo $(mongodb_atlas_database_name)
+        echo $(mongodb_atlas_dbadmin)
+      displayName: Show vars
+    - template: include-import-mongodb-collections-from-bitbucket.yml       # Template reference
+      parameters:
+        mongodb_connection_strings: $(mongodb_connection_strings)
+        mongodb_atlas_database_name: $(mongodb_atlas_database_name)
+        mongodb_atlas_dbadmin: $(mongodb_atlas_dbadmin)
+        secret_mongodb_atlas_dbadmin_password: $(secret_mongodb_atlas_dbadmin_password)

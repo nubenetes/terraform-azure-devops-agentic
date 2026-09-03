@@ -1,0 +1,78 @@
+# File: templates/terraform-validate.yml
+
+parameters:
+- name: 'environment'
+  type: string
+- name: 'SERVICE_CONNECTION_NAME_TFSTATE'
+  type: string
+- name: 'MONGODB_REPO'
+  type: string
+
+# Stage-1: Terraform Validate Stage
+## Step-1: Publish Artifacts to Pipeline (Pipeline artifacts provide a way to share files between stages in a pipeline or between different pipelines)
+## Step-2: Install Terraform
+## Step-3: Validate Terraform Manifests (terraform init, terraform validate)
+
+jobs:
+- job: TerraformValidateJob
+  displayName: Validate
+  continueOnError: false
+  variables:
+    - template: ../configuration/variable-group-with-secrets.yml
+      parameters:
+        environment: ${{ lower(parameters.environment) }}
+  steps:
+  - bash: |
+      echo "Build.SourceBranchName: $(Build.SourceBranchName)"
+    displayName: 'show Build.SourceBranchName'
+  - bash: |
+      echo "GIT_BRANCH: $(GIT_BRANCH)"
+    displayName: 'show GIT_BRANCH'
+  - checkout: self
+    clean: true
+  - checkout: ${{ PARAMETERS.MONGODB_REPO }}
+    displayName: Checkout bitbucket repo with mongodb collections
+    path: ${{ lower(parameters.environment) }}
+    clean: true
+  - script: git config --system -l
+    displayName: git config system wide
+  - bash: env
+    displayName: 'Show env'
+  - bash: |
+      echo "Bitbucket ref: $TOOLS_REF"
+    displayName: Bitbucket ref    # https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/multi-repo-checkout
+  - script: ls -la $(Build.SourcesDirectory)
+    displayName: Show folders with multi repo checkouts
+  - task: PublishPipelineArtifact@1
+    displayName: Publish MongoDB Collections Artifacts
+    inputs:
+      targetPath: $(Pipeline.Workspace)/${{ lower(parameters.environment) }}/data
+      artifactName: $(ARTIFACTS_FOLDER_WITH_MONGODB_DATA)-${{ lower(parameters.environment) }}
+      artifactType: 'pipeline'
+  - task: PublishPipelineArtifact@1
+    displayName: Publish Terraform Files Artifacts
+    inputs:
+      targetPath: $(FOLDER_WITH_TERRAFORM_FILES)
+      artifactName: $(ARTIFACTS_FOLDER_WITH_TERRAFORM_FILES)
+      artifactType: 'pipeline'
+  - task: TerraformInstaller@0
+    displayName: Terraform Install
+    inputs:
+      terraformVersion: $(TERRAFORM_VERSION)
+  - task: TerraformTaskV3@3
+    displayName: Terraform Init
+    inputs:
+      provider: 'azurerm'
+      command: 'init'
+      backendServiceArm: ${{ PARAMETERS.SERVICE_CONNECTION_NAME_TFSTATE }}
+      backendAzureRmResourceGroupName: $(RESOURCE_GROUP_NAME_TERRAFORM_STATE)
+      backendAzureRmStorageAccountName: $(STORAGE_ACCOUNT_NAME)
+      backendAzureRmContainerName: $(CONTAINER_NAME)
+      backendAzureRmKey: '$(INFRA_NAME)-$(GIT_BRANCH)branch-base.tfstate'
+      workingDirectory: $(FOLDER_WITH_TERRAFORM_FILES)
+  - task: TerraformTaskV3@3
+    displayName: Terraform Validate
+    inputs:
+      provider: 'azurerm'
+      command: 'validate'
+      workingDirectory: $(FOLDER_WITH_TERRAFORM_FILES)

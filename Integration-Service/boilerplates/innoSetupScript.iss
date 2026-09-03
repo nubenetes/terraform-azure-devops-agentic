@@ -1,0 +1,201 @@
+#define MyAppName "data_router"
+#define MyAppVersion "1.0.0"
+#define MyAppPublisher "enterprise"
+#define MyAppURL "https://www.enterprise.com/"
+#define MyAppServiceExeName "applinkonpremise-1.0.0-service.exe"
+#define MyAppServiceXmlName "applinkonpremise-1.0.0-service.xml"
+#define MyAppExeName "applinkonpremise-1.0.0.exe"
+#define MyAppAssocName MyAppName + " File"
+#define MyAppAssocExt ".myp"
+#define MyAppAssocKey StringChange(MyAppAssocName, " ", "") + MyAppAssocExt
+#define MyAppId "{00000000-0000-0000-0000-000000000000}"
+
+[Setup]
+; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
+; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
+AppId={{00000000-0000-0000-0000-000000000000}
+AppName={#MyAppName}
+AppVersion={#MyAppVersion}
+AppPublisher={#MyAppPublisher}
+AppPublisherURL={#MyAppURL}
+AppSupportURL={#MyAppURL}
+AppUpdatesURL={#MyAppURL}
+DefaultDirName={autopf}\{#MyAppName}
+ChangesAssociations=yes
+DisableProgramGroupPage=yes
+PrivilegesRequiredOverridesAllowed=dialog
+OutputBaseFilename=applinkonpremise_installer
+Compression=lzma
+SolidCompression=yes
+WizardStyle=modern
+SetupIconFile=favicon_traans_square.ico
+DisableDirPage=no
+OutputDir="..\innoSetupOutput"
+
+[Languages]
+Name: "english"; MessagesFile: "compiler:Default.isl"
+
+[Files]
+Source: "*"; Excludes: "*.iss, *.DS_Store, \innoSetupOutput"; DestDir: "{app}\resources"; Permissions: users-modify; Flags: ignoreversion recursesubdirs createallsubdirs;
+Source: "..\innoSetupInput\{#MyAppServiceXmlName}"; DestDir: "{app}"; Permissions: users-modify; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsService
+Source: "..\innoSetupInput\{#MyAppServiceExeName}"; DestDir: "{app}"; Permissions: users-modify; Flags: ignoreversion; Check: IsService
+Source: "..\innoSetupInput\{#MyAppExeName}"; DestDir: "{app}"; Permissions: users-modify; Flags: ignoreversion recursesubdirs createallsubdirs; Check: IsExecutable;
+
+; NOTE: Don't use "Flags: ignoreversion" on any shared system files
+
+[Registry]
+Root: HKA; Subkey: "Software\Classes\{#MyAppAssocExt}\OpenWithProgids"; ValueType: string; ValueName: "{#MyAppAssocKey}"; ValueData: ""; Flags: uninsdeletevalue
+Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}"; ValueType: string; ValueName: ""; ValueData: "{#MyAppAssocName}"; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#MyAppServiceExeName},0"
+Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppServiceExeName}"" ""%1"""
+Root: HKA; Subkey: "Software\Classes\Applications\{#MyAppServiceExeName}\SupportedTypes"; ValueType: string; ValueName: ".myp"; ValueData: ""
+
+[Run]
+Filename: "{cmd}"; Description: "Run as a service"; Parameters: "/c cd {app} && {#MyAppServiceExeName} install && {#MyAppServiceExeName} start"; Flags: postinstall; Check: IsService
+
+[UninstallRun]
+Filename: "{cmd}"; Parameters: "/c sc stop applinkOnPremiseServiceWinSw && sc delete applinkOnPremiseServiceWinSw"; RunOnceId: "applinkService"; Flags: runhidden runascurrentuser waituntilterminated; Check: IsService
+Filename: "{cmd}"; Parameters: "/c timeout 5"; RunOnceId: "applinkService"; Flags: runhidden runascurrentuser waituntilterminated; Check: IsService
+Filename: "{cmd}"; Parameters: "/c taskkill /IM javaw.exe /F"; Flags: runhidden runascurrentuser waituntilterminated; Check: isExecutable
+Filename: "{cmd}"; Parameters: "/c taskkill /IM {#MyAppExeName} /F"; Flags: runhidden runascurrentuser waituntilterminated; Check: isExecutable
+Filename: "{cmd}"; Parameters: "/c rmdir {app} /s /q"; RunOnceId: "applinkService"; Flags: runhidden waituntilterminated;
+
+
+[Code] 
+
+const
+  serviceText =
+  'Installs the application as a Windows Service, that will run on background and persist even if the computer restarts';
+  execTest =
+  'To run the application, it is needed to run the application after being installed';
+
+
+var
+  CustomPage: TWizardPage;
+  ServiceDescLabel: TLabel;
+  ServiceRadioButton: TNewRadioButton;
+  ExecDescLabel: TLabel;
+  ExecRadioButton: TNewRadioButton;
+
+procedure InitializeWizard;
+begin
+  CustomPage := CreateCustomPage(wpWelcome, 'Installation type', '');
+  ServiceRadioButton := TNewRadioButton.Create(WizardForm);
+  ServiceRadioButton.Parent := CustomPage.Surface;
+  ServiceRadioButton.Checked := True;
+  ServiceRadioButton.Top := 16;
+  ServiceRadioButton.Width := CustomPage.SurfaceWidth;
+  ServiceRadioButton.Font.Style := [fsBold];
+  ServiceRadioButton.Font.Size := 9;
+  ServiceRadioButton.Caption := 'Run as a service'
+  ServiceDescLabel := TLabel.Create(WizardForm);
+  ServiceDescLabel.Parent := CustomPage.Surface;
+  ServiceDescLabel.Left := 8;
+  ServiceDescLabel.Top := ServiceRadioButton.Top + ServiceRadioButton.Height + 8;
+  ServiceDescLabel.Width := CustomPage.SurfaceWidth; 
+  ServiceDescLabel.Height := 40;
+  ServiceDescLabel.AutoSize := False;
+  ServiceDescLabel.Wordwrap := True;
+  ServiceDescLabel.Caption := serviceText;
+  ExecRadioButton := TNewRadioButton.Create(WizardForm);
+  ExecRadioButton.Parent := CustomPage.Surface;
+  ExecRadioButton.Top := ServiceDescLabel.Top + ServiceDescLabel.Height + 16;
+  ExecRadioButton.Width := CustomPage.SurfaceWidth;
+  ExecRadioButton.Font.Style := [fsBold];
+  ExecRadioButton.Font.Size := 9;
+  ExecRadioButton.Caption := 'Run by executable file'
+  ExecDescLabel := TLabel.Create(WizardForm);
+  ExecDescLabel.Parent := CustomPage.Surface;
+  ExecDescLabel.Left := 8;
+  ExecDescLabel.Top := ExecRadioButton.Top + ExecRadioButton.Height + 8;
+  ExecDescLabel.Width := CustomPage.SurfaceWidth;
+  ExecDescLabel.Height := 40;
+  ExecDescLabel.AutoSize := False;
+  ExecDescLabel.Wordwrap := True;
+  ExecDescLabel.Caption := execTest;
+end;
+
+function isService: Boolean;
+begin
+  Result := ServiceRadioButton.Checked;
+end;
+
+function isExecutable: Boolean;
+begin
+  Result := ExecRadioButton.Checked;
+end;
+
+function GetUninstallString: string;
+var
+  sUnInstPath: string;
+  sUnInstallString: String;
+begin
+  Result := '';
+  sUnInstPath := ExpandConstant('Software\Microsoft\Windows\CurrentVersion\Uninstall\{{00000000-0000-0000-0000-000000000000}_is1'); { Your App GUID/ID }
+  sUnInstallString := '';
+  if not RegQueryStringValue(HKLM, sUnInstPath, 'UninstallString', sUnInstallString) then
+    RegQueryStringValue(HKCU, sUnInstPath, 'UninstallString', sUnInstallString);
+  Result := sUnInstallString;
+end;
+
+function InitializeSetup(): Boolean;
+var
+  V: Integer;
+  iResultCode: Integer;
+  sUnInstallString: string;
+begin
+  // allow the setup to continue initially
+  Result := True;
+  // if the registry key based on current OS bitness doesn't exist, then...
+if IsWin64 then
+begin
+ if RegKeyExists(HKLM, 'SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{00000000-0000-0000-0000-000000000000}_is1') then
+  begin
+   V := MsgBox(ExpandConstant('An installed version of applink was detected. Do you want to uninstall it?'), mbInformation, MB_YESNO); { Custom Message if App installed }
+    if V = IDYES then
+    begin
+      sUnInstallString := GetUninstallString();
+      sUnInstallString :=  RemoveQuotes(sUnInstallString);
+      Exec(ExpandConstant(sUnInstallString), '', '', SW_SHOW, ewWaitUntilTerminated, iResultCode);
+      Result := False; { if you want to proceed after uninstall }
+    end
+    else
+      Result := False; { when older version present and not uninstalled }
+  end
+
+  else
+   if RegKeyExists(HKLM, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{00000000-0000-0000-0000-000000000000}_is1') then
+    begin
+     V := MsgBox(ExpandConstant('An installed version of applink was detected. Do you want to uninstall it?'), mbInformation, MB_YESNO); { Custom Message if App installed }
+      if V = IDYES then
+      begin
+        sUnInstallString := GetUninstallString();
+        sUnInstallString :=  RemoveQuotes(sUnInstallString);
+        Exec(ExpandConstant(sUnInstallString), '', '', SW_SHOW, ewWaitUntilTerminated, iResultCode)
+        Result := False; { if you want to proceed after uninstall }
+      end
+      else
+        Result := False; { when older version present and not uninstalled }
+    end
+  end;
+end;
+
+procedure TaskKill(fileName: String);
+var
+    resultCode: Integer;
+begin
+    Exec(ExpandConstant('taskkill.exe'), '/f /im ' + '"' + fileName + '"', '', SW_HIDE, ewWaitUntilTerminated, resultCode);
+end;
+
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  if CurUninstallStep = usDone then
+      begin
+        if not DelTree(ExpandConstant('{app}'), true, true, true) then
+          MsgBox('Can''t remove some files, please delete it manually', mbError, MB_OK);
+      end;
+  if CurUninstallStep = usPostUninstall then
+      begin
+        TaskKill('javaw.exe')
+      end;
+end;

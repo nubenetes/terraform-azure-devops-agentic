@@ -1,0 +1,7 @@
+# configuration/mainbranch-service-connections.yml
+
+# Define Azure DevOps Service Connections applied on this repo's main branch
+variables:
+  SERVICE_CONNECTION_NAME_TFSTATE: 'svccon-day2ops-devops'  # Azure Subscription with TFSTATE - Enterprise Example-DevOps-Subscription
+  SERVICE_CONNECTION_NAME_ENG:     'svccon-day2ops-dev'     # Enterprise Example-Dev-Subscription
+  SERVICE_CONNECTION_NAME_PRO:     'svccon-day2ops-pro'     # Enterprise Example-Prod-Subscription

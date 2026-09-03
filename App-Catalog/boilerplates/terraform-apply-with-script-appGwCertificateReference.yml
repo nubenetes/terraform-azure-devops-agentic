@@ -1,0 +1,205 @@
+# File: templates/terraform-apply.yml 
+# https://github.com/microsoft/azure-pipelines-terraform/tree/main/Tasks/TerraformTask/TerraformTaskV2
+# https://github.com/microsoft/azure-pipelines-terraform/tree/main/Tasks/TerraformTask/TerraformTaskV3
+
+parameters:
+- name: 'environment'
+  type: string
+  default: 'dev'
+- name: 'client_name'
+  type: string
+  default: 'myclient'
+
+jobs: 
+- deployment: DeployInfra
+  displayName: Deploy ${{ upper(parameters.environment) }} Discovery
+  environment: ${{ parameters.environment }}
+  variables:
+    - group: CloudOpsDev-AppAnalysis3
+      # Current content (example):
+      # appGatewayListenerSecure-appanalysis-myclient-dev
+      # appGatewayListenerSecure-appanalysis-myclient-qa
+      # k8s-cluster-cert-appanalysis-myclient-2-dev
+      # k8s-user-cert-appanalysis-myclient-2-dev
+      # k8s-user-key-appanalysis-myclient-2-dev
+      # k8s-user-token-appanalysis-myclient-2-dev
+      # docker-registry-password-1
+      # appanalysis-config-key-myclient-2-dev
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - task: TerraformTaskV3@3
+          displayName: Terraform Init
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            #commandOptions: '-flag'
+            backendServiceArm: $(SERVICE_CONNECTION_NAME)
+            backendAzureRmResourceGroupName: $(RESOURCE_GROUP_NAME_TERRAFORM_STATE)
+            backendAzureRmStorageAccountName: $(STORAGE_ACCOUNT_NAME)
+            backendAzureRmContainerName: $(CONTAINER_NAME)
+            backendAzureRmKey: '$(INFRA_NAME)-${{ parameters.environment }}.tfstate'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+        - task: TerraformTaskV3@3
+          displayName: Terraform plan
+          inputs:
+            provider: 'azurerm'
+            command: 'plan'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
+            commandOptions: >
+              -var environment=${{ parameters.environment }}
+              -var client_name=${{ parameters.client_name }}
+              -var-file="$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)/${{ parameters.environment }}.tfvars"
+              -out $(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)/${{ parameters.environment }}-$(Build.BuildId).out
+              -var secret_appGatewayListenerSecure=$(appGatewayListenerSecure-appanalysis-${{ parameters.client_name }}-${{ parameters.environment }})
+              -var secret_k8s_cluster_certificate=$(k8s-cluster-cert-appanalysis-myclient-2-${{ parameters.environment }})
+              -var secret_k8s_user_client_certificate=$(k8s-user-cert-appanalysis-myclient-2-${{ parameters.environment }})
+              -var secret_k8s_user_client_key=$(k8s-user-key-appanalysis-myclient-2-${{ parameters.environment }})
+              -var secret_k8s_user_token=$(k8s-user-token-appanalysis-myclient-2-${{ parameters.environment }}
+              -var secret_docker_registry_server_password='$(docker-registry-password-1)'
+              -var secret_app_analysis_config_key=$(appanalysis-config-key-myclient-2-${{ parameters.environment }})
+              -var secret_mongodb_atlas_public_key=$(mongodb-atlas-Enterprise${{ parameters.environment }}test-public-key)
+              -var secret_mongodb_atlas_private_key=$(mongodb-atlas-Enterprise${{ parameters.environment }}test-private-key)
+              -var secret_mongodb_atlas_dbuser_password=$(mongodb-atlas-Enterprise${{ parameters.environment }}test-dbuser-password)
+        - task: TerraformTaskV3@3
+          displayName: Terraform apply
+          inputs:
+            provider: 'azurerm'
+            command: 'apply'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            commandOptions: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)/${{ parameters.environment }}-$(Build.BuildId).out'
+            environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output 
+          inputs:
+            provider: 'azurerm'
+            command: 'output'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
+        - task: TerraformTaskV3@3
+          displayName: Terraform Show (current tfstate)
+          inputs:
+            provider: 'azurerm'
+            command: 'show' 
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
+            outputTo: 'file'   #'console'
+            filename: 'myFile.json'
+
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output myappanalysis3_agw
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            commandOptions: 'output -json myappanalysis3_agw'
+            environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
+            outputTo: 'file'   #'console'
+            filename: 'myFile2.json'
+        - script: echo "##vso[task.setvariable variable=myappanalysis3_agw;isOutput=true]$(cat $(customFilePath))"
+          displayName: setup myappanalysis3_agw var
+          name: passOutput1
+
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output myManagedIdentity
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            commandOptions: 'output -json myManagedIdentity'
+            environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
+            outputTo: 'file'   #'console'
+            filename: 'myFile3.json'
+        - script: echo "##vso[task.setvariable variable=myManagedIdentity;isOutput=true]$(cat $(customFilePath))"
+          displayName: setup myManagedIdentity var
+          name: passOutput2
+
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output appanalysis3_keyvault
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            commandOptions: 'output -json appanalysis3_keyvault'
+            environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
+            outputTo: 'file'   #'console'
+            filename: 'myFile4.json'
+        - script: echo "##vso[task.setvariable variable=appanalysis3_keyvault;isOutput=true]$(cat $(customFilePath))"
+          displayName: setup appanalysis3_keyvault var
+          name: passOutput3
+
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output myCertificateName
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            commandOptions: 'output -json myCertificateName'
+            environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
+            outputTo: 'file'   #'console'
+            filename: 'myFile5.json'
+        - script: echo "##vso[task.setvariable variable=myCertificateName;isOutput=true]$(cat $(customFilePath))"
+          displayName: setup myCertificateName var
+          name: passOutput4
+
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output myResourceGroup
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            commandOptions: 'output -json myResourceGroup'
+            environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
+            outputTo: 'file'   #'console'
+            filename: 'myFile6.json'
+        - script: echo "##vso[task.setvariable variable=myResourceGroup;isOutput=true]$(cat $(customFilePath))"
+          displayName: setup myResourceGroup var
+          name: passOutput5
+
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output myAzureSubscription
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            commandOptions: 'output -json myAzureSubscription'
+            environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
+            outputTo: 'file'   #'console'
+            filename: 'myFile7.json'
+        - script: echo "##vso[task.setvariable variable=myAzureSubscription;isOutput=true]$(cat $(customFilePath))"
+          displayName: setup myAzureSubscription var
+          name: passOutput6       
+
+- job: appGwCertificateReference
+  dependsOn: DeployInfra
+  condition: false    # Currently disabled since it seems like this is not finally required. We leave this here just in case we need it.
+  pool:
+    vmImage: 'windows-2022'
+    #vmImage: 'ubuntu-latest'
+    #vmImage: 'macOS-12' 
+  variables:  # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/deployment-jobs
+    myappanalysis3_agw: $[ dependencies.DeployInfra.outputs['DeployInfra.passOutput1.myappanalysis3_agw'] ]  
+    myManagedIdentity: $[ dependencies.DeployInfra.outputs['DeployInfra.passOutput2.myManagedIdentity'] ]
+    appanalysis3_keyvault: $[ dependencies.DeployInfra.outputs['DeployInfra.passOutput3.appanalysis3_keyvault'] ]
+    myCertificateName: $[ dependencies.DeployInfra.outputs['DeployInfra.passOutput4.myCertificateName'] ]
+    myResourceGroupName: $[ dependencies.DeployInfra.outputs['DeployInfra.passOutput5.myResourceGroup'] ]
+    myAzureSubscription: $[ dependencies.DeployInfra.outputs['DeployInfra.passOutput6.myAzureSubscription'] ]
+  steps:
+    - bash: |
+        echo $(myappanalysis3_agw)
+        echo $(myResourceGroupName)
+        echo $(myManagedIdentity)
+        echo $(appanalysis3_keyvault)
+        echo $(myCertificateName)
+        echo $(myAzureSubscription)
+      displayName: Show vars
+    - task: AzurePowerShell@5
+      displayName: 'run scripts/appgateway_setup_keyvault_certificate_reference.ps1'
+      inputs:
+        azureSubscription: $(SERVICE_CONNECTION_NAME)
+        scriptType: 'FilePath'
+        scriptPath: '$(System.DefaultWorkingDirectory)/scripts/appgateway_setup_keyvault_certificate_reference.ps1'
+        scriptArguments: '$(myappanalysis3_agw) $(myResourceGroupName) $(myManagedIdentity) $(appanalysis3_keyvault) $(myCertificateName) $(myAzureSubscription)'
+        azurePowerShellVersion: 'latestVersion' # Required. Options: latestVersion, otherVersion

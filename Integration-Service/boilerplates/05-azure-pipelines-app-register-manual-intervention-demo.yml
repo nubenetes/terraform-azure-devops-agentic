@@ -1,0 +1,86 @@
+trigger:
+- manual
+
+pool:
+  vmImage: 'windows-2022'
+
+variables:
+  serviceConnection: 'svccon-integration-service-dev'
+  devopsAzurePipelineSpName: 'sp-integration-service-enterprise-dev' # Service Principal Name used by our Devops Azure Pipeline that loads this YAML file.
+  appName: 'appr-integration-service-OnPrem-test'
+  appsecret: 'enterpriseDemoStuff1!'
+  spName: $(appName)
+  tenant: '00000000-0000-0000-0000-000000000000'
+  resourceGroup: 'rg-integration-onpremise-dev'
+  rgLocation: 'northeurope'
+  storageAccount: 'st-integration-dev'
+  storageContainerName: 'sgcontainerintegration-servicedev1'
+  blobName: 'blob1'
+  storageAccountTags: 'env=dev'
+
+stages:
+- stage: registerAppInAD
+  jobs:
+  - job: integration-serviceAppRegister
+    timeoutInMinutes: 10 # how long to run the job before automatically cancelling
+    cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+    steps:
+        - task: AzureCLI@2
+          displayName: 'run boilerplates/scripts/02-azure-pipelines-AzureAD-AppSecurity-Demo/01-deleteRegisteredApp-destroyRG.ps1'
+          inputs:
+            azureSubscription: 'svccon-integration-service-dev'
+            scriptType: 'ps'
+            scriptLocation: 'scriptPath'
+            scriptPath: 'boilerplates/scripts/02-azure-pipelines-AzureAD-AppSecurity-Demo/01-deleteRegisteredApp-destroyRG.ps1'
+            arguments: '$(appName) $(resourceGroup) $(rgLocation) $(storageAccountTags)'
+        - task: AzureCLI@2
+          displayName: 'run 05-appRegisterApiPermissions-createRG.ps1'
+          inputs:
+            azureSubscription: 'svccon-integration-service-dev'
+            scriptType: 'ps'
+            scriptLocation: 'scriptPath'
+            scriptPath: '05-appRegisterApiPermissions-createRG.ps1'
+            arguments: '$(appName) $(appSecret) $(spName) $(rgLocation) $(resourceGroup) $(storageAccountTags)'  
+
+- stage: manualIntervention
+  condition:  eq(false, 'true')
+  jobs:
+    - job: waitForValidation
+      displayName: Wait for external validation
+      pool: server
+      timeoutInMinutes: 60 # job times out in 60 minutes
+      steps:
+      - task: ManualValidation@0
+        timeoutInMinutes: 60 # task times out in 60 minutes
+        inputs:
+          #notifyUsers: |
+          #  cloud-admin@example.com
+          #  cloud-admin@example.com
+          instructions: |
+             Please run manually the following AZ CLI as an Azure Global Administrator 
+             (or click on "Grant admin consent for enterprise.com" in Azure UI -> appr-integration-service-OnPrem-test -> API permissions): 
+             
+              az ad app permission admin-consent --id $app.appId
+
+              (Grab $app.appId from the previous stage)
+          onTimeout: 'resume'
+
+
+- stage: assignCustomSecurityAttribute
+  jobs:  
+  - job: integration-serviceAssignCustomSecurityAttribute
+    timeoutInMinutes: 10 # how long to run the job before automatically cancelling
+    cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+    steps:      
+        - task: AzureCLI@2
+          displayName: 'run 05-addSelfSignedCertitficateToRegisteredAppSP-Connect-MgGraph-ToAppSP'
+          condition:  eq(true, 'true')
+          inputs:
+            azureSubscription: 'svccon-integration-service-dev'
+            scriptType: 'ps'
+            scriptLocation: 'scriptPath'
+            scriptPath: '05-addSelfSignedCertitficateToRegisteredAppSP-Connect-MgGraph-ToAppSP'
+            arguments: '$(appName) $(spName) $(tenant) $(devopsAzurePipelineSpName)'
+
+
+

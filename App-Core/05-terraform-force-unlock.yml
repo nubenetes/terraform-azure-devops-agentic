@@ -1,0 +1,122 @@
+# https://stackoverflow.com/questions/57150346/is-there-a-way-where-terraform-ignores-resourcenotfoundexception-and-destroys-th
+# https://www.terraform.io/cli/commands/state/rm
+
+########################################################################################
+# This pipeline forces the unlock (get the LockID from the error)
+# Useful when Terraform State blob is already locked.
+#
+# terraform force-unlock <LockId>
+########################################################################################
+
+trigger:
+- manual
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+parameters:
+- name: 'unlockDEV'
+  displayName: 'Terraform Unlock DEV App-Core (Development & Test)'
+  type: boolean
+  default: false
+- name: 'unlockQA'
+  displayName: 'Terraform Unlock QA App-Core (Integration Tests)'
+  type: boolean
+  default: false
+- name: 'unlockUAT' 
+  displayName: 'Terraform Unlock UAT App-Core (User Acceptance Testing)'
+  type: boolean
+  default: false
+- name: 'unlockPRE' 
+  displayName: 'Terraform Unlock PRE App-Core (Staging)'
+  type: boolean
+  default: false
+- name: 'unlockPRO' 
+  displayName: 'Terraform Unlock PRO App-Core (Production)'
+  type: boolean
+  default: false
+- name: 'unlockDEMO' 
+  displayName: 'Terraform Unlock DEM App-Core (Demo)'
+  type: boolean
+  default: false
+- name: 'unlockRES' 
+  displayName: 'Terraform Unlock RES App-Core (RR&D DiscoveryD AppAnalysis)'
+  type: boolean
+  default: false  
+- name: 'idOfLockShownInError' 
+  displayName: 'ID of terraform lock shown in Error: Terraform acquires a state lock to protect the state from being written by multiple users at the same time.
+    Please resolve the issue above and try again.'
+  type: string
+  default: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# Define Variables for Environments
+variables:
+- template: configuration/shared-azure-devops-pipeline-vars.yml
+- template: configuration/developbranch-service-connections.yml
+- ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+  - template: configuration/mainbranch-service-connections.yml
+
+stages: 
+- stage: TerraformUnlockDEV
+  displayName: Terraform force-unlock DEV
+  condition: ${{parameters.unlockDEV}}
+  jobs:
+    - template: templates/terraform-force-unlock.yml
+      parameters: 
+        environment: ${{ variables.DEV_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        RESOURCE: ${{ parameters.idOfLockShownInError }}
+- stage: TerraformUnlockQA
+  displayName: Terraform force-unlock QA
+  condition: ${{parameters.unlockQA}}
+  jobs:
+    - template: templates/terraform-force-unlock.yml
+      parameters: 
+        environment: ${{ variables.QA_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        RESOURCE: ${{ parameters.idOfLockShownInError }}
+- stage: TerraformUnlockUAT
+  displayName: Terraform force-unlock UAT
+  condition: ${{parameters.unlockUAT}}
+  jobs:
+    - template: templates/terraform-force-unlock.yml
+      parameters: 
+        environment: ${{ variables.UAT_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        RESOURCE: ${{ parameters.idOfLockShownInError }}
+- stage: TerraformUnlockPRE
+  displayName: Terraform force-unlock PRE
+  condition: ${{parameters.unlockPRE}}
+  jobs:
+    - template: templates/terraform-force-unlock.yml
+      parameters: 
+        environment: ${{ variables.PRE_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        RESOURCE: ${{ parameters.idOfLockShownInError }}
+- stage: TerraformUnlockPRO
+  displayName: Terraform force-unlock PRO
+  condition: ${{parameters.unlockPRO}}
+  jobs:
+    - template: templates/terraform-force-unlock.yml
+      parameters: 
+        environment: ${{ variables.PRO_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        RESOURCE: ${{ parameters.idOfLockShownInError }}
+- stage: TerraformUnlockDEMO
+  displayName: Terraform force-unlock DEMO
+  condition: ${{parameters.unlockDEMO}}
+  jobs:
+    - template: templates/terraform-force-unlock.yml
+      parameters: 
+        environment: ${{ variables.DEMO_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        RESOURCE: ${{ parameters.idOfLockShownInError }}
+- stage: TerraformUnlockRES
+  displayName: Terraform force-unlock RESEARCH
+  condition: ${{parameters.unlockRES}}
+  jobs:
+    - template: templates/terraform-force-unlock.yml
+      parameters: 
+        environment: ${{ variables.RESEARCH_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        RESOURCE: ${{ parameters.idOfLockShownInError }}    

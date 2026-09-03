@@ -1,0 +1,14 @@
+<service>
+  <id>integration-service-OnPremiseServiceWinSw</id>
+  <name>integration-service-OnPremise</name>
+  <description>enterprise - integration-service-OnPremise as service</description>
+  <startmode>Automatic</startmode>
+  <executable>resources\jre\bin\java</executable>  
+  <arguments>-jar "%BASE%\integration-service-{{ integration-serviceRelease }}.jar"</arguments>
+  <logmode>rotate</logmode>
+</service>
+
+<!--
+./integration-service-onpremise-1.0.0.exe install
+./integration-service-onpremise-1.0.0.exe start
+-->

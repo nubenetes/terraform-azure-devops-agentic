@@ -1,0 +1,138 @@
+# Billing Settings:
+# https://dev.azure.com/enterpriseDev/_settings/billing
+# https://stackoverflow.com/questions/64800434/azure-artifact-cannot-be-uploaded-because-max-quantity-has-been-exceeded-or-the
+# https://devblogs.microsoft.com/devops/optimizing-package-storage-and-costs/
+
+trigger:
+- manual
+
+pool:
+  vmImage: 'windows-2022'
+
+parameters:
+- name: environment
+  displayName: Environment
+  type: string
+  default: 'app-env-qa'
+  values:    # Only the following values are valid and accepted by the pipeline:
+    - 'app-env-dev' # DEV north europe - Development & Development Test
+    - 'app-env-qa'  # QA north europe - Integration Test
+    - 'app-env-uat' # UAT north europe - User Acceptance Test
+    - 'app-env-pre' # PRE north europe - aka Staging
+    - 'app-env'    # PRO north europe - Production
+    - 'app-env-res' # RES north europe - RR&D aka DiscoveryD aka AppAnalysis
+
+# Define Variables for Environments
+variables:
+  - ${{ if eq(parameters.environment, 'app-env-dev') }}:
+    - template: configuration/app-env-dev.yml
+  - ${{ if eq(parameters.environment, 'app-env-qa') }}:
+    - template: configuration/app-env-qa.yml
+  - ${{ if eq(parameters.environment, 'app-env-uat') }}:
+    - template: configuration/app-env-uat.yml
+  - ${{ if eq(parameters.environment, 'app-env-pre') }}:
+    - template: configuration/app-env-pre.yml
+  - ${{ if eq(parameters.environment, 'app-env') }}:
+    - template: configuration/app-env.yml
+  - ${{ if eq(parameters.environment, 'app-env-res') }}:
+    - template: configuration/app-env-res.yml
+
+stages:
+- stage: DownloadArtifactsFromInternet
+  displayName: Download Artifacts from Internet
+  jobs:
+  - job: downloadArtifacts
+    steps:
+    - powershell: New-Item -Path $(System.DefaultWorkingDirectory) -Name "publicArtifacts" -ItemType "directory"
+      displayName: create folder
+
+    # Download winSW.exe
+    # https://javadeveloperzone.com/spring-boot/spring-boot-as-windows-service/
+    # https://github.com/winsw/winsw
+    # https://github.com/winsw/winsw/releases/download/v2.12.0/WinSW-x64.exe
+    - powershell: Invoke-WebRequest -Uri $(WINSW_DOWNLOAD_URL) -OutFile '$(System.DefaultWorkingDirectory)/publicArtifacts/WinSW${{ variables.winswRelease }}.exe'
+      retryCountOnTaskFailure: 2 # Max number of retries; default is zero
+      timeoutInMinutes: 5 # how long to wait before timing out the task
+      displayName: Download WinSW${{ variables.winswRelease }} from Internet
+
+    - script: ls -l $(System.DefaultWorkingDirectory)/publicArtifacts
+      displayName: 'ls -l publicArtifacts/'
+
+    # Publish a Universal Package
+    # https://docs.microsoft.com/en-us/azure/devops/pipelines/artifacts/universal-packages?view=azure-devops&tabs=yaml
+    - task: UniversalPackages@0
+      displayName: Publish WinSW${{ variables.winswRelease }} artifact in internal repo
+      retryCountOnTaskFailure: 2 # Max number of retries; default is zero
+      timeoutInMinutes: 5 # how long to wait before timing out the task
+      continueOnError: true  # 'true' if future steps should run even if this step fails; defaults to 'false'
+      condition: succeededOrFailed()
+      inputs:
+        command: publish
+        publishDirectory: '$(System.DefaultWorkingDirectory)/publicArtifacts/'
+        vstsFeedPublish: 'GitOps/integration-service-Artifacts-Feed2'
+        vstsFeedPackagePublish: winsw
+        packagePublishDescription: winsw ${{ variables.winswRelease }}
+        verbosity: trace
+        versionOption: custom
+        versionPublish: ${{ variables.winswRelease }}
+
+    - script: rm -f $(System.DefaultWorkingDirectory)/publicArtifacts/*
+      displayName: 'Delete contents of publicArtifacts/'
+
+    # Download JRE
+    - powershell: Invoke-WebRequest -Uri $(JRE_DOWNLOAD_URL) -OutFile "$(System.DefaultWorkingDirectory)/publicArtifacts/jre${{ variables.javaRelease }}.zip"
+      retryCountOnTaskFailure: 2 # Max number of retries; default is zero
+      timeoutInMinutes: 5 # how long to wait before timing out the task
+      displayName: Download JRE${{ variables.javaRelease }} from Internet
+
+    - script: ls -l $(System.DefaultWorkingDirectory)/publicArtifacts
+      displayName: 'ls -l publicArtifacts/'
+
+    # Publish a Universal Package
+    - task: UniversalPackages@0
+      displayName: Publish JRE${{ variables.javaRelease }} artifact in internal repo
+      retryCountOnTaskFailure: 2 # Max number of retries; default is zero
+      timeoutInMinutes: 5 # how long to wait before timing out the task
+      continueOnError: true  # 'true' if future steps should run even if this step fails; defaults to 'false'
+      condition: succeededOrFailed()
+      inputs:
+        command: publish
+        publishDirectory: '$(System.DefaultWorkingDirectory)/publicArtifacts/'
+        vstsFeedPublish: 'GitOps/integration-service-Artifacts-Feed2'
+        vstsFeedPackagePublish: jre
+        packagePublishDescription: jre ${{ variables.javaRelease }} for windows
+        verbosity: trace
+        versionOption: custom
+        versionPublish: ${{ variables.javaRelease }}
+
+    - script: rm -f $(System.DefaultWorkingDirectory)/publicArtifacts/*
+      displayName: 'Delete contents of publicArtifacts/'
+
+    # Download Maven binary
+    - powershell: Invoke-WebRequest -Uri $(MAVEN_DOWNLOAD_URL) -OutFile '$(System.DefaultWorkingDirectory)/publicArtifacts/maven${{ variables.mavenRelease }}.zip'
+      retryCountOnTaskFailure: 2 # Max number of retries; default is zero
+      timeoutInMinutes: 5 # how long to wait before timing out the task
+      displayName: Download Maven${{ variables.mavenRelease }} from Internet
+
+    - script: ls -l $(System.DefaultWorkingDirectory)/publicArtifacts
+      displayName: 'ls -l publicArtifacts/'
+
+    # Publish a Universal Package
+    - task: UniversalPackages@0
+      displayName: Publish Maven${{ variables.mavenRelease }} artifact in internal repo
+      retryCountOnTaskFailure: 2 # Max number of retries; default is zero
+      timeoutInMinutes: 5 # how long to wait before timing out the task
+      continueOnError: true  # 'true' if future steps should run even if this step fails; defaults to 'false'
+      condition: succeededOrFailed()
+      inputs:
+        command: publish
+        publishDirectory: '$(System.DefaultWorkingDirectory)/publicArtifacts/'
+        vstsFeedPublish: 'GitOps/integration-service-Artifacts-Feed2'
+        vstsFeedPackagePublish: maven
+        packagePublishDescription: maven ${{ variables.mavenRelease }} binary
+        verbosity: trace
+        versionOption: custom
+        versionPublish: ${{ variables.mavenRelease }}
+
+    - script: rm -f $(System.DefaultWorkingDirectory)/publicArtifacts/*
+      displayName: 'Delete contents of publicArtifacts/'

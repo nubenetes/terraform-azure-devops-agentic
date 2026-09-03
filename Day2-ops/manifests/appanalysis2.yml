@@ -1,0 +1,95 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: Enterprise-Enterpriseapp-analysis-63f7dac0
+  namespace: Enterprise
+  uid: 00000000-0000-0000-0000-000000000000
+  resourceVersion: '1728125'
+  generation: 1
+  creationTimestamp: '2000-01-01T00:00:00Z'
+  labels:
+    controller-uid: 00000000-0000-0000-0000-000000000000
+    job-name: Enterprise-Enterpriseapp-analysis-63f7dac0
+  annotations:
+    batch.kubernetes.io/job-tracking: ''
+  selfLink: /apis/batch/v1/namespaces/Enterprise/jobs/Enterprise-Enterpriseapp-analysis-63f7dac0
+status:
+  conditions:
+    - type: Complete
+      status: 'True'
+      lastProbeTime: '2000-01-01T00:00:00Z'
+      lastTransitionTime: '2000-01-01T00:00:00Z'
+  startTime: '2000-01-01T00:00:00Z'
+  completionTime: '2000-01-01T00:00:00Z'
+  succeeded: 1
+  uncountedTerminatedPods: {}
+  ready: 0
+spec:
+  parallelism: 1
+  completions: 1
+  backoffLimit: 0
+  selector:
+    matchLabels:
+      controller-uid: 00000000-0000-0000-0000-000000000000
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        controller-uid: 00000000-0000-0000-0000-000000000000
+        job-name: Enterprise-Enterpriseapp-analysis-63f7dac0
+    spec:
+      volumes:
+        - name: storage
+          azureFile:
+            secretName: stappcoreneres
+            shareName: fs-appcore-Enterprise-neres
+      initContainers:
+        - name: normalizer-job-v0-2-0
+          image: enterpriseappcr.azurecr.io/normalizer_job:0.2.0
+          resources:
+            limits:
+              cpu: '1'
+              memory: 2000Mi
+            requests:
+              cpu: '1'
+              memory: 2000Mi
+          volumeMounts:
+            - name: storage
+              mountPath: /asset
+              subPath: >-
+                Enterprise/000000000000000000000000/2.25.218904180017201830206977437204558052525
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+      containers:
+        - name: app-analysis-vupdate-common-lib-fa5e687
+          image: enterpriseappcr.azurecr.io/app-analysis-service:update_common-lib-fa5e687
+          args:
+            - /asset/pipeline/000000000000000000000000/input.json
+            - >-
+              eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ii1LSTNROW5OUjdiUm9meG1lWm9YcWJIWkdldyIsImtpZCI6Ii1LSTNROW5OUjdiUm9meG1lWm9YcWJIWkdldyJ9.eyJhdWQiOiJhcGk6Ly9hcHByLXFwY2FyZS1xcGxpbmstY2xvdWQtbmVyZXMiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC9hYzFiNDhjZi1mZmRhLTRhYmYtODE3Ni04ZDVmMDBjMWE2NDMvIiwiaWF0IjoxNjc3MTg3MDI0LCJuYmYiOjE2NzcxODcwMjQsImV4cCI6MTY3NzE5MjI4MSwiYWNyIjoiMSIsImFpbyI6IkFWUUFxLzhUQUFBQWh5NENiSXQ4RlFMYTRwam5UbndDRWRYam0xSCtyQ0NlZ3VVUkVlamlVY3hXa09TUlV2THp2S0NqeTFORlV6VTh4bittSnVRR0Z4NlV6V2NvLzJPRE5vMjhhTmp5R3BBUUJQdElxOFNuMFVRPSIsImFtciI6WyJwd2QiLCJtZmEiXSwiYXBwaWQiOiI2Mjg4YmQ3My0zMGY0LTQ5NWYtYTU1Yy05ZDhjNTM4M2NjY2YiLCJhcHBpZGFjciI6IjAiLCJmYW1pbHlfbmFtZSI6IkNhbWFjaG8gUmFtb3MiLCJnaXZlbl9uYW1lIjoiRWR1YXJkbyIsImlwYWRkciI6IjYyLjgzLjExMy4yMTkiLCJuYW1lIjoiRWR1YXJkbyBDYW1hY2hvIiwib2lkIjoiMzM0ZGVhYTQtNjZiZC00MGVlLTliM2EtMTM3YTAxYjg3YTFlIiwicHdkX2V4cCI6IjE1NjkzNiIsInB3ZF91cmwiOiJodHRwczovL3BvcnRhbC5taWNyb3NvZnRvbmxpbmUuY29tL0NoYW5nZVBhc3N3b3JkLmFzcHgiLCJyaCI6IjAuQVNBQXowZ2JyTnJfdjBxQmRvMWZBTUdtUTBYUE9jQVdyMmxJdHdmeFg0Mmt2NlVnQU1JLiIsInNjcCI6IkdlbmVyYWwiLCJzdWIiOiI4VUlrR2V1YjhEcEdXV05UVVhvdHRjbm1tZ0Foa1dvQVIxWTZGejNWUDRRIiwidGlkIjoiYWMxYjQ4Y2YtZmZkYS00YWJmLTgxNzYtOGQ1ZjAwYzFhNjQzIiwidW5pcXVlX25hbWUiOiJlZHVjYW1hY2hvQHF1aWJpbS5jb20iLCJ1cG4iOiJlZHVjYW1hY2hvQHF1aWJpbS5jb20iLCJ1dGkiOiJhRmFGYk5ZOHIwaUZlZUw2bnprbkFBIiwidmVyIjoiMS4wIn0.buxXbqGP_r_IVhz2gu111hnflDsHd6FyI36gEtnQRUvCjzbpv6cltQUDOGRGLZCks8lQcszLzJMfep3ny-xo1dFZ9X_qM5oEF3D49JZnRdAfn2kU5lKyYQxoEZQXMG9kTrFStLTyFjwtPi_lcsyjBbG_4nueo1vafN70o-VSubfp0E6HWG27Ydca_OqxLg3Zndppe6jLVidsxaJCapyZlsyi4Wqr3mUYgP6slviZViMKh2hICHL8oTXnH8dHLJi5gznvYAfQ_O9lwjrHDEaKVPM_UuU2SRqzgEfl0NT9jOWt1IrDnEappBncD62yuYX1uWlwSfP5w-vBKm_AvHzCRSw
+          resources:
+            limits:
+              cpu: '4'
+              memory: 16000Mi
+            requests:
+              cpu: '4'
+              memory: 16000Mi
+          volumeMounts:
+            - name: storage
+              mountPath: /asset
+              subPath: >-
+                Enterprise/000000000000000000000000/2.25.218904180017201830206977437204558052525
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+      restartPolicy: Never
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      imagePullSecrets:
+        - {}
+      schedulerName: default-scheduler
+  ttlSecondsAfterFinished: 86400
+  completionMode: NonIndexed
+  suspend: false

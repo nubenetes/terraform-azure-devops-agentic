@@ -1,0 +1,152 @@
+# https://learn.microsoft.com/en-us/azure/aks/devops-pipeline?pivots=pipelines-yaml
+# https://learn.microsoft.com/en-us/azure/devops/pipelines/ecosystems/kubernetes/deploy?view=azure-devops
+# https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/kubernetes-manifest-v0?view=azure-pipelines
+# https://learn.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml#kubernetes-service-connection
+    # https://www.youtube.com/watch?v=ORFWrBFwlps
+    # AKS with Kubernetes Service Connection returns "Could not find any secrets associated with the Service Account." error in Azure Pipelines: https://learn.microsoft.com/en-us/answers/questions/1051970/aks-with-kubernetes-service-connection-returns-cou
+      # https://developercommunity.visualstudio.com/t/New-Kubernetes-service-connection-causes/10138123#T-N10138393
+      # 
+# https://learnk8s.io/templating-yaml-with-code
+# https://github.com/learnk8s/templating-kubernetes/blob/master/java/README.md
+
+trigger:
+- manual
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+parameters:
+- name: 'aksENGday2'
+  displayName: 'Run kubernetes manifests against AKS ENG North Europe'
+  type: boolean
+  default: false
+- name: 'aksPROday2' 
+  displayName: 'Run kubernetes manifests against AKS PRO North Europe'
+  type: boolean
+  default: false
+
+# Define Variables for Environments
+variables:
+- template: configuration/shared-azure-devops-pipeline-vars.yml
+- template: configuration/developbranch-service-connections.yml
+- ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+  - template: configuration/mainbranch-service-connections.yml
+
+stages:
+- stage: ManifestBuild
+  displayName: Build stage
+  # dependsOn: 
+  #   - TerraformENG
+  #   - TerraformPRO
+  condition: or(succeeded('TerraformENG'), succeeded('TerraformPRO'))
+  jobs:  
+  - job: Build
+    displayName: Build job
+    # pool:
+    #   vmImage: $(vmImageName)
+    steps:
+    - task: PublishPipelineArtifact@1
+      inputs:
+        artifactName: 'manifests'
+        path: 'manifests'
+- stage: aksDENG
+  dependsOn: ManifestBuild
+  condition: and(succeeded('TerraformENG'),eq(variables['Build.SourceBranchName'], 'develop'))
+  displayName: Deploy manifests aks DENG
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy job
+    environment: ${{ variables.ENG_ENVIRONMENT }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          # https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/kubernetes-manifest-v0
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifactName: 'manifests'
+              downloadPath: '$(System.ArtifactsDirectory)/manifests'
+          - task: KubernetesManifest@0 
+            displayName: Deploy to K8s
+            inputs:
+              kubernetesServiceConnection: 'aks-dneeng'
+              action: deploy
+              manifests: |
+                $(System.ArtifactsDirectory)/manifests/namespace.yml
+          # Deploy helm chart with kube-prometheus-stack
+          # https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/helm-deploy-v0
+          # - task: HelmDeploy@0
+          #   displayName: 'Add Service Catalog Helm Repo'
+          #   enabled: true
+          #   inputs:
+          #     kubernetesServiceConnection: 'aks-dneeng'
+          #     command: 'repo'
+          #     arguments: 'add prometheus-community https://prometheus-community.github.io/helm-charts'
+          # - task: HelmDeploy@0
+          #   displayName: 'helm repo update'
+          #   enabled: true
+          #   inputs:
+          #     kubernetesServiceConnection: 'aks-dneeng'
+          #     command: 'repo'
+          #     arguments: 'update'
+          # - task: HelmDeploy@0
+          #   displayName: Helm install kube-prometheus-stack
+          #   continueOnError: true  # This chart could already be installed            
+          #   inputs:
+          #     kubernetesServiceConnection: 'aks-dneeng'
+          #     command: install
+          #     chartType: Name
+          #     chartName: prometheus-community/kube-prometheus-stack
+          #     chartVersion: 45.6.0
+          #     namespace: monitoring
+- stage: aksENG
+  dependsOn: ManifestBuild
+  condition: and(succeeded('TerraformENG'),eq(variables['Build.SourceBranchName'], 'main'))
+  displayName: Deploy manifests aks ENG
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy job
+    environment: ${{ variables.ENG_ENVIRONMENT }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifactName: 'manifests'
+              downloadPath: '$(System.ArtifactsDirectory)/manifests'
+          - task: KubernetesManifest@0
+            displayName: Deploy to K8s
+            inputs:
+              kubernetesServiceConnection: 'aks-neeng'
+              action: deploy
+              #namespace: "Enterprise" #$(k8sNamespace)
+              manifests: |
+                $(System.ArtifactsDirectory)/manifests/namespace.yml
+- stage: aksPRO
+  dependsOn: ManifestBuild
+  condition: succeeded('TerraformPRO')
+  displayName: Deploy manifests aks PRO
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy job
+    environment: ${{ variables.ENG_ENVIRONMENT }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifactName: 'manifests'
+              downloadPath: '$(System.ArtifactsDirectory)/manifests'
+          - task: KubernetesManifest@0
+            displayName: Deploy to K8s
+            inputs:
+              kubernetesServiceConnection: 'aks-nepro'
+              action: deploy
+              #namespace: "Enterprise" #$(k8sNamespace)
+              manifests: |
+                $(System.ArtifactsDirectory)/manifests/namespace.yml
+                
+
+

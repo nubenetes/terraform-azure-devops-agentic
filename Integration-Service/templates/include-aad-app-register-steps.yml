@@ -1,0 +1,28 @@
+# File: templates/include-aad-app-register-steps.yml 
+
+steps:
+- powershell: 'ls env:'
+  displayName: 'Show env'
+- task: AzureCLI@2
+  displayName: 'run scripts/07-createAppRegister.ps1'
+  name: ProduceVarAppReg
+  # Where $(clientId) & $(appSecret) global vars are obtained from 
+  # az ad app create: Parameter '--end-date' is not setup. Default value is one year after current time (means the secret expires in 1 year by default)
+  inputs:
+    azureSubscription: $(serviceConnection)
+    scriptType: 'ps'
+    scriptLocation: 'scriptPath'
+    scriptPath: 'scripts/07-createAppRegister.ps1'
+    arguments: $(appName) $(rgLocation) $(resourceGroup) $(storageAccountTags) $(storageAccount) $(upnName) $(centerName) 
+- powershell: |
+    Write-Host "set variables in scripts - clientId: $(clientId)"
+  displayName: 'clientId'
+- task: AzurePowerShell@5
+  displayName: 'run scripts/08-assign-customSecurityAttributes.ps1'
+  inputs:
+    azureSubscription: $(serviceConnection)
+    scriptType: 'FilePath'
+    scriptPath: 'scripts/08-assign-customSecurityAttributes.ps1'
+    scriptArguments: '$(spName) $(centerName)'
+    azurePowerShellVersion: 'latestVersion' # Required. Options: latestVersion, otherVersion
+    pwsh: true  # true = powershell 7.x , false = powershell 5.1 

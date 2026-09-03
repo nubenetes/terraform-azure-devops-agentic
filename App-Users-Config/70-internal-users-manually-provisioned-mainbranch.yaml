@@ -1,0 +1,8 @@
+---
+- email: cloud-admin@example.com
+  center: &center001 Enterprise # defines anchor label &center001
+  appcore-admin-role: &role001 # defines anchor label &role001
+    - nedev
+    - neuat
+    - neres
+    - nepro

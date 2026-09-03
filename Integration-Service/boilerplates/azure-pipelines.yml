@@ -1,0 +1,434 @@
+trigger:
+  - manual
+
+pool:
+    vmImage: 'windows-2022'
+
+resources:
+    repositories:
+    - repository: integration-service-Bitbucket-Repo
+      type: bitbucket
+      endpoint: svccon-bitbucket
+      name: enterprise/data_router
+      #ref: master    # check out a specific ref/branch (master)
+      ref: refs/tags/1.0.0     # check out a specific tag
+
+  # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/runtime-parameters
+parameters:
+    - name: upn
+      displayName: User Principal Name (upn)
+      type: string
+      default: 'cloud-admin@example.com'     # 'cloud-admin@example.com' , 'cloud-admin@example.com' , 'cloud-admin@example.com' , etc
+    - name: AETitle     # Should NOT CONTAIN special symbols such as <>\'&    ---> Due to automatic character escape feature of ConvertTo-Json in 09-assign-customSecurityAttributes.ps1
+      displayName: Center Name - AETitle Custom Security Attribute
+      type: string
+      default: 'client-example'     # 'enterprise' , 'client-example' , etc
+    - name: environment
+      displayName: Environment
+      type: string
+      default: 'test-app'
+      values:            # Only the following values are valid and accepted by the pipeline:
+        - 'dev-app'
+        - 'test-app'
+        - 'core'      # production
+
+variables:
+    MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
+    MAVEN_JVM_OPTS: "-Xmx3072m" # maven jvm params
+    MAVEN_OPTIONS: "-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -DskipTests -Denvironment=${{ lower(parameters.environment) }}" # Skipping Tests since they have already passed in bitbucket repo
+      #-Dskip.unit.tests=true -Dskip.it.tests=true"
+    POM_FILE: "pom-azure-pipelines.xml"        # "pom-azure-pipelines.xml" (recommended in Azure DevOps) , "pom.xml"
+    # Download URLs of Public Artifacts
+    WINSW_DOWNLOAD_URL: 'https://github.com/winsw/winsw/releases/download/v2.12.0/WinSW-x64.exe'
+    JRE_DOWNLOAD_URL: 'https://github.com/adoptium/temurin11-binaries/releases/download/jdk-127.0.0.1%2B1/OpenJDK11U-jre_x64_windows_hotspot_11.0.14.1_1.zip'
+    MAVEN_DOWNLOAD_URL: "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.6.3/apache-maven-3.6.3-bin.zip"
+    # Conditions
+    enableConditionOptionalStages: 'false' # true/false  - do we enable all the optional stages ?
+    enableConditionDownloadFromInternet: 'false' # true/false - do we download public artifacts from internet instead of azure artifact repo ?
+    enableConditionGitCloneSrcFromBitBucket: 'true' # true/false  - do we enable a git clone from bitbucket repo with integration-service source code obtained from there?
+    # integration-service On-Premise App Security:
+    serviceConnection: "svccon-integration-service-${{ lower(parameters.environment) }}"  # Example: 'enterprise Example-Dev-Subscription' with RG 'dev-appcResourceGroup' (app-core DevTest environment)
+    resourceGroup: "${{ lower(parameters.environment) }}ResourceGroup"  # 'dev-appcResourceGroup' , 'test-appcResourceGroup' , 'coreResourceGroup' , etc
+    rgLocation: 'northeurope'
+    appName: "appr-integration-service-onprem-${{ lower(parameters.AETitle) }}-${{ lower(parameters.environment) }}"  # Application Name in AAD - Based on AETitle and Environment
+    storageContainerName: "co-integration-service-onprem-${{ lower(parameters.AETitle) }}-${{ lower(parameters.environment) }}"
+    blobName: "blob_integration-service_${{ lower(parameters.AETitle) }}_${{ lower(parameters.environment) }}"
+    storageAccountTags: "env=${{ lower(parameters.environment) }}"
+    upnName: ${{ lower(parameters.upn) }}    # lower() -> change to lowercase (capital letters can arise errors when creating azure resources)
+    centerName: ${{ lower(parameters.AETitle) }}   # $centerName should NOT CONTAIN special symbols such as <>\'&    ---> Due to automatic character escape feature of ConvertTo-Json in 09-assign-customSecurityAttributes.ps1
+    environment: ${{ lower(parameters.environment) }}
+
+stages:
+  - stage: getKeysFromVault_startMessage
+    displayName: 'START in Queue'
+    jobs:
+    - job: sendMessage
+      timeoutInMinutes: 15 # how long to run the job before automatically cancelling
+      cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+      steps:
+          - task: AzureCLI@2
+            displayName: 'run scripts/04-getkeysFromVault.ps1'
+            name: ProduceVarStorageAccount
+            inputs:
+              azureSubscription: $(serviceConnection)
+              scriptType: 'ps'
+              scriptLocation: 'scriptPath'
+              scriptPath: 'scripts/04-getkeysFromVault.ps1'
+              arguments: '$(centerName) $(environment)'
+          - task: AzureCLI@2
+            displayName: 'run scripts/06-storageMessage-START.ps1'
+            inputs:
+              azureSubscription: $(serviceConnection)
+              scriptType: 'ps'
+              scriptLocation: 'scriptPath'
+              scriptPath: 'scripts/06-storageMessage-START.ps1'
+              arguments: '$(resourceGroup) $(rgLocation) $(storageAccount) $(storageAccountTags) $(upnName) $(centerName)'
+  - stage: registerAppInAAD
+    displayName: AAD App Register
+    dependsOn: getKeysFromVault_startMessage
+    jobs:
+    - job: registerAppWithCustomSecAttributes
+      timeoutInMinutes: 15 # how long to run the job before automatically cancelling
+      cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+      variables:
+        storageAccount: $[ stageDependencies.getKeysFromVault_startMessage.sendMessage.outputs['ProduceVarStorageAccount.storageAccountOutput'] ]
+      steps:
+          - task: AzureCLI@2
+            displayName: 'run scripts/07-createAppRegister.ps1'
+            name: ProduceVarAppReg
+            # Where $(clientId) & $(appSecret) global vars are obtained from
+            # az ad app create: Parameter '--end-date' is not setup. Default value is one year after current time (means the secret expires in 1 year by default)
+            inputs:
+              azureSubscription: $(serviceConnection)
+              scriptType: 'ps'
+              scriptLocation: 'scriptPath'
+              scriptPath: 'scripts/07-createAppRegister.ps1'
+              arguments: $(appName) $(rgLocation) $(resourceGroup) $(storageAccountTags) $(storageAccount) $(upnName) $(centerName)
+          - powershell: |
+              Write-Host "set variables in scripts - appSecret/clientSecret: $(appSecret)"
+            displayName: 'appSecret/clientSecret content:'
+          - powershell: |
+              Write-Host "set variables in scripts - clientId: $(clientId)"
+            displayName: 'clientId content:'
+          - task: AzurePowerShell@5
+            displayName: 'run scripts/08-assign-customSecurityAttributes.ps1'
+            inputs:
+              azureSubscription: $(serviceConnection)
+              scriptType: 'FilePath'
+              scriptPath: 'scripts/08-assign-customSecurityAttributes.ps1'
+              scriptArguments: '$(spName) $(centerName)'
+              azurePowerShellVersion: 'latestVersion' # Required. Options: latestVersion, otherVersion
+  - stage: JavaBuild
+    displayName: Java Build
+    dependsOn: [getKeysFromVault_startMessage,registerAppInAAD]
+    jobs:
+    - job: mavenBuild
+      timeoutInMinutes: 15 # how long to run the job before automatically cancelling
+      cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+      variables:
+        # Use outputs in a different stage (pass variables between stages):
+        # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=azure-devops&tabs=yaml%2Cbatch#use-outputs-in-a-different-stage
+        clientId: $[ stageDependencies.registerAppInAAD.registerAppWithCustomSecAttributes.outputs['ProduceVarAppReg.clientIdOutput'] ]
+        appSecret: $[ stageDependencies.registerAppInAAD.registerAppWithCustomSecAttributes.outputs['ProduceVarAppReg.appSecretOutput'] ]
+      steps:
+        - checkout: self
+          clean: true
+          env:
+            autocrlf: true  # Solution to this issue: spring-io/spring-javaformat Requiring LF line separators isn't Windows-friendly. https://github.com/spring-io/spring-javaformat/issues/202
+        - checkout: integration-service-Bitbucket-Repo
+          clean: true
+          condition:  eq(variables['enableConditionGitCloneSrcFromBitBucket'], 'true')
+        - script: ls -la $(Build.SourcesDirectory)
+          displayName: Show folders with multi repo checkouts
+        - powershell: Get-ChildItem $(Build.SourcesDirectory)\integration-service\src\ | Remove-Item -Recurse -Force -Verbose
+          displayName: delete the content of integration-service/src/ folder and make it empty
+          condition:  eq(variables['enableConditionGitCloneSrcFromBitBucket'], 'true')
+        - script: ls -la $(Build.SourcesDirectory)\integration-service\src\
+          displayName: Show files in integration-service/src/ folder
+        - powershell: Move-Item "$(Build.SourcesDirectory)\data_router\src\main" -Destination "$(Build.SourcesDirectory)\integration-service\src\" -Verbose
+          displayName: Move content of src/main folder from Bitbucket Cloud to Azure Repo
+          condition:  eq(variables['enableConditionGitCloneSrcFromBitBucket'], 'true')
+        - powershell: Move-Item "$(Build.SourcesDirectory)\data_router\src\test" -Destination "$(Build.SourcesDirectory)\integration-service\src\" -Verbose
+          displayName: Move content of src/test folder from Bitbucket Cloud to Azure Repo
+          condition:  eq(variables['enableConditionGitCloneSrcFromBitBucket'], 'true')
+        - script: ls -la $(Build.SourcesDirectory)/integration-service/src/
+          displayName: Show files in integration-service/src/ folder
+          condition:  eq(variables['enableConditionGitCloneSrcFromBitBucket'], 'true')
+        - task: CopyFiles@2
+          displayName: 'Copy pom.xml from Bitbucket Folder to integration-service Folder'
+          inputs:
+            SourceFolder: '$(Build.SourcesDirectory)\data_router\'
+            Contents: 'pom.xml'
+            TargetFolder: '$(Build.SourcesDirectory)\integration-service\'
+          condition:  eq(variables['enableConditionGitCloneSrcFromBitBucket'], 'true')
+        - powershell: Get-ChildItem -Path "$(Build.SourcesDirectory)\integration-service\*" -Recurse -Force | Move-Item -Destination "$(Build.SourcesDirectory)\" -Force -Verbose
+          displayName: Moving updated content from integration-service/ folder to current working directory (root folder)
+        - script: ls -la $(Build.SourcesDirectory)/integration-service/
+          displayName: Show remaining files in integration-service/ folder
+        - powershell: Remove-Item -Path $(Build.SourcesDirectory)\integration-service -Recurse -Verbose -Force
+          displayName: delete integration-service/ folder
+        - powershell: Remove-Item -Path $(Build.SourcesDirectory)\data_router -Recurse -Verbose -Force
+          displayName: delete data_router/ folder
+        - script: ls -la
+          displayName: Show files in root folder
+        - script: ls -la src/
+          displayName: Show files in src/ folder
+        - powershell: |
+            Write-Host "set variables in scripts - clientId: $(clientId)"
+            Write-Host "set variables in scripts - appSecret/clientSecret: $(appSecret)"
+          displayName: 'Show variables content grabbed from pipeline parameters'
+        - task: UsePythonVersion@0
+          displayName: 'Setting up Python'
+          inputs:
+            versionSpec: '*' # * = latest
+        # Grab Project Version from POM File:
+        - powershell: |
+            $filePath = "$(POM_FILE)"
+            [xml]$pomXml = Get-Content $filePath
+            $projectVersion = $pomXml.project.version
+            Write-Host "Current Project Version (integration-service release) grabbed from POM file: $projectVersion"
+            Write-Host "Setup gobal variable needed by the next task: integration-serviceRelease"
+            Write-Host "##vso[task.setvariable variable=integration-serviceRelease]$projectVersion"
+            Write-Host "setup output variable needed by the next stage: integration-serviceReleaseOutput"
+            Write-Host "##vso[task.setvariable variable=integration-serviceReleaseOutput;isOutput=true]$projectVersion"
+          name: ProduceVarintegration-serviceRelease
+        # Download Apache Maven Binary
+        - task: UniversalPackages@0
+          displayName: 'Download Maven from internal repo'
+          condition:  eq(variables['enableConditionDownloadFromInternet'], 'false')
+          inputs:
+            command: download
+            vstsFeed: 'GitOps/integration-service-Artifacts-Feed2'
+            vstsFeedPackage: 'maven'
+            vstsPackageVersion: '*' # * = latest , a specifc release like 0.0.1 needs to be saved as "view" within the artifact repo to avoid being removed by the retention policy
+            downloadDirectory: '$(Build.SourcesDirectory)\publicArtifacts'
+            verbosity: trace
+        - script: ls -l $(Build.SourcesDirectory)\publicArtifacts
+          displayName: 'ls -l $(Build.SourcesDirectory)\publicArtifacts'
+          condition:  eq(variables['enableConditionDownloadFromInternet'], 'false')
+        - task: CopyFiles@2
+          displayName: 'Copy maven.zip to System Default Working Directory'
+          condition:  eq(variables['enableConditionDownloadFromInternet'], 'false')
+          inputs:
+            SourceFolder: '$(Build.SourcesDirectory)\publicArtifacts'
+            contents: 'maven.zip'
+            targetFolder: '$(System.DefaultWorkingDirectory)/'
+        - script: ls -l $(System.DefaultWorkingDirectory)/
+          displayName: 'ls -l $(System.DefaultWorkingDirectory)/'
+          condition:  eq(variables['enableConditionDownloadFromInternet'], 'false')
+        - powershell: 'Invoke-WebRequest -Uri $(MAVEN_DOWNLOAD_URL) -OutFile $(System.DefaultWorkingDirectory)/maven.zip'
+          displayName: 'Download Maven from Internet'
+          condition:  eq(variables['enableConditionDownloadFromInternet'], 'true')
+        - powershell: 'Expand-Archive -Path $(System.DefaultWorkingDirectory)/maven.zip -DestinationPath $(System.DefaultWorkingDirectory)/ -Verbose'
+          displayName: 'Unzip maven.zip downloaded from internet'
+        - script: ls -l
+          displayName: 'ls -l'
+        - pwsh: 'Rename-Item apache-maven-* maven'
+          displayName: 'Rename maven folder'
+        - script: ls -l
+          displayName: 'ls -l'
+        - script: ls -l maven/
+          displayName: 'ls -l maven/'
+        - script: ls -l maven/bin
+          displayName: 'ls -l maven/bin/'
+
+        # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/build/maven?view=azure-devops
+        - task: Maven@3
+          displayName: 'maven build'
+          inputs:
+            mavenPomFile: "$(POM_FILE)"
+            mavenOptions: $(MAVEN_JVM_OPTS)
+            options: "$(MAVEN_OPTIONS) -DclientId=$(clientId) -DclientSecret=$(appSecret)"
+            publishJUnitResults: false
+            #testResultsFiles: '**/surefire-reports/TEST-*.xml'
+            #testRunTitle: 'mytests'
+            javaHomeOption: 'JDKVersion'
+            jdkVersionOption: '1.11'
+            mavenVersionSelection: 'Path'
+            mavenPath: $(System.DefaultWorkingDirectory)/maven
+            mavenSetM2Home: true
+            mavenAuthenticateFeed: true
+            sonarQubeRunAnalysis: false
+            #sqMavenPluginVersionChoice: 'latest' # Required when sonarQubeRunAnalysis == True# Options: latest, pom
+            goals: 'package'
+            #options: # Optional. Specify any Maven command-line options you want to use.
+            #codeCoverageToolOption: 'None' # Optional. Options: none, cobertura, jaCoCo. Enabling code coverage inserts the `clean` goal into the Maven goals list when Maven runs.
+        - task: CopyFiles@2
+          displayName: 'Copy Files to artifact staging directory'
+          inputs:
+            SourceFolder: '$(System.DefaultWorkingDirectory)'
+            Contents: '**/target/*.?(jar|exe)'
+            TargetFolder: $(Build.ArtifactStagingDirectory)
+        - task: PublishPipelineArtifact@1
+          displayName: 'Publish integration-service-onpremise-$(integration-serviceRelease).jar & integration-service-onpremise-$(integration-serviceRelease).exe Artifacts in drop folder'
+          inputs:
+            targetPath: $(Build.ArtifactStagingDirectory)/target/
+            artifactName: 'drop'
+        - script: ls -l $(Build.ArtifactStagingDirectory)/target/
+          displayName: 'ls -l Build.ArtifactStagingDirectory/target/'
+  - stage: InnoSetupBuildUploadintegration-serviceToStorageContainer
+    displayName: InnoSetup Build # - Upload integration-service Installer to Storage Container - Create Download URL with SAS token
+    dependsOn: [getKeysFromVault_startMessage,registerAppInAAD,JavaBuild]
+    jobs:
+    - job: createintegration-serviceExe
+      timeoutInMinutes: 25 # how long to run the job before automatically cancelling
+      cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+      variables:
+        storageAccount: $[ stageDependencies.getKeysFromVault_startMessage.sendMessage.outputs['ProduceVarStorageAccount.storageAccountOutput'] ]
+        appRegisterTimestamp: $[ stageDependencies.registerAppInAAD.registerAppWithCustomSecAttributes.outputs['ProduceVarAppReg.appRegisterTimestampOutput'] ]
+        spName: $[ stageDependencies.registerAppInAAD.registerAppWithCustomSecAttributes.outputs['ProduceVarAppReg.spNameOutput'] ]
+        integration-serviceRelease: $[ stageDependencies.JavaBuild.mavenBuild.outputs['ProduceVarintegration-serviceRelease.integration-serviceReleaseOutput'] ]
+      steps:
+      # Download winSW.exe
+      # https://javadeveloperzone.com/spring-boot/spring-boot-as-windows-service/
+      # https://github.com/winsw/winsw
+      # https://github.com/winsw/winsw/releases/download/v2.12.0/WinSW-x64.exe
+      - powershell: Invoke-WebRequest -Uri $(WINSW_DOWNLOAD_URL) -OutFile 'resources/integration-service-onpremise-$(integration-serviceRelease)-service.exe'
+        displayName: 'Download winSW.exe fron Internet'
+        condition:  eq(variables['enableConditionDownloadFromInternet'], 'true')
+      - task: UniversalPackages@0
+        displayName: 'Download winSW.exe from internal repo'
+        condition:  eq(variables['enableConditionDownloadFromInternet'], 'false')
+        inputs:
+          command: download
+          vstsFeed: 'GitOps/integration-service-Artifacts-Feed2'
+          vstsFeedPackage: 'winsw'
+          vstsPackageVersion: '*' # * = latest , a specifc release like 0.0.1 needs to be saved as "view" within the artifact repo to avoid being removed by the retention policy
+          downloadDirectory: '$(Build.SourcesDirectory)\publicArtifacts'
+          verbosity: trace
+      - script: ls -l $(Build.SourcesDirectory)\publicArtifacts
+        displayName: 'ls -l Build.SourcesDirectory\publicArtifacts'
+        condition:  eq(variables['enableConditionDownloadFromInternet'], 'false')
+      - powershell: Rename-Item -Path $(Build.SourcesDirectory)\publicArtifacts\WinSW-x64.exe -NewName integration-service-onpremise-$(integration-serviceRelease)-service.exe
+        displayName: 'rename winSW.exe'
+        condition:  eq(variables['enableConditionDownloadFromInternet'], 'false')
+      - script: ls -l $(Build.SourcesDirectory)\publicArtifacts
+        displayName: 'ls -l Build.SourcesDirectory\publicArtifacts'
+        condition:  eq(variables['enableConditionDownloadFromInternet'], 'false')
+      - task: CopyFiles@2
+        displayName: 'Copy integration-service winSW.exe renamed as integration-service-onpremise-$(integration-serviceRelease)-service.exe to resources folder'
+        condition:  eq(variables['enableConditionDownloadFromInternet'], 'false')
+        inputs:
+          SourceFolder: '$(Build.SourcesDirectory)\publicArtifacts'
+          contents: '*.exe'
+          targetFolder: 'resources/'
+      - script: ls -l resources/
+        displayName: 'ls -l resources/'
+      # Download JRE
+      - powershell: Invoke-WebRequest -Uri $(JRE_DOWNLOAD_URL) -OutFile '$(System.DefaultWorkingDirectory)/jre11.zip'
+        displayName: 'Download JRE from Internet'
+        condition:  eq(variables['enableConditionDownloadFromInternet'], 'true')
+      - task: UniversalPackages@0
+        displayName: 'Download JRE from internal repo'
+        condition:  eq(variables['enableConditionDownloadFromInternet'], 'false')
+        inputs:
+          command: download
+          vstsFeed: 'GitOps/integration-service-Artifacts-Feed2'
+          vstsFeedPackage: 'jre'
+          vstsPackageVersion: '*' # * = latest , a specifc release like 0.0.1 needs to be saved as "view" within the artifact repo to avoid being removed by the retention policy
+          downloadDirectory: '$(Build.SourcesDirectory)\publicArtifacts'
+          verbosity: trace
+      - script: ls -l $(Build.SourcesDirectory)/publicArtifacts
+        displayName: 'ls -l Build.SourcesDirectory/publicArtifacts'
+        condition:  eq(variables['enableConditionDownloadFromInternet'], 'false')
+      - powershell: 'Expand-Archive -Path $(Build.SourcesDirectory)/publicArtifacts/jre11.zip -DestinationPath resources/ -Verbose'
+        displayName: 'Unzip jre11.zip downloaded from internal repo'
+        condition:  eq(variables['enableConditionDownloadFromInternet'], 'false')
+      - powershell: 'Expand-Archive -Path $(System.DefaultWorkingDirectory)/jre11.zip -DestinationPath resources/ -Verbose'
+        displayName: 'Unzip jre11.zip downloaded from internet'
+        condition:  eq(variables['enableConditionDownloadFromInternet'], 'true')
+      - powershell: 'Move-Item -Path resources/jdk-* -Destination resources/jre'
+        displayName: 'Rename jre folder'
+      - script: ls -l resources/
+        displayName: 'ls -l resources/'
+      # InnoSetup
+      - task: Installer@1  # Innosetup Installer
+        ##[warning]Task 'Installer' (1.0.0) is using deprecated task execution handler. The task should use the supported task-lib: https://aka.ms/tasklib
+        # The above warning arises with windows-2022 Agent, check https://github.com/ricardo-pignone/InnoSetupTools/issues/5
+        displayName: Innosetup Installer
+        inputs:
+          version: '6.2.1'
+      - task: DownloadPipelineArtifact@2
+        displayName: Grab integration-service-onpremise-$(integration-serviceRelease).jar, integration-service-onpremise-$(integration-serviceRelease).exe & innoSetupScript.iss Artifacts generated in previous stage
+        inputs:
+          source: 'current'
+          path: $(Build.ArtifactStagingDirectory)
+      - task: CopyFiles@2
+        displayName: 'Copy integration-service-onpremise-$(integration-serviceRelease).jar file from artifact staging directory to resources/ folder'
+        inputs:
+          SourceFolder: $(Build.ArtifactStagingDirectory)/drop
+          Contents: '*.?(war|jar)'
+          TargetFolder: $(System.DefaultWorkingDirectory)/resources/
+      - task: CopyFiles@2
+        displayName: 'Copy integration-service-onpremise-$(integration-serviceRelease).exe file from artifact staging directory to resources/ folder'
+        inputs:
+          SourceFolder: $(Build.ArtifactStagingDirectory)/drop
+          Contents: '*.exe'
+          TargetFolder: $(System.DefaultWorkingDirectory)\resources
+      # Render Jinja2 templates
+      - script: python -m pip install jinja2-cli
+        displayName: 'Setting up jinja2-cli'
+      # Rendering innoSetupScript.j2 template in resources/ folder
+      - script: >
+          jinja2 -D integration-serviceRelease=$(integration-serviceRelease)
+          templates/innoSetupScript.j2 --outfile=$(System.DefaultWorkingDirectory)/resources/innoSetupScript.iss
+        displayName: 'Rendering Jinja2 template: innoSetupScript.iss'
+      # Rendered files:
+      - script: cat resources/innoSetupScript.iss
+        displayName: 'cat rendered resources/innoSetupScript.iss'
+      # Rendering innoSetup-service.j2 template in resources/ folder
+      - script: >
+          jinja2 -D integration-serviceRelease=$(integration-serviceRelease)
+          templates/innoSetup-service.j2 --outfile=$(System.DefaultWorkingDirectory)/resources/integration-service-onpremise-$(integration-serviceRelease)-service.xml
+        displayName: 'Rendering Jinja2 template: integration-service-onpremise-$(integration-serviceRelease)-service.xml'
+      # Rendered files:
+      - script: cat resources/integration-service-onpremise-$(integration-serviceRelease)-service.xml
+        displayName: 'cat resources/integration-service-onpremise-$(integration-serviceRelease)-service.xml'
+      - script: ls -l $(System.DefaultWorkingDirectory)\resources
+        displayName: 'ls -l $(System.DefaultWorkingDirectory)\resources'
+      - task: Build@1 # Innosetup Build .
+        ##[warning]Task 'Build' (1.0.0) is using deprecated task execution handler. The task should use the supported task-lib: https://aka.ms/tasklib
+        # The above warning arises with windows-2022 Agent, check https://github.com/ricardo-pignone/InnoSetupTools/issues/5
+        displayName: Innosetup Build
+        inputs:
+          version: '6.2.1'
+          file: 'resources/innoSetupScript.iss'
+      - script: ls -l innoSetupOutput/
+        displayName: 'ls -l innoSetupOutput/'
+      - task: CopyFiles@2
+        displayName: 'Copy integration-service installer'
+        inputs:
+          SourceFolder: 'innoSetupOutput/'
+          contents: '*.exe'
+          targetFolder: '$(Build.ArtifactStagingDirectory)'
+      - task: AzureCLI@2
+        displayName: 'run scripts/09-createStorageContainer-upload-integration-service-OnPremInstaller-createURL.ps1'
+        inputs:
+          azureSubscription: $(serviceConnection)
+          scriptType: 'ps'
+          scriptLocation: 'scriptPath'
+          scriptPath: 'scripts/09-createStorageContainer-upload-integration-service-OnPremInstaller-createURL.ps1'
+          arguments: '$(resourceGroup) $(rgLocation) $(storageAccount) $(storageContainerName) $(blobName) $(storageAccountTags) $(spName) $(Build.ArtifactStagingDirectory) $(appRegisterTimestamp)'
+        name: ProduceVarBlobFileDownloadUrlOutput
+  - stage: EndMessage_with_URL
+    displayName: 'END in Queue'
+    dependsOn: [getKeysFromVault_startMessage,InnoSetupBuildUploadintegration-serviceToStorageContainer]
+    jobs:
+    - job: sendMessage
+      timeoutInMinutes: 15 # how long to run the job before automatically cancelling
+      cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+      variables:
+          # Use outputs in a different stage (pass variables between stages):
+          # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=azure-devops&tabs=yaml%2Cbatch#use-outputs-in-a-different-stage
+          BlobFileDownloadUrl: $[ stageDependencies.InnoSetupBuildUploadintegration-serviceToStorageContainer.createintegration-serviceExe.outputs['ProduceVarBlobFileDownloadUrlOutput.BlobFileDownloadUrlOutput'] ]
+          storageAccount: $[ stageDependencies.getKeysFromVault_startMessage.sendMessage.outputs['ProduceVarStorageAccount.storageAccountOutput'] ]
+      steps:
+          - task: AzureCLI@2
+            displayName: 'run scripts/10-storageMessage-END-URL.ps1'
+            inputs:
+              azureSubscription: $(serviceConnection)
+              scriptType: 'ps'
+              scriptLocation: 'scriptPath'
+              scriptPath: 'scripts/10-storageMessage-END-URL.ps1'
+              arguments: $(resourceGroup) $(storageAccount) $(upnName) $(centerName) '$(BlobFileDownloadUrl)'
+              # Be core_FULL_PLACEHOLDER with the above line! BlobFileDownloadUrl var needs to be quoted like this, otherwise special chars might arise errors

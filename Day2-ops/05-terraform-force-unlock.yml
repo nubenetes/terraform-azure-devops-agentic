@@ -1,0 +1,57 @@
+# https://stackoverflow.com/questions/57150346/is-there-a-way-where-terraform-ignores-resourcenotfoundexception-and-destroys-th
+# https://www.terraform.io/cli/commands/state/rm
+
+########################################################################################
+# This pipeline forces the unlock (get the LockID from the error)
+# Useful when Terraform State blob is already locked.
+#
+# terraform force-unlock <LockId>
+########################################################################################
+
+trigger:
+- manual
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+parameters:
+- name: 'unlockENG'
+  displayName: 'Terraform Unlock ENG Shared-infra (Dev, QA, UAT, Pre)'
+  type: boolean
+  default: false
+- name: 'unlockPRO'
+  displayName: 'Terraform Unlock PRO Shared-infra (Production)'
+  type: boolean
+  default: false
+- name: 'idOfLockShownInError' 
+  displayName: 'ID of terraform lock shown in Error: Terraform acquires a state lock to protect the state from being written by multiple users at the same time.
+    Please resolve the issue above and try again.'
+  type: string
+  default: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# Define Variables for Environments
+variables:
+- template: configuration/shared-azure-devops-pipeline-vars.yml
+- template: configuration/developbranch-service-connections.yml
+- ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+  - template: configuration/mainbranch-service-connections.yml
+
+stages: 
+- stage: TerraformUnlockENG
+  displayName: Terraform force-unlock ENG
+  condition: ${{parameters.unlockENG}}
+  jobs:
+    - template: templates/terraform-force-unlock.yml
+      parameters: 
+        environment: ${{ variables.ENG_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        RESOURCE: ${{ parameters.idOfLockShownInError }}
+- stage: TerraformUnlockPRO
+  displayName: Terraform force-unlock PRO
+  condition: ${{parameters.unlockPRO}}
+  jobs:
+    - template: templates/terraform-force-unlock.yml
+      parameters: 
+        environment: ${{ variables.PRO_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        RESOURCE: ${{ parameters.idOfLockShownInError }}

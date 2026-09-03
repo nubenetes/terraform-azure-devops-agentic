@@ -1,0 +1,86 @@
+trigger:
+- manual
+
+stages:
+- stage: runAgents
+  displayName: 'runAgents'
+  jobs:  
+  - job: windowsAgent
+    pool:
+      vmImage: 'windows-2022'
+    steps:
+      - bash: |
+          touch file.txt
+          echo "##############     Mkdir Directory     ########################"
+          mkdir directory
+          echo
+          echo "##############     DIRECTORY     ########################"
+          ls -l 
+          ls -l directory/
+      - powershell: Move-Item file.txt -Destination "directory\" -Verbose
+        displayName: powershell 1. Move file
+      - powershell: |
+          dir *.*
+          dir directory/*.*
+          dir directory/*.txt
+        displayName: powershell 2
+      - pwsh: |
+          dir *.*
+          dir directory/*.*
+          dir directory/*.txt
+        displayName: pwsh 
+      - script: |
+          ls -l 
+          echo 
+          echo "##############     DIRECTORY     ########################"
+          echo           
+          ls -la directory/
+      - bash: |
+          ls -l 
+          echo 
+          echo "##############     DIRECTORY     ########################"
+          echo 
+          ls -la directory/
+          find . -name file.txt
+  - job: linuxAgent
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+      - bash: |
+          touch file.txt
+          echo "##############     Mkdir Directory     ########################"
+          mkdir directory
+          echo
+          echo "##############     DIRECTORY     ########################"
+          ls -l 
+          ls -l directory/
+      - powershell: Move-Item file.txt -Destination "directory\" -Verbose
+        displayName: Powershell 1. Move file
+      - powershell: |
+          ls -l 
+          ls -l directory/
+          dir *.*
+          dir directory/*.*
+          dir directory/*.txt
+        displayName: powershell 2
+      - pwsh: |
+          ls -l 
+          ls -la directory/
+          dir *.*
+          dir directory/*.*
+          dir directory/*.txt
+        displayName: pwsh 
+      - script: |
+          ls -l 
+          echo
+          echo "##############     DIRECTORY     ########################"
+          echo 
+          ls -la directory/
+      - bash: |
+          ls -l
+          echo 
+          echo "##############     DIRECTORY     ########################"
+          echo  
+          ls -la directory/
+          find . -name file.txt
+

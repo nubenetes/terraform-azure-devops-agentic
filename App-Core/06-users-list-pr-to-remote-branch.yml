@@ -1,0 +1,31 @@
+# https://stackoverflow.com/questions/61396789/how-to-make-a-pull-request-to-a-remote-branch-in-a-pipeline-in-azure-devops
+# https://css-tricks.com/generate-a-pull-request-of-static-content-with-a-simple-html-form/
+
+#####################################
+# This pipeline is not completed yet
+#####################################
+
+trigger:
+- manual
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+# Define Variables for Environments
+variables:
+#- template: configuration/shared-azure-devops-pipeline-vars.yml
+
+stages:
+- stage: prListClients
+  displayName: PR List of Cients
+
+  jobs:
+
+    - task: PowerShell@2
+      inputs:
+        targetType: inline
+        Script: 'az repos pr create -r <YOUR_REPO> -s <SOURCE_BRANCH> -t <TARGET_BRANCH> --title "Auto PR: XXX" --delete-source-branch true -d  "Created by $(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildID)" --merge-commit-message "Integration [skip ci]" --org $(System.CollectionUri) -p $(System.TeamProject)'
+      displayName: Create PR
+      name: CreatePR
+      env:
+        AZURE_DEVOPS_EXT_PAT: $(System.AccessToken)

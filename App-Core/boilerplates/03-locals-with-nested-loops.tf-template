@@ -1,0 +1,58 @@
+
+
+resource "azuread_user" "test_users" {
+     # We need a map to use for_each, so we convert our list into a map by adding a unique key:
+     for_each            = { for entry in local.list_of_clients_users: "${entry.client}.${entry.user}" => entry } 
+     #user_principal_name = "${each.value.user}@${each.value.client}.${var.dns_zone}" 
+     #      UsersClient.BaseClient.Post(): unexpected status 400 with OData error: Request_BadRequest: The domain portion of the userPrincipalName property is invalid. You must use one of the verified domain names in your organization.
+     user_principal_name = "${each.value.user}-${each.value.client}@${var.dns_zone}"
+     #display_name        = "Test ${each.value.user} App-Core ${each.value.client} ${var.environment}"
+     display_name        = "${each.value.user}-appcore-${each.value.client}-${var.environment}"
+     #mail_nickname       = "jdoe"
+     password            = "SecretP@sswd99!"
+#    provisioner "local-exec" {
+#      ################################################################################
+#      # Creation-time provisioner: 
+#      # https://k21academy.com/terraform-iac/terraform-provisioners/
+#      # https://www.terraform.io/language/resources/provisioners/connection
+#      # https://www.terraform.io/language/resources/provisioners/null_resource
+#      ################################################################################
+#      command     = "./creation-time-provisioner-assign-customSecurityAttributes.ps1"
+#    }
+}
+
+
+
+# Since these variables are re-used - a locals block makes this more maintainable
+# https://stackoverflow.com/questions/71610535/dynamically-create-a-list-of-objects-to-be-used-inside-a-module-in-terraform
+
+locals {
+  tags = {
+    Project     = "GitOps Azure DevOps Terraform"
+    Product     = "${var.Enterprise_product}"
+    Environment = "${var.environment}"
+    Department  = "R&D"
+    Team        = "System Architecture and Cloud Operations"
+    CostCentre  = "C1234" # Example
+  }
+  resource_group_name                             = "${var.rg_prefix}-${var.Enterprise_product}-${var.environment}"
+  location                                        = lower("${var.location}")
+
+  ######################################################################################################################
+  Create a list of users per client with nested loops in terraform
+  Nested for_each/loops in terraform: https://www.daveperrett.com/articles/2021/08/19/nested-for-each-with-terraform/ 
+  ######################################################################################################################
+  client_names                                   = var.client_names
+  user_names                                     = var.user_names
+  # Nested loop over both lists, and flatten the result.
+  list_of_clients_users = distinct(flatten([
+    for client in local.client_names : [
+      for user in local.user_names : {
+        user    = user
+        client  = client
+      }
+    ]
+  ]))
+  
+}
+

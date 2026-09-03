@@ -1,0 +1,357 @@
+trigger:
+- manual
+
+pool:
+  vmImage: 'windows-2022'
+
+parameters:
+  - name: upn
+    displayName: User Principal Name (upn)
+    type: string
+    default: 'cloud-admin@example.com'
+  - name: AETitle
+    displayName: Center Name - AETitle Custom Security Attribute
+    type: string
+    default: 'enterprise'
+  - name: environment
+    displayName: Environment
+    type: string
+    default: 'dev-app'
+
+variables:
+  MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
+  MAVEN_OPTS: '-Xmx3072m -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
+  # Placeholders found in templates/application-properties.j2
+  # Download URLs of Public Artifacts
+  WINSW_DOWNLOAD_URL: 'https://github.com/winsw/winsw/releases/download/v2.12.0/WinSW-x64.exe'
+  JRE_DOWNLOAD_URL: 'https://github.com/adoptium/temurin11-binaries/releases/download/jdk-127.0.0.1%2B1/OpenJDK11U-jre_x64_windows_hotspot_11.0.14.1_1.zip'
+  # Conditions
+  enableConditionOptionalStages: 'false' # true/false  - do we enable all the optional stages ?
+  enableConditionAzureArtifacts: 'false' # true/false - do we download public artifacts from internet instead of azure artifact repo ?
+  # integration-service On-Premise App Security:
+  serviceConnection: 'svccon-integration-service-dev'
+  appName: 'appr-integration-service-OnPrem-test'   # Application Name in AAD
+  #appName: "appr-integration-service-onprem-${{ parameters.AETitle }}-${{ parameters.environment }}"  # Application Name in AAD - Based on AETitle and Environment
+  spName: $(appName)
+  resourceGroup: 'rg-integration-onpremise-dev'
+  rgLocation: 'northeurope'
+  storageAccount: 'st-integration-dev'
+  storageContainerName: 'sgcontainerintegration-servicedev1'
+  blobName: 'integration-serviceinstaller'
+  storageAccountTags: "env=${{ parameters.environment }}"
+  upnName: ${{ parameters.upn }}
+  centerName: ${{ parameters.AETitle }}
+
+stages:
+- stage: destroyRG_destroyApp
+  displayName: Destroy Existing Resources
+  jobs:
+  - job: destroyRG_destroyApp
+    timeoutInMinutes: 10 # how long to run the job before automatically cancelling
+    cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+    steps:
+      - task: AzureCLI@2
+        displayName: 'run scripts/01-destroyRG.ps1'
+        inputs:
+          azureSubscription: $(serviceConnection)
+          scriptType: 'ps'
+          scriptLocation: 'scriptPath'
+          scriptPath: 'scripts/01-destroyRG.ps1'
+          arguments: '$(appName) $(resourceGroup) $(rgLocation) $(storageAccountTags) $(storageAccount) $(storageContainerName)'
+      - task: AzureCLI@2
+        displayName: 'run scripts/02-destroyApp.ps1'
+        inputs:
+          azureSubscription: $(serviceConnection)
+          scriptType: 'ps'
+          scriptLocation: 'scriptPath'
+          scriptPath: 'scripts/02-destroyApp.ps1'
+          arguments: '$(appName) $(resourceGroup) $(rgLocation) $(storageAccountTags) $(storageAccount) $(storageContainerName)'
+- stage: createRg_createSA_createQueue_StartMessage
+  displayName: 'Create RG + Storage Account + Storage Queue + put START message in the Storage Queue'
+  jobs:
+  - job: createAzureEnvironment
+    timeoutInMinutes: 15 # how long to run the job before automatically cancelling
+    cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+    steps:
+        - task: AzureCLI@2
+          displayName: 'run scripts/03-createRG-createSA.ps1'
+          inputs:
+            azureSubscription: $(serviceConnection)
+            scriptType: 'ps'
+            scriptLocation: 'scriptPath'
+            scriptPath: 'scripts/03-createRG-createSA.ps1'
+            arguments: '$(resourceGroup) $(rgLocation) $(storageAccount) $(storageAccountTags) $(upnName) $(centerName)'
+        - task: AzureCLI@2
+          displayName: 'run scripts/05-createStorageQueue.ps1'
+          inputs:
+            azureSubscription: $(serviceConnection)
+            scriptType: 'ps'
+            scriptLocation: 'scriptPath'
+            scriptPath: 'scripts/05-createStorageQueue.ps1'
+            arguments: '$(resourceGroup) $(rgLocation) $(storageAccount) $(storageAccountTags) $(upnName) $(centerName)'
+        - task: AzureCLI@2
+          displayName: 'run scripts/06-storageMessage-START.ps1'
+          inputs:
+            azureSubscription: $(serviceConnection)
+            scriptType: 'ps'
+            scriptLocation: 'scriptPath'
+            scriptPath: 'scripts/06-storageMessage-START.ps1'
+            arguments: '$(resourceGroup) $(rgLocation) $(storageAccount) $(storageAccountTags) $(upnName) $(centerName)'
+- stage: registerAppInAD
+  displayName: Register App in Azure AD
+  jobs:
+  - job: registerAppWithCustomSecAttributes
+    timeoutInMinutes: 15 # how long to run the job before automatically cancelling
+    cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+    steps:
+        - task: AzureCLI@2
+          displayName: 'run scripts/07-createAppRegister.ps1'
+          name: ProduceVarAppReg
+          # Where $(clientId) & $(appSecret) global vars are obtained from
+          # az ad app create: Parameter '--end-date' is not setup. Default value is one year after current time (means the secret expires in 1 year by default)
+          inputs:
+            azureSubscription: $(serviceConnection)
+            scriptType: 'ps'
+            scriptLocation: 'scriptPath'
+            scriptPath: 'scripts/07-createAppRegister.ps1'
+            arguments: $(appName) $(spName) $(rgLocation) $(resourceGroup) $(storageAccountTags) $(storageAccount) $(upnName) $(centerName)
+        - powershell: |
+            Write-Host "set variables in scripts - clientId: $(clientId)"
+          displayName: 'clientId content:'
+        - powershell: |
+            Write-Host "set variables in scripts - appSecret/clientSecret: $(appSecret)"
+          displayName: 'appSecret/clientSecret content:'
+        - task: AzurePowerShell@5
+          displayName: 'run scripts/08-assign-customSecurityAttributes.ps1'
+          inputs:
+            azureSubscription: $(serviceConnection)
+            scriptType: 'FilePath'
+            scriptPath: 'scripts/08-assign-customSecurityAttributes.ps1'
+            scriptArguments: '$(spName) $(centerName)'
+            azurePowerShellVersion: 'latestVersion' # Required. Options: latestVersion, otherVersion
+- stage: JavaBuild
+  displayName: Java Build with jinja2 template and maven
+  dependsOn: registerAppInAD
+  jobs:
+  - job: jinjaJavaBuild
+    timeoutInMinutes: 15 # how long to run the job before automatically cancelling
+    cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+    variables:
+      # Use outputs in a different stage (pass variables between stages):
+      # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=azure-devops&tabs=yaml%2Cbatch#use-outputs-in-a-different-stage
+      clientId: $[ stageDependencies.registerAppInAD.registerAppWithCustomSecAttributes.outputs['ProduceVarAppReg.clientIdOutput'] ]
+      appSecret: $[ stageDependencies.registerAppInAD.registerAppWithCustomSecAttributes.outputs['ProduceVarAppReg.appSecretOutput'] ]
+    steps:
+    - powershell: |
+        Write-Host "set variables in scripts - clientId: $(clientId)"
+        Write-Host "set variables in scripts - appSecret/clientSecret: $(appSecret)"
+      displayName: 'Show variables content grabbed from pipeline parameters'
+    - task: UsePythonVersion@0
+      displayName: 'Setting up Python'
+      inputs:
+        versionSpec: '*' # * = latest
+    - script: python -m pip install jinja2-cli
+      displayName: 'Setting up jinja2-cli'
+    - script: >
+        jinja2 -D clientId=$(clientId)
+        -D clientSecret=$(appSecret)
+        templates/application-properties.j2 --outfile=application.properties
+      displayName: 'generating application.properties with jinja2-cli'
+    - script: cat application.properties
+      displayName: 'cat application.properties'
+    - task: CopyFiles@2
+      displayName: 'Copy generated application.properties to src/main/resources directory'
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: 'application.properties'
+        overWrite: true
+        TargetFolder: $(System.DefaultWorkingDirectory)/src/main/resources
+    - script: cat src/main/resources/application.properties
+      displayName: 'cat src/main/resources/application.properties'
+
+    - script: ls -l resources/
+      displayName: 'ls -l resources/'
+
+    # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/build/maven?view=azure-devops
+    - task: Maven@3
+      displayName: 'maven build'
+      inputs:
+        mavenPomFile: 'pom-azure-pipelines.xml'
+        mavenOptions: $(MAVEN_OPTS)
+        publishJUnitResults: true
+        testResultsFiles: '**/surefire-reports/TEST-*.xml'
+        testRunTitle: 'mytests'
+        javaHomeOption: 'JDKVersion'
+        jdkVersionOption: '1.11'
+        mavenVersionOption: 'Default'
+        mavenAuthenticateFeed: false
+        effectivePomSkip: false
+        sonarQubeRunAnalysis: false
+        #sqMavenPluginVersionChoice: 'latest' # Required when sonarQubeRunAnalysis == True# Options: latest, pom
+        goals: 'package'
+        #options: # Optional. Specify any Maven command-line options you want to use.
+        #codeCoverageToolOption: 'None' # Optional. Options: none, cobertura, jaCoCo. Enabling code coverage inserts the `clean` goal into the Maven goals list when Maven runs.
+
+    - task: CopyFiles@2
+      displayName: 'Copy Files to artifact staging directory'
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: '**/target/*.?(jar|exe)'
+        TargetFolder: $(Build.ArtifactStagingDirectory)
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish integration-service-onpremise-1.0.0-SNAPSHOT.jar & integration-service-onpremise-1.0.0.exe Pipeline Artifacts in drop folder'
+      inputs:
+        targetPath: $(Build.ArtifactStagingDirectory)/target/
+        artifactName: 'drop'
+
+    - script: ls -l $(Build.ArtifactStagingDirectory)/target/
+      displayName: 'ls -l $(Build.ArtifactStagingDirectory)/target/'
+
+- stage: InnoSetupBuildUploadintegration-serviceToStorageContainer
+  displayName: InnoSetup Build - Upload integration-service Installer to Storage Container - Create Download URL with SAS token
+  dependsOn: [registerAppInAD]
+  jobs:
+  - job: BuildTheCode
+    timeoutInMinutes: 25 # how long to run the job before automatically cancelling
+    cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+    variables:
+      appRegisterTimestamp: $[ stageDependencies.registerAppInAD.registerAppWithCustomSecAttributes.outputs['ProduceVarAppReg.appRegisterTimestampOutput'] ]
+    steps:
+    # Download winSW.exe
+    # https://javadeveloperzone.com/spring-boot/spring-boot-as-windows-service/
+    # https://github.com/winsw/winsw
+    # https://github.com/winsw/winsw/releases/download/v2.12.0/WinSW-x64.exe
+    - powershell: Invoke-WebRequest -Uri $(WINSW_DOWNLOAD_URL) -OutFile 'innoSetupInput/integration-service-onpremise-1.0.0-service.exe'
+      displayName: 'Download winSW.exe from Internet'
+      condition:  eq(variables['enableConditionAzureArtifacts'], 'false')
+    - task: UniversalPackages@0
+      displayName: 'Download winSW.exe from internal repo'
+      condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
+      inputs:
+        command: download
+        vstsFeed: 'GitOps/integration-service-Artifacts-Feed2'
+        vstsFeedPackage: 'winsw'
+        vstsPackageVersion: '*' # * = latest , a specifc release like 0.0.1 needs to be saved as "view" within the artifact repo to avoid being removed by the retention policy
+        downloadDirectory: '$(Build.SourcesDirectory)\publicArtifacts'
+        verbosity: trace
+    - script: ls -l $(Build.SourcesDirectory)\publicArtifacts
+      displayName: 'ls -l $(Build.SourcesDirectory)\publicArtifacts'
+      condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
+    - powershell: Rename-Item -Path $(Build.SourcesDirectory)\publicArtifacts\WinSW-x64.exe -NewName integration-service-onpremise-1.0.0-service.exe
+      displayName: 'rename winSW.exe'
+      condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
+    - script: ls -l $(Build.SourcesDirectory)\publicArtifacts
+      displayName: 'ls -l $(Build.SourcesDirectory)\publicArtifacts'
+      condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
+    - task: CopyFiles@2
+      displayName: 'Copy integration-service winSW.exe renamed as integration-service-onpremise-1.0.0-service.exe to innoSetupInput folder'
+      condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
+      inputs:
+        SourceFolder: '$(Build.SourcesDirectory)\publicArtifacts'
+        contents: '*.exe'
+        targetFolder: 'innoSetupInput/'
+    - script: ls -l innoSetupInput/
+      displayName: 'ls -l innoSetupInput/'
+    # Download JRE
+    - powershell: Invoke-WebRequest -Uri $(JRE_DOWNLOAD_URL) -OutFile '$(System.DefaultWorkingDirectory)/jre11.zip'
+      displayName: 'Download JRE from Internet'
+      condition:  eq(variables['enableConditionAzureArtifacts'], 'false')
+    - task: UniversalPackages@0
+      displayName: 'Download JRE from internal repo'
+      condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
+      inputs:
+        command: download
+        vstsFeed: 'GitOps/integration-service-Artifacts-Feed2'
+        vstsFeedPackage: 'jre'
+        vstsPackageVersion: '*' # * = latest , a specifc release like 0.0.1 needs to be saved as "view" within the artifact repo to avoid being removed by the retention policy
+        downloadDirectory: '$(Build.SourcesDirectory)\publicArtifacts'
+        verbosity: trace
+    - script: ls -l $(Build.SourcesDirectory)/publicArtifacts
+      displayName: 'ls -l $(Build.SourcesDirectory)/publicArtifacts'
+      condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
+    - powershell: 'Expand-Archive -Path $(Build.SourcesDirectory)/publicArtifacts/jre11.zip -DestinationPath resources/ -Verbose'
+      displayName: 'Unzip jre11.zip downloaded from internal repo'
+      condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
+    - powershell: 'Expand-Archive -Path $(System.DefaultWorkingDirectory)/jre11.zip -DestinationPath resources/ -Verbose'
+      displayName: 'Unzip jre11.zip downloaded from internet'
+      condition:  eq(variables['enableConditionAzureArtifacts'], 'false')
+    - powershell: 'Move-Item -Path resources/jdk-* -Destination resources/jre'
+      displayName: 'Rename jre folder'
+    - script: ls -l resources/
+      displayName: 'ls -l resources/'
+    # InnoSetup
+    - task: Installer@1  # Innosetup Installer
+      ##[warning]Task 'Installer' (1.0.0) is using deprecated task execution handler. The task should use the supported task-lib: https://aka.ms/tasklib
+      # The above warning arises with windows-2022 Agent, check https://github.com/ricardo-pignone/InnoSetupTools/issues/5
+      displayName: Innosetup Installer
+      inputs:
+        version: '6.2.1'
+    - task: DownloadPipelineArtifact@2
+      displayName: Grab integration-service-onpremise-1.0.0-SNAPSHOT.jar & integration-service-onpremise-1.0.0.exe Artifacts generated in previous stage
+      inputs:
+        source: 'current'
+        path: $(Build.ArtifactStagingDirectory)
+    - task: CopyFiles@2
+      displayName: 'Copy integration-service-onpremise-1.0.0-SNAPSHOT.jar file from artifact staging directory to resources/ folder'
+      inputs:
+        SourceFolder: $(Build.ArtifactStagingDirectory)/drop
+        Contents: '*.?(war|jar)'
+        TargetFolder: $(System.DefaultWorkingDirectory)/resources/
+    - task: CopyFiles@2
+      displayName: 'Copy integration-service-onpremise-1.0.0.exe file from artifact staging directory to innoSetupInput/ folder'
+      inputs:
+        SourceFolder: $(Build.ArtifactStagingDirectory)/drop
+        Contents: '*.exe'
+        TargetFolder: $(System.DefaultWorkingDirectory)\innoSetupInput
+    - script: ls -l
+      displayName: 'ls -l '
+    - script: ls -l $(System.DefaultWorkingDirectory)\innoSetupInput
+      displayName: 'ls -l $(System.DefaultWorkingDirectory)\innoSetupInput'
+    - script: ls -l innoSetupInput/
+      displayName: 'ls -l innoSetupInput/'
+    - task: Build@1 # Innosetup Build .
+      ##[warning]Task 'Build' (1.0.0) is using deprecated task execution handler. The task should use the supported task-lib: https://aka.ms/tasklib
+      # The above warning arises with windows-2022 Agent, check https://github.com/ricardo-pignone/InnoSetupTools/issues/5
+      displayName: Innosetup Build
+      inputs:
+        version: '6.2.1'
+        file: 'resources/innoSetupScript.iss'
+    - script: ls -l innoSetupOutput/
+      displayName: 'ls -l innoSetupOutput/'
+    - task: CopyFiles@2
+      displayName: 'Copy integration-service installer'
+      inputs:
+        SourceFolder: 'innoSetupOutput/'
+        contents: '*.exe'
+        targetFolder: '$(Build.ArtifactStagingDirectory)'
+    - task: AzureCLI@2
+      displayName: 'run scripts/09-createStorageContainer-uploadintegration-service-OnPremInstaller-createURL.ps1'
+      inputs:
+         azureSubscription: $(serviceConnection)
+         scriptType: 'ps'
+         scriptLocation: 'scriptPath'
+         scriptPath: 'scripts/09-createStorageContainer-uploadintegration-service-OnPremInstaller-createURL.ps1'
+         arguments: '$(resourceGroup) $(rgLocation) $(storageAccount) $(storageContainerName) $(blobName) $(storageAccountTags) $(spName) $(Build.ArtifactStagingDirectory) $(appRegisterTimestamp)'
+      name: ProduceVarBlobFileDownloadUrlOutput
+- stage: EndMessage_with_URL
+  displayName: 'Put END Message in the Storage Queue with integration-service Download URL'
+  dependsOn: InnoSetupBuildUploadintegration-serviceToStorageContainer
+  jobs:
+  - job: sendMessage
+    timeoutInMinutes: 15 # how long to run the job before automatically cancelling
+    cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+    variables:
+        # Use outputs in a different stage (pass variables between stages):
+        # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=azure-devops&tabs=yaml%2Cbatch#use-outputs-in-a-different-stage
+        BlobFileDownloadUrl: $[ stageDependencies.InnoSetupBuildUploadintegration-serviceToStorageContainer.BuildTheCode.outputs['ProduceVarBlobFileDownloadUrlOutput.BlobFileDownloadUrlOutput'] ]
+    steps:
+        - task: AzureCLI@2
+          displayName: 'run scripts/10-storageMessage-END-URL.ps1'
+          inputs:
+            azureSubscription: $(serviceConnection)
+            scriptType: 'ps'
+            scriptLocation: 'scriptPath'
+            scriptPath: 'scripts/10-storageMessage-END-URL.ps1'
+            arguments: $(resourceGroup) $(storageAccount) $(upnName) $(centerName) '$(BlobFileDownloadUrl)'
+            # Be core_FULL_PLACEHOLDER with the above line! BlobFileDownloadUrl var needs to be quoted like this, otherwise special chars might arise errors

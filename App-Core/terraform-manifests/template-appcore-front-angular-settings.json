@@ -1,0 +1,5 @@
+{
+  "clientId": "${clientId}",
+  "beScope": "${beScope}",
+  "applinkScope": "${applinkScope}"
+}

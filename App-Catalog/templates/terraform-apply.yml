@@ -1,0 +1,113 @@
+# File: templates/terraform-apply.yml
+# https://github.com/microsoft/azure-pipelines-terraform/tree/main/Tasks/TerraformTask/TerraformTaskV2
+# https://github.com/microsoft/azure-pipelines-terraform/tree/main/Tasks/TerraformTask/TerraformTaskV3
+
+# Environments:
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/process/environments
+
+# Define approvals and checks: https://learn.microsoft.com/en-us/azure/devops/pipelines/process/approvals
+# Manual approval in an Azure DevOps YAML-pipeline : https://erwinstaal.nl/posts/manual-approval-in-an-azure-devops-yaml-pipeline/
+
+parameters:
+- name: 'environment'
+  type: string
+  default: 'dev'
+- name: 'SERVICE_CONNECTION_NAME'
+  type: string
+  default: 'svccon-app-analysis-dev'
+- name: 'SERVICE_CONNECTION_NAME_TFSTATE'
+  type: string
+  default: 'svccon-app-analysis-dev'
+
+# Stage-3: Terraform Apply Stage. Deploy Stages for Dev, QA, UAT, PRE, PRO
+# Deployment-1: DeployInfra
+## Step-1: Define Variables for environments
+## Step-2: Terraform Initialize (State Storage to store in Azure Storage Account, 1 per environment)
+## Step-3: Terraform Plan (Create Plan)
+## Step-4: Terraform Apply (Use the plan created in previous step)
+
+jobs:
+- deployment: DeployInfra
+  dependsOn: WaitForValidationJob
+  displayName: Deploy ${{ upper(parameters.environment) }} AppAnalysis
+  environment: ${{ parameters.environment }}   # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/deployment-jobs
+  variables:
+    - template: ../configuration/variable-group-with-secrets.yml
+      parameters:
+        environment: ${{ lower(parameters.environment) }}
+  timeoutInMinutes: 90 # how long to run the job before automatically cancelling
+  cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - task: Bash@3
+          name: BuildAgentIP # https://build5nines.com/what-is-ip-address-of-azure-devops-build-agent-and-set-firewall-to-allow-it/
+          inputs:
+            targetType: 'inline'
+            script: |
+              ipaddress=$(curl -s http://ipinfo.io/ip)
+              echo "##vso[task.setvariable variable=address;isOutput=true;]$ipaddress"
+              echo BuildAgentIP.address is $ipaddress
+        ######################################################
+        # Terraform Install
+        ######################################################
+        - task: TerraformInstaller@0
+          displayName: Terraform Install
+          inputs:
+            terraformVersion: $(TERRAFORM_VERSION)
+        #################################################
+        # Terraform Init: App-Core-<branch>-<env>.tfstate
+        #################################################
+        - task: TerraformTaskV3@3
+          displayName: Terraform Init
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            #commandOptions: '-flag'
+            backendServiceArm: ${{ PARAMETERS.SERVICE_CONNECTION_NAME_TFSTATE }}
+            backendAzureRmResourceGroupName: $(RESOURCE_GROUP_NAME_TERRAFORM_STATE)
+            backendAzureRmStorageAccountName: $(STORAGE_ACCOUNT_NAME)
+            backendAzureRmContainerName: $(CONTAINER_NAME)
+            backendAzureRmKey: '$(INFRA_NAME)-$(GIT_BRANCH)branch-${{ parameters.environment }}.tfstate'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+        ##############################
+        # Terraform Apply
+        ##############################
+        - task: TerraformTaskV3@3
+          displayName: Terraform apply
+          inputs:
+            provider: 'azurerm'
+            command: 'apply'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            commandOptions: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}/${{ parameters.environment }}-$(Build.BuildId).out'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+        ###################################
+        # Terraform Output - Show - Graph
+        ###################################
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output
+          inputs:
+            provider: 'azurerm'
+            command: 'output'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+        - task: TerraformTaskV3@3
+          displayName: Terraform Show (current tfstate)
+          inputs:
+            provider: 'azurerm'
+            command: 'show'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            outputTo: 'file'   #'console'
+            filename: 'myFile.json'
+        - task: TerraformTaskV3@3
+          displayName: Terraform graph
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            customCommand: 'graph'
+            #commandOptions: '-type=plan'
+            outputTo: 'console'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}

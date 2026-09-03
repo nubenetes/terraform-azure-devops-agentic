@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ml-config
+  namespace: app-env-dev-client-anon
+data:
+  json: /asset/pipeline/000000000000000000000000/input.json
+  assetrelativepath: client-anon/000000000000000000000000/2.25.218904180017201830206977437204558052525
+
+# https://kubernetes.io/docs/concepts/configuration/configmap/
+# https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/
+# https://docs.openshift.com/container-platform/3.11/dev_guide/configmaps.html#configmaps-use-case-setting-command-line-arguments

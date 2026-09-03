@@ -1,0 +1,98 @@
+# File: templates/terraform-validate.yaml
+
+parameters:
+- name: 'SERVICE_CONNECTION_NAME_TFSTATE'
+  type: string
+
+# Stage-1: Terraform Validate Stage
+## Step-1: Publish Artifacts to Pipeline (Pipeline artifacts provide a way to share files between stages in a pipeline or between different pipelines)
+## Step-2: Install Terraform
+## Step-3: Validate Terraform Manifests (terraform init, terraform validate)
+
+jobs:
+- job: TerraformValidateJob
+  displayName: Validate
+  continueOnError: false
+  variables:
+    - template: ../configuration/variable-group.yaml
+  steps:
+  - bash: |
+      echo "Build.SourceBranchName: $(Build.SourceBranchName)"
+    displayName: 'show Build.SourceBranchName'
+  - bash: |
+      echo "GIT_BRANCH: $(GIT_BRANCH)"
+    displayName: 'show GIT_BRANCH'
+  - checkout: self
+    clean: true
+  - checkout: App-Core-Users-YAML
+    clean: true
+    condition: eq(variables['Build.SourceBranchName'],'main')
+  - bash: env
+    displayName: 'Show env'
+  - script: git config --system -l
+    displayName: git config system wide
+  - script: ls -la $(Build.SourcesDirectory)
+    displayName: Show folders with multi repo checkouts
+  - bash: |
+      ls -la $(Build.SourcesDirectory)/App-Core-Users/
+    displayName: Show the content of App-Core-Users
+  - bash: |
+      ls -la $(Build.SourcesDirectory)/App-Core-Users/terraform-manifests/
+    displayName: Show the content of App-Core-Users/terraform-manifests/
+  - bash: |
+      ls -la $(Build.SourcesDirectory)/App-Core-Users-YAML/
+    displayName: Show the content of App-Core-Users-YAML
+    condition: eq(variables['Build.SourceBranchName'],'main')
+  - bash: |
+      cp -v $(Build.SourcesDirectory)/App-Core-Users-YAML/30-internal-users-mainbranch.yaml $(Build.SourcesDirectory)/App-Core-Users/terraform-manifests/
+      cp -v $(Build.SourcesDirectory)/App-Core-Users-YAML/50-external-users-mainbranch.yaml $(Build.SourcesDirectory)/App-Core-Users/terraform-manifests/
+      cp -v $(Build.SourcesDirectory)/App-Core-Users-YAML/70-internal-users-manually-provisioned-mainbranch.yaml $(Build.SourcesDirectory)/App-Core-Users/terraform-manifests/
+    displayName: Copy the content from App-Core-Users-YAML/*.yaml to App-Core-Users/terraform-manifests/
+    condition: eq(variables['Build.SourceBranchName'],'main')
+  - bash: |
+      ls -la $(Build.SourcesDirectory)/App-Core-Users/terraform-manifests/
+    displayName: Show the content of App-Core-Users/terraform-manifests/
+  - bash: |
+      mv -fv $(Build.SourcesDirectory)/App-Core-Users/* $(Build.SourcesDirectory)
+      ls -la $(Build.SourcesDirectory)/App-Core-Users/
+    displayName: Moving updated content from App-Core-Users/ folder to current working directory (root folder)
+  - bash: |
+      rm -rfv $(Build.SourcesDirectory)/App-Core-Users
+      ls -la
+    displayName: delete App-Core-Users/ folder
+  - bash: |
+      rm -rfv $(Build.SourcesDirectory)/App-Core-Users-YAML
+      ls -la
+    displayName: delete App-Core-Users-YAML/ folder
+    condition: eq(variables['Build.SourceBranchName'],'main')
+  - script: ls -la $(Build.SourcesDirectory)
+    displayName: Show Build.SourcesDirectory
+  - script: ls -la $(Build.SourcesDirectory)/terraform-manifests
+    displayName: Show Build.SourcesDirectory/terraform-manifests
+  - task: PublishPipelineArtifact@1
+    displayName: Publish Terraform Files Artifacts
+    inputs:
+      targetPath: $(FOLDER_WITH_TERRAFORM_FILES)
+      artifactName: $(ARTIFACTS_FOLDER_WITH_TERRAFORM_FILES)
+      artifactType: 'pipeline'
+  - task: TerraformInstaller@0
+    displayName: Terraform Install
+    inputs:
+      terraformVersion: $(TERRAFORM_VERSION)
+  - task: TerraformTaskV3@3
+    displayName: Terraform Init
+    inputs:
+      provider: 'azurerm'
+      command: 'init'
+      backendServiceArm: ${{ PARAMETERS.SERVICE_CONNECTION_NAME_TFSTATE }}
+      backendAzureRmResourceGroupName: $(RESOURCE_GROUP_NAME_TERRAFORM_STATE)
+      backendAzureRmStorageAccountName: $(STORAGE_ACCOUNT_NAME)
+      backendAzureRmContainerName: $(CONTAINER_NAME)
+      backendAzureRmKey: '$(INFRA_NAME)-$(GIT_BRANCH)branch-base.tfstate'
+      workingDirectory: $(FOLDER_WITH_TERRAFORM_FILES)
+  - task: TerraformTaskV3@3
+    displayName: Terraform Validate
+    inputs:
+      provider: 'azurerm'
+      command: 'validate'
+      workingDirectory: $(FOLDER_WITH_TERRAFORM_FILES)

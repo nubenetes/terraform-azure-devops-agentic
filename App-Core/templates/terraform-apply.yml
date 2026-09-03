@@ -1,0 +1,325 @@
+# File: templates/terraform-apply.yml
+# https://github.com/microsoft/azure-pipelines-terraform/tree/main/Tasks/TerraformTask/TerraformTaskV2
+# https://github.com/microsoft/azure-pipelines-terraform/tree/main/Tasks/TerraformTask/TerraformTaskV3
+
+# Environments:
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/process/environments
+
+# Define approvals and checks: https://learn.microsoft.com/en-us/azure/devops/pipelines/process/approvals
+# Manual approval in an Azure DevOps YAML-pipeline : https://erwinstaal.nl/posts/manual-approval-in-an-azure-devops-yaml-pipeline/
+
+parameters:
+- name: 'environment'
+  type: string
+- name: 'SERVICE_CONNECTION_NAME'
+  type: string
+- name: 'SERVICE_CONNECTION_NAME_TFSTATE'
+  type: string
+
+# Stage-3: Terraform Apply Stage. Deploy Stages for Dev, QA, UAT, PRE, PRO
+# Deployment-1: DeployInfra
+## Step-1: Define Variables for environments
+## Step-2: Terraform Initialize (State Storage to store in Azure Storage Account, 1 per environment)
+## Step-3: Terraform Plan (Create Plan)
+## Step-4: Terraform Apply (Use the plan created in previous step)
+
+jobs:
+- deployment: DeployInfra
+  dependsOn: WaitForValidationJob
+  displayName: Deploy ${{ upper(parameters.environment) }} App-Core
+  environment: ${{ parameters.environment }}
+  variables:
+    - template: ../configuration/variable-group-with-secrets.yml
+      parameters:
+        environment: ${{ lower(parameters.environment) }}
+  timeoutInMinutes: 90 # how long to run the job before automatically cancelling
+  cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - task: Bash@3
+          displayName: install kubelogin
+          inputs:
+            targetType: 'inline'
+            script: |
+              wget $(KUBELOGIN_DOWNLOAD_URL)
+              unzip kubelogin-linux-amd64.zip
+              sudo mv bin/linux_amd64/kubelogin /usr/bin
+        - script: ls -la /usr/bin/kubelogin
+          displayName: ls -la /usr/bin/kubelogin
+        - task: Bash@3
+          name: BuildAgentIP # https://build5nines.com/what-is-ip-address-of-azure-devops-build-agent-and-set-firewall-to-allow-it/
+          inputs:
+            targetType: 'inline'
+            script: |
+              ipaddress=$(curl -s http://ipinfo.io/ip)
+              echo "##vso[task.setvariable variable=address;isOutput=true;]$ipaddress"
+              echo BuildAgentIP.address is $ipaddress
+        ######################################################
+        # Terraform Install
+        ######################################################
+        - task: TerraformInstaller@0
+          displayName: Terraform Install
+          inputs:
+            terraformVersion: $(TERRAFORM_VERSION)
+        #################################################
+        # Terraform Init: appcore-<branch>-<env>.tfstate
+        #################################################
+        - task: TerraformTaskV3@3
+          displayName: Terraform Init
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            #commandOptions: '-flag'
+            backendServiceArm: ${{ PARAMETERS.SERVICE_CONNECTION_NAME_TFSTATE }}
+            backendAzureRmResourceGroupName: $(RESOURCE_GROUP_NAME_TERRAFORM_STATE)
+            backendAzureRmStorageAccountName: $(STORAGE_ACCOUNT_NAME)
+            backendAzureRmContainerName: $(CONTAINER_NAME)
+            backendAzureRmKey: '$(INFRA_NAME)-$(GIT_BRANCH)branch-${{ parameters.environment }}.tfstate'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+        ##############################
+        # Terraform Apply
+        ##############################
+        - script: ls -la $(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}
+          displayName: Show file with generated plan
+        - task: TerraformTaskV3@3
+          displayName: Terraform apply
+          inputs:
+            provider: 'azurerm'
+            command: 'apply'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            commandOptions: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}/${{ parameters.environment }}-$(Build.BuildId).out'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+        ###################################
+        # Terraform Output - Show - Graph
+        ###################################
+        ####################################################################################################################################################################
+        # Create Outputs
+        # https://spacelift.io/blog/terraform-output
+        # "terraform ouput -json": This is quite useful when we want to pass the outputs to other tools for automation since JSON is way easier to handle programmatically.
+        # Note that Terraform does not protect sensitive output values when using the -json flag.
+        ####################################################################################################################################################################
+        - task: TerraformTaskV3@3
+          displayName: Terraform output
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            customCommand: 'output'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+        - task: TerraformTaskV3@3
+          displayName: Terraform output -json
+          inputs:
+            provider: 'azurerm'
+            command: 'output' # "terraform output -json" is implicitly triggered here!
+              # Terraform does not protect sensitive output values when using the -json flag
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+        - task: TerraformTaskV3@3
+          displayName: Terraform Show (current tfstate)
+          inputs:
+            provider: 'azurerm'
+            command: 'show'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            outputTo: 'file'
+            filename: 'myFile.json'
+        - task: TerraformTaskV3@3
+          displayName: Terraform graph
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            customCommand: 'graph'
+            #commandOptions: '-type=plan'
+            outputTo: 'console'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+        #############################
+        # Europe - Terraform Output
+        #############################
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output list_of_client_namesEurope
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            commandOptions: 'output -json list_of_client_namesEurope'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            outputTo: 'file'
+            filename: 'myFile1.json'
+        - script: echo "##vso[task.setvariable variable=list_of_client_namesEurope;isOutput=true]$(cat $(customFilePath))"
+          displayName: setup list_of_client_namesEurope var
+          name: passOutput1
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output list_of_test_usersEurope
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            commandOptions: 'output -json list_of_test_usersEurope'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            outputTo: 'file'
+            filename: 'myFile2.json'
+        - script: echo "##vso[task.setvariable variable=list_of_test_usersEurope;isOutput=true]$(cat $(customFilePath))"
+          displayName: setup list_of_test_usersEurope var
+          name: passOutput2
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output gitbranchEurope
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            commandOptions: 'output -json gitbranchEurope'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            outputTo: 'file'
+            filename: 'myFile3.json'
+        - script: echo "##vso[task.setvariable variable=gitbranchEurope;isOutput=true]$(cat $(customFilePath))"
+          displayName: setup gitbranchEurope var
+          name: passOutput3
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output deploy_Europe
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            commandOptions: 'output -json deploy_Europe'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            outputTo: 'file'
+            filename: 'myFile4.json'
+        - script: echo "##vso[task.setvariable variable=deploy_Europe;isOutput=true]$(cat $(customFilePath))"
+          displayName: setup deploy_Europe var
+          name: passOutput4
+        ####################################
+        # United States - Terraform Output
+        ####################################
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output list_of_client_namesUS
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            commandOptions: 'output -json list_of_client_namesUS'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            outputTo: 'file'
+            filename: 'myFile5.json'
+        - script: echo "##vso[task.setvariable variable=list_of_client_namesUS;isOutput=true]$(cat $(customFilePath))"
+          displayName: setup list_of_client_namesUS var
+          name: passOutput5
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output list_of_test_usersUS
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            commandOptions: 'output -json list_of_test_usersUS'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            outputTo: 'file'
+            filename: 'myFile6.json'
+        - script: echo "##vso[task.setvariable variable=list_of_test_usersUS;isOutput=true]$(cat $(customFilePath))"
+          displayName: setup list_of_test_usersUS var
+          name: passOutput6
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output gitbranchUS
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            commandOptions: 'output -json gitbranchUS'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            outputTo: 'file'
+            filename: 'myFile7.json'
+        - script: echo "##vso[task.setvariable variable=gitbranchUS;isOutput=true]$(cat $(customFilePath))"
+          displayName: setup gitbranchUS var
+          name: passOutput7
+        - task: TerraformTaskV3@3
+          displayName: Terraform Output deploy_United_States
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            commandOptions: 'output -json deploy_United_States'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            outputTo: 'file'
+            filename: 'myFile8.json'
+        - script: echo "##vso[task.setvariable variable=deploy_United_States;isOutput=true]$(cat $(customFilePath))"
+          displayName: setup deploy_United_States var
+          name: passOutput8
+##################################################################
+# Europe - Assign Azure Custom Security Attributes to Test Users
+##################################################################
+- job: assignCustomSecurityAttributeEurope
+  dependsOn: DeployInfra
+  condition: succeeded()
+  pool:
+    vmImage: 'windows-2022'
+    #vmImage: 'ubuntu-latest'
+    #vmImage: 'macOS-12'
+  variables:  # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/deployment-jobs
+    list_of_client_namesEurope: $[ dependencies.DeployInfra.outputs['DeployInfra.passOutput1.list_of_client_namesEurope'] ]
+    list_of_test_usersEurope: $[ dependencies.DeployInfra.outputs['DeployInfra.passOutput2.list_of_test_usersEurope'] ]
+    gitbranchEurope: $[ dependencies.DeployInfra.outputs['DeployInfra.passOutput3.gitbranchEurope'] ]
+    deploy_Europe: $[ dependencies.DeployInfra.outputs['DeployInfra.passOutput4.deploy_Europe'] ]
+  timeoutInMinutes: 60 # how long to run the job before automatically cancelling
+  cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+  steps:
+    - bash: |
+        echo "List of CenterNames/AETitles (list_of_client_namesEurope):" $(list_of_client_namesEurope)
+        echo "List of User Principals (list_of_test_usersEurope):" $(list_of_test_usersEurope)
+        echo "gitbranch:" $(gitbranchEurope)
+        echo "deploy_Europe:" $(deploy_Europe)
+      displayName: show vars
+    - task: AzurePowerShell@5
+      displayName: 'run scripts/01-assign-customSecurityAttributes.ps1'
+      condition: eq(variables['deploy_Europe'], 'true')
+      inputs:
+        azureSubscription: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+        scriptType: 'FilePath'
+        scriptPath: '$(System.DefaultWorkingDirectory)/scripts/01-assign-customSecurityAttributes.ps1'  # https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables
+        scriptArguments:
+          -upNameList '$(list_of_test_usersEurope)'
+          -centerNameList '$(list_of_client_namesEurope)'
+          -envName ${{ lower(parameters.environment) }}
+          -locationCode ne
+          -gitBranch $(gitbranchEurope)
+        azurePowerShellVersion: 'latestVersion' # Required. Options: latestVersion, otherVersion
+        pwsh: true  # true = powershell 7.x , false = powershell 5.1
+##########################################################################
+# United States - Assign Azure Custom Security Attributes to Test Users
+##########################################################################
+- job: assignCustomSecurityAttributeUS
+  dependsOn: DeployInfra
+  condition: succeeded()
+  pool:
+    vmImage: 'windows-2022'
+    #vmImage: 'ubuntu-latest'
+    #vmImage: 'macOS-12'
+  variables:  # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/deployment-jobs
+    list_of_client_namesUS: $[ dependencies.DeployInfra.outputs['DeployInfra.passOutput5.list_of_client_namesUS'] ]
+    list_of_test_usersUS: $[ dependencies.DeployInfra.outputs['DeployInfra.passOutput6.list_of_test_usersUS'] ]
+    gitbranchUS: $[ dependencies.DeployInfra.outputs['DeployInfra.passOutput7.gitbranchUS'] ]
+    deploy_United_States: $[ dependencies.DeployInfra.outputs['DeployInfra.passOutput8.deploy_United_States'] ]
+  timeoutInMinutes: 60 # how long to run the job before automatically cancelling
+  cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+  steps:
+    - bash: |
+        echo "List of CenterNames/AETitles (list_of_client_namesUS):" $(list_of_client_namesUS)
+        echo "List of User Principals (list_of_test_usersUS):" $(list_of_test_usersUS)
+        echo "gitbranch:" $(gitbranchUS)
+        echo "deploy_United_States:" $(deploy_United_States)
+      displayName: show vars
+    - task: AzurePowerShell@5
+      displayName: 'run scripts/01-assign-customSecurityAttributes.ps1'
+      condition: eq(variables['deploy_United_States'], 'true')
+      inputs:
+        azureSubscription: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+        scriptType: 'FilePath'
+        scriptPath: '$(System.DefaultWorkingDirectory)/scripts/01-assign-customSecurityAttributes.ps1'  # https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables
+        scriptArguments:
+          -upNameList '$(list_of_test_usersUS)'
+          -centerNameList '$(list_of_client_namesUS)'
+          -envName ${{ lower(parameters.environment) }}
+          -locationCode cus
+          -gitBranch $(gitbranchUS)
+        azurePowerShellVersion: 'latestVersion' # Required. Options: latestVersion, otherVersion
+        pwsh: true  # true = powershell 7.x , false = powershell 5.1

@@ -1,0 +1,122 @@
+# File: templates/terraform-destroy.yml 
+
+parameters:
+- name: 'environment'
+  type: string
+  default: 'dev'
+- name: 'SERVICE_CONNECTION_NAME'
+  type: string
+  default: 'svccon-app-analysis-dev'
+- name: 'SERVICE_CONNECTION_NAME_TFSTATE'
+  type: string
+  default: 'svccon-app-analysis-dev'
+  
+jobs:
+- deployment: DestroyInfra
+  dependsOn: TerraformValidateJob
+  displayName: Destroy ${{ upper(parameters.environment) }} AppAnalysis
+  environment: ${{ parameters.environment }}
+  variables:
+    - template: ../configuration/variable-group-with-secrets.yml
+      parameters:
+        environment: ${{ lower(parameters.environment) }}
+  strategy:
+    runOnce:
+      deploy:
+        steps:            
+        - task: TerraformTaskV3@3
+          displayName: Terraform Init
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            backendServiceArm: ${{ PARAMETERS.SERVICE_CONNECTION_NAME_TFSTATE }}
+            backendAzureRmResourceGroupName: $(RESOURCE_GROUP_NAME_TERRAFORM_STATE)
+            backendAzureRmStorageAccountName: $(STORAGE_ACCOUNT_NAME)
+            backendAzureRmContainerName: $(CONTAINER_NAME)
+            backendAzureRmKey: '$(INFRA_NAME)-$(GIT_BRANCH)branch-${{ parameters.environment }}.tfstate'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+        - task: TerraformTaskV3@3
+          condition: ne(variables['Build.SourceBranchName'],'main')
+          # develop & other development branches
+          displayName: Terraform Destroy Develop(s) Dev/QA/UAT/Pre/Dem/Pro (Enterprise DevOps Subscr)
+          inputs:
+            provider: 'azurerm'
+            command: 'destroy'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            commandOptions: >
+              -var environment=${{ parameters.environment }}
+              -var gitbranch=$(GIT_BRANCH)
+              -var azure_subscription_unitedstates="00000000-0000-0000-0000-000000000000"
+              -var azure_subscription_europe="00000000-0000-0000-0000-000000000000"
+              -var secret_appGatewayListenerSecure="ANY_VALUE_DIFFERENT_FROM_EMPTY_IS_VALID"
+              -var secret_docker_registry_server_password="ANY_VALUE_DIFFERENT_FROM_EMPTY_IS_VALID"
+              -var secret_mongodb_atlas_public_key=$(mongodb-atlas-Enterprisedevtest-public-key)
+              -var secret_mongodb_atlas_private_key=$(mongodb-atlas-Enterprisedevtest-private-key)
+              -var secret_mongodb_atlas_dbadmin_password="ANY_VALUE_DIFFERENT_FROM_EMPTY_IS_VALID"
+              -var secret_mongodb_atlas_dbuser_password="ANY_VALUE_DIFFERENT_FROM_EMPTY_IS_VALID"       
+              -var secret_app_analysis_config_key="ANY_VALUE_DIFFERENT_FROM_EMPTY_IS_VALID"
+              -var secret_aks_kube_config_host_europe=$(aks-eng-kube-config-host)
+              -var secret_aks_kube_config_client_certificate_europe=$(aks-eng-kube-config-client-certificate)
+              -var secret_aks_kube_config_client_key_europe=$(aks-eng-kube-config-client-key)
+              -var secret_aks_kube_config_cluster_ca_certificate_europe=$(aks-eng-kube-config-cluster-ca-certificate)
+              -var secret_aks_kube_config_host_unitedstates=$(aks-eng-kube-config-host)
+              -var secret_aks_kube_config_client_certificate_unitedstates=$(aks-eng-kube-config-client-certificate-usa)
+              -var secret_aks_kube_config_client_key_unitedstates=$(aks-eng-kube-config-client-key-usa)
+              -var secret_aks_kube_config_cluster_ca_certificate_unitedstates=$(aks-eng-kube-config-cluster-ca-certificate-usa)              
+        - task: TerraformTaskV3@3
+          condition: and(and(ne(variables['TERRAFORM_ENV'], 'pro'),ne(variables['TERRAFORM_ENV'], 'dem')),eq(variables['Build.SourceBranchName'],'main'))
+          displayName: Terraform Destroy Main Dev/QA/UAT/Pre (Enterprise DevTest Subscr) 
+          inputs:
+            provider: 'azurerm'
+            command: 'destroy'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            commandOptions: >
+              -var environment=${{ parameters.environment }}
+              -var gitbranch=$(GIT_BRANCH)
+              -var azure_subscription_unitedstates="00000000-0000-0000-0000-000000000000"
+              -var azure_subscription_europe="00000000-0000-0000-0000-000000000000"
+              -var secret_appGatewayListenerSecure="ANY_VALUE_DIFFERENT_FROM_EMPTY_IS_VALID"
+              -var secret_docker_registry_server_password="ANY_VALUE_DIFFERENT_FROM_EMPTY_IS_VALID"
+              -var secret_mongodb_atlas_public_key=$(mongodb-atlas-Enterprisedevtest-public-key)
+              -var secret_mongodb_atlas_private_key=$(mongodb-atlas-Enterprisedevtest-private-key)
+              -var secret_mongodb_atlas_dbadmin_password="ANY_VALUE_DIFFERENT_FROM_EMPTY_IS_VALID"
+              -var secret_mongodb_atlas_dbuser_password="ANY_VALUE_DIFFERENT_FROM_EMPTY_IS_VALID"       
+              -var secret_app_analysis_config_key="ANY_VALUE_DIFFERENT_FROM_EMPTY_IS_VALID"              
+              -var secret_aks_kube_config_host_europe=$(aks-eng-kube-config-host)
+              -var secret_aks_kube_config_client_certificate_europe=$(aks-eng-kube-config-client-certificate)
+              -var secret_aks_kube_config_client_key_europe=$(aks-eng-kube-config-client-key)
+              -var secret_aks_kube_config_cluster_ca_certificate_europe=$(aks-eng-kube-config-cluster-ca-certificate)
+              -var secret_aks_kube_config_host_unitedstates=$(aks-eng-kube-config-host)
+              -var secret_aks_kube_config_client_certificate_unitedstates=$(aks-eng-kube-config-client-certificate-usa)
+              -var secret_aks_kube_config_client_key_unitedstates=$(aks-eng-kube-config-client-key-usa)
+              -var secret_aks_kube_config_cluster_ca_certificate_unitedstates=$(aks-eng-kube-config-cluster-ca-certificate-usa)              
+        - task: TerraformTaskV3@3
+          displayName: Terraform Destroy Main Dem/Pro (Enterprise Core Subscr)
+          condition: and(or(eq(variables['TERRAFORM_ENV'], 'pro'),eq(variables['TERRAFORM_ENV'], 'dem')),eq(variables['Build.SourceBranchName'],'main'))
+          inputs:
+            provider: 'azurerm'
+            command: 'destroy'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            commandOptions: >
+              -var environment=${{ parameters.environment }}
+              -var gitbranch=$(GIT_BRANCH)
+              -var azure_subscription_unitedstates="00000000-0000-0000-0000-000000000000"
+              -var azure_subscription_europe="00000000-0000-0000-0000-000000000000"
+              -var secret_appGatewayListenerSecure="ANY_VALUE_DIFFERENT_FROM_EMPTY_IS_VALID"
+              -var secret_docker_registry_server_password="ANY_VALUE_DIFFERENT_FROM_EMPTY_IS_VALID"
+              -var secret_mongodb_atlas_public_key=$(mongodb-atlas-Enterprise-public-key)
+              -var secret_mongodb_atlas_private_key=$(mongodb-atlas-Enterprise-private-key)
+              -var secret_mongodb_atlas_dbadmin_password="ANY_VALUE_DIFFERENT_FROM_EMPTY_IS_VALID"
+              -var secret_mongodb_atlas_dbuser_password="ANY_VALUE_DIFFERENT_FROM_EMPTY_IS_VALID"     
+              -var secret_app_analysis_config_key="ANY_VALUE_DIFFERENT_FROM_EMPTY_IS_VALID"
+              -var secret_aks_kube_config_host_europe=$(aks-pro-kube-config-host)
+              -var secret_aks_kube_config_client_certificate_europe=$(aks-pro-kube-config-client-certificate)
+              -var secret_aks_kube_config_client_key_europe=$(aks-pro-kube-config-client-key)
+              -var secret_aks_kube_config_cluster_ca_certificate_europe=$(aks-pro-kube-config-cluster-ca-certificate)
+              -var secret_aks_kube_config_host_unitedstates=$(aks-pro-kube-config-host)
+              -var secret_aks_kube_config_client_certificate_unitedstates=$(aks-pro-kube-config-client-certificate-usa)
+              -var secret_aks_kube_config_client_key_unitedstates=$(aks-pro-kube-config-client-key-usa)
+              -var secret_aks_kube_config_cluster_ca_certificate_unitedstates=$(aks-pro-kube-config-cluster-ca-certificate-usa)                

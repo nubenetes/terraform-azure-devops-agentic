@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ivan-r-immune-orig-pembro-base-3
+  namespace: Enterprise
+spec:
+  parallelism: 1
+  completions: 1
+  backoffLimit: 0
+  template:
+    spec:
+      volumes:
+        - name: storage
+          azureFile:
+            secretName: dev-appEnterprisesa
+            shareName: fs-Enterprise-aidev
+      containers:
+        - name: ivan-r-immune-orig-pembro-base-3
+          image: enterprisedevappcr.azurecr.io/merck_regression:latest
+          args:
+            - -i
+            - >-
+              /folder
+          resources:
+            limits:
+              cpu: '6'
+              memory: 2000Mi
+            requests:
+              cpu: '1'
+              memory: 1000Mi
+          volumeMounts:
+            - name: storage
+              mountPath: /folder
+              subPath: >-
+                2022_Merck/PO1/regression/R_Immune_Orig_Pembro_Base
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+      restartPolicy: Never
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      imagePullSecrets:
+        - {}
+      schedulerName: default-scheduler

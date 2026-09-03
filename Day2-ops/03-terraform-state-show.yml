@@ -1,0 +1,47 @@
+# https://stackoverflow.com/questions/57150346/is-there-a-way-where-terraform-ignores-resourcenotfoundexception-and-destroys-th
+# https://www.terraform.io/cli/commands/state/rm
+
+##################################################################
+# This pipeline shows the content of the existing Terraform State
+##################################################################
+
+trigger:
+- manual
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+parameters:
+- name: 'stateShowENG'
+  displayName: 'Terraform state show ENG Shared-infra (Dev, QA, UAT, Pre)'
+  type: boolean
+  default: false
+- name: 'stateShowPRO' 
+  displayName: 'Terraform state show PRO Shared-infra (Production)'
+  type: boolean
+  default: false  
+
+# Define Variables for Environments
+variables:
+- template: configuration/shared-azure-devops-pipeline-vars.yml
+- template: configuration/developbranch-service-connections.yml
+- ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+  - template: configuration/mainbranch-service-connections.yml
+
+stages: 
+- stage: TerraformstateShowENG
+  displayName: Terraform stateShowENG
+  condition: ${{parameters.stateShowENG}}
+  jobs:
+    - template: templates/terraform-state.yml
+      parameters: 
+        environment: ${{ variables.ENG_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+- stage: TerraformstateShowPRO
+  displayName: Terraform stateShowPRO
+  condition: ${{parameters.stateShowPRO}}
+  jobs:
+    - template: templates/terraform-state.yml
+      parameters: 
+        environment: ${{ variables.PRO_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}

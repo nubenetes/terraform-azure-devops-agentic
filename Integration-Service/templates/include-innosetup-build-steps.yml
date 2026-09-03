@@ -1,0 +1,140 @@
+# File: templates/include-innosetup-build-steps.yml
+
+steps:
+- powershell: 'ls env:'
+  displayName: 'Show env'
+# Download winSW.exe
+# https://javadeveloperzone.com/spring-boot/spring-boot-as-windows-service/
+# https://github.com/winsw/winsw
+# https://github.com/winsw/winsw/releases/download/v2.12.0/WinSW-x64.exe
+- powershell: Invoke-WebRequest -Uri $(WINSW_DOWNLOAD_URL) -OutFile 'resources/integration-service-onpremise-$(integration-serviceRelease)-service.exe'
+  displayName: 'Download winSW.exe from Internet'
+  condition:  eq(variables['enableConditionAzureArtifacts'], 'false')
+- task: UniversalPackages@0
+  displayName: 'Download winSW.exe from internal repo'
+  condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
+  inputs:
+    command: download
+    vstsFeed: 'GitOps/integration-service-Artifacts-Feed2'
+    vstsFeedPackage: 'winsw'
+    vstsPackageVersion: $(winswRelease) # * = latest , a specifc release like 0.0.1 needs to be saved as "view" within the artifact repo to avoid being removed by the retention policy
+    downloadDirectory: '$(Build.SourcesDirectory)\publicArtifacts'
+    verbosity: trace
+- script: ls -l $(Build.SourcesDirectory)\publicArtifacts
+  displayName: 'ls -l Build.SourcesDirectory\publicArtifacts'
+  condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
+- powershell: Rename-Item -Path $(Build.SourcesDirectory)\publicArtifacts\WinSW$(winswRelease).exe -NewName integration-service-onpremise-$(integration-serviceRelease)-service.exe
+  displayName: 'rename winSW.exe'
+  condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
+- script: ls -l $(Build.SourcesDirectory)\publicArtifacts
+  displayName: 'ls -l Build.SourcesDirectory\publicArtifacts'
+  condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
+- task: CopyFiles@2
+  displayName: 'Copy integration-service winSW.exe renamed as integration-service-onpremise-$(integration-serviceRelease)-service.exe to resources folder'
+  condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)\publicArtifacts'
+    contents: '*.exe'
+    targetFolder: 'resources/'
+- script: ls -l resources/
+  displayName: 'ls -l resources/'
+# Download JRE
+- powershell: Invoke-WebRequest -Uri $(JRE_DOWNLOAD_URL) -OutFile '$(System.DefaultWorkingDirectory)/jre$(javaRelease).zip'
+  displayName: 'Download JRE from Internet'
+  condition:  eq(variables['enableConditionAzureArtifacts'], 'false')
+- task: UniversalPackages@0
+  displayName: 'Download JRE from internal repo'
+  condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
+  inputs:
+    command: download
+    vstsFeed: 'GitOps/integration-service-Artifacts-Feed2'
+    vstsFeedPackage: 'jre'
+    vstsPackageVersion: $(javaRelease) # * = latest , a specifc release like 0.0.1 needs to be saved as "view" within the artifact repo to avoid being removed by the retention policy
+    downloadDirectory: '$(Build.SourcesDirectory)\publicArtifacts'
+    verbosity: trace
+- script: ls -l $(Build.SourcesDirectory)/publicArtifacts
+  displayName: 'ls -l Build.SourcesDirectory/publicArtifacts'
+  condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
+- powershell: 'Expand-Archive -Path $(Build.SourcesDirectory)/publicArtifacts/jre$(javaRelease).zip -DestinationPath resources/ -Verbose'
+  displayName: 'Unzip jre$(javaRelease).zip downloaded from internal repo'
+  condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
+- powershell: 'Expand-Archive -Path $(System.DefaultWorkingDirectory)/jre$(javaRelease).zip -DestinationPath resources/ -Verbose'
+  displayName: 'Unzip jre$(javaRelease).zip downloaded from internet'
+  condition:  eq(variables['enableConditionAzureArtifacts'], 'false')
+- powershell: 'Move-Item -Path resources/jdk-* -Destination resources/jre'
+  displayName: 'Rename jre folder'
+- script: ls -l resources/
+  displayName: 'ls -l resources/'
+# InnoSetup
+- task: Installer@1  # Innosetup Installer
+  ##[warning]Task 'Installer' (1.0.0) is using deprecated task execution handler. The task should use the supported task-lib: https://aka.ms/tasklib
+  # The above warning arises with windows-2022 Agent, check https://github.com/ricardo-pignone/InnoSetupTools/issues/5
+  displayName: Innosetup Installer
+  inputs:
+    version: '6.2.1'
+- task: DownloadPipelineArtifact@2
+  displayName: Grab integration-service-onpremise-$(integration-serviceRelease).jar, integration-service-onpremise-$(integration-serviceRelease).exe & innoSetupScript.iss Artifacts generated in previous stage
+  inputs:
+    source: 'current'
+    path: $(Build.ArtifactStagingDirectory)
+- task: CopyFiles@2
+  displayName: 'Copy integration-service-onpremise-$(integration-serviceRelease).jar file from artifact staging directory to resources/ folder'
+  inputs:
+    SourceFolder: $(Build.ArtifactStagingDirectory)/drop
+    Contents: '*.?(war|jar)'
+    TargetFolder: $(System.DefaultWorkingDirectory)/resources/
+- task: CopyFiles@2
+  displayName: 'Copy integration-service-onpremise-$(integration-serviceRelease).exe file from artifact staging directory to resources/ folder'
+  inputs:
+    SourceFolder: $(Build.ArtifactStagingDirectory)/drop
+    Contents: '*.exe'
+    TargetFolder: $(System.DefaultWorkingDirectory)\resources
+- task: UsePythonVersion@0
+  displayName: 'Setting up Python'
+  inputs:
+    versionSpec: '*' # * = latest
+# Render Jinja2 templates
+- script: python -m pip install jinja2-cli
+  displayName: 'Setting up jinja2-cli'
+# Rendering innoSetupScript.j2 template in resources/ folder
+- script: >
+    jinja2 -D integration-serviceRelease=$(integration-serviceRelease)
+    templates/innoSetupScript.j2 --outfile=$(System.DefaultWorkingDirectory)/resources/innoSetupScript.iss
+  displayName: 'Rendering Jinja2 template: innoSetupScript.iss'
+# Rendered files:
+- script: cat resources/innoSetupScript.iss
+  displayName: 'cat rendered resources/innoSetupScript.iss'
+# Rendering innoSetup-service.j2 template in resources/ folder
+- script: >
+    jinja2 -D integration-serviceRelease=$(integration-serviceRelease)
+    templates/innoSetup-service.j2 --outfile=$(System.DefaultWorkingDirectory)/resources/integration-service-onpremise-$(integration-serviceRelease)-service.xml
+  displayName: 'Rendering Jinja2 template: integration-service-onpremise-$(integration-serviceRelease)-service.xml'
+# Rendered files:
+- script: cat resources/integration-service-onpremise-$(integration-serviceRelease)-service.xml
+  displayName: 'cat resources/integration-service-onpremise-$(integration-serviceRelease)-service.xml'
+- script: ls -l resources/
+  displayName: 'ls -l resources/'
+- task: Build@1 # Innosetup Build .
+  ##[warning]Task 'Build' (1.0.0) is using deprecated task execution handler. The task should use the supported task-lib: https://aka.ms/tasklib
+  # The above warning arises with windows-2022 Agent, check https://github.com/ricardo-pignone/InnoSetupTools/issues/5
+  displayName: Innosetup Build
+  inputs:
+    version: '6.2.1'
+    file: 'resources/innoSetupScript.iss'
+- script: ls -l innoSetupOutput/
+  displayName: 'ls -l innoSetupOutput/'
+- task: CopyFiles@2
+  displayName: 'Copy integration-service installer'
+  inputs:
+    SourceFolder: 'innoSetupOutput/'
+    contents: '*.exe'
+    targetFolder: '$(Build.ArtifactStagingDirectory)'
+- task: AzureCLI@2
+  displayName: 'run scripts/09-createStorageContainer-upload-integration-service-OnPremInstaller-createURL.ps1'
+  inputs:
+    azureSubscription: $(serviceConnection)
+    scriptType: 'ps'
+    scriptLocation: 'scriptPath'
+    scriptPath: 'scripts/09-createStorageContainer-upload-integration-service-OnPremInstaller-createURL.ps1'
+    arguments: '$(resourceGroup) $(rgLocation) $(storageAccount) $(storageContainerName) $(blobName) $(storageAccountTags) $(spName) $(Build.ArtifactStagingDirectory) $(appRegisterTimestamp)'
+  name: ProduceVarBlobFileDownloadUrlOutput

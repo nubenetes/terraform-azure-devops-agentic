@@ -1,0 +1,146 @@
+# File: templates/include-java-build-steps.yml
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/process/templates
+
+parameters:
+- name: 'sonarQubeRunAnalysis'  # defaults for any parameters that aren't specified
+  type: boolean
+  default: false
+- name: 'showEnv'      # different command per Azure DevOps Agent (Windows, Ubuntu, MacOS)
+  type: string
+  default: 'ls env:'   # only valid for windows agents
+- name: 'enableConditionAzureArtifacts'
+  type: boolean
+  default: false
+- name: 'azureArtifactsMavenProfile'
+  type: string
+  default: 'azureDevOps'
+- name: 'task_maven3_jdkVersionOption'
+  type: string
+  default: '1.11'
+
+steps:
+- powershell: ${{ parameters.showEnv }}
+  displayName: 'Show env'
+- powershell: |
+    Write-Host "set variables in scripts - clientId: $(clientId)"
+  displayName: 'Show variables content grabbed from pipeline parameters'
+# Grab Project Version from POM File:
+- powershell: |
+    $filePath = "$(POM_FILE)"
+    [xml]$pomXml = Get-Content $filePath
+    $projectVersion = $pomXml.project.version
+    Write-Host "Current Project Version (integration-service release) grabbed from POM file: $projectVersion"
+    Write-Host "Setup gobal variable needed by the next task: integration-serviceRelease"
+    Write-Host "##vso[task.setvariable variable=integration-serviceRelease]$projectVersion"
+    Write-Host "setup output variable needed by the next stage: integration-serviceReleaseOutput"
+    Write-Host "##vso[task.setvariable variable=integration-serviceReleaseOutput;isOutput=true]$projectVersion"
+  name: ProduceVarintegration-serviceRelease
+# Download Apache Maven Binary
+- task: UniversalPackages@0
+  displayName: 'Download Maven from internal repo'
+  condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
+  inputs:
+    command: download
+    vstsFeed: 'GitOps/integration-service-Artifacts-Feed2'
+    vstsFeedPackage: 'maven'
+    vstsPackageVersion: $(mavenRelease) # * = latest , a specifc release like 0.0.1 needs to be saved as "view" within the artifact repo to avoid being removed by the retention policy
+    downloadDirectory: '$(Build.SourcesDirectory)/publicArtifacts'
+    verbosity: trace
+- script: ls -l $(Build.SourcesDirectory)/publicArtifacts
+  displayName: 'ls -l publicArtifacts/ folder'
+  condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
+- task: CopyFiles@2
+  displayName: 'Copy maven.zip to System Default Working Directory'
+  condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)/publicArtifacts'
+    contents: 'maven$(mavenRelease).zip'
+    targetFolder: '$(System.DefaultWorkingDirectory)/'
+- script: ls -l $(System.DefaultWorkingDirectory)/
+  displayName: 'ls -l'
+  condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
+- powershell: 'Invoke-WebRequest -Uri $(MAVEN_DOWNLOAD_URL) -OutFile $(System.DefaultWorkingDirectory)/maven$(mavenRelease).zip'
+  displayName: 'Download Maven from Internet'
+  condition:  eq(variables['enableConditionAzureArtifacts'], 'false')
+- powershell: 'Expand-Archive -Path $(System.DefaultWorkingDirectory)/maven$(mavenRelease).zip -DestinationPath $(System.DefaultWorkingDirectory)/ -Verbose'
+  displayName: 'Unzip maven$(mavenRelease).zip artifact'
+# - pwsh: 'Rename-Item apache-maven-* maven'
+#   displayName: 'Rename maven folder'
+- bash: mv -fv apache-maven-* maven
+  displayName: 'Rename maven folder'
+- bash: |
+    ls -la
+    echo
+    echo "############ List contents of maven/ folder: ###################"
+    ls -l maven/
+    echo
+    echo "############ List contents of maven/bin/ folder: ###################"
+    ls -l maven/bin/
+  displayName: 'ls -l'
+- bash: find . -name '*'
+  displayName: 'list files recursively'
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/build/maven?view=azure-devops
+- bash: cat src/main/resources/application.properties
+  displayName: cat application.properties
+- bash: cat $(POM_FILE)
+  displayName: cat POM File
+- ${{ if eq(parameters.sonarQubeRunAnalysis, false) }}:
+  - task: Maven@3
+    displayName: 'maven build'
+    inputs:
+      mavenPomFile: "$(POM_FILE)"
+      mavenOptions: $(MAVEN_JVM_OPTS)
+      ${{ if eq(parameters.enableConditionAzureArtifacts, true) }}:
+        options: "$(MAVEN_OPTIONS) -DskipTests -DclientId=$(clientId) -DclientSecret=$(appSecret) -P$(azureArtifactsMavenProfile)"  # -PazureDevOps profile defined in pom.xml
+        # Optional. Specify any Maven command-line options you want to use.
+      ${{ else }}:
+        options: "$(MAVEN_OPTIONS) -DskipTests -DclientId=$(clientId) -DclientSecret=$(appSecret)"
+        # Optional. Specify any Maven command-line options you want to use.
+      publishJUnitResults: false
+      javaHomeOption: 'JDKVersion'
+      jdkVersionOption: $(task_maven3_jdkVersionOption)
+      mavenVersionSelection: 'Path'
+      mavenPath: $(System.DefaultWorkingDirectory)/maven
+      mavenSetM2Home: true
+      mavenAuthenticateFeed: true
+      sonarQubeRunAnalysis: false
+      goals: 'package'
+- ${{ if eq(parameters.sonarQubeRunAnalysis, true) }}:
+  - task: Maven@3
+    displayName: 'maven build with sonarQubeRunAnalysis'
+    inputs:
+      mavenPomFile: "$(POM_FILE)"
+      mavenOptions: $(MAVEN_JVM_OPTS)
+      ${{ if eq(parameters.enableConditionAzureArtifacts, true) }}:
+        options: "$(MAVEN_OPTIONS) -DclientId=$(clientId) -DclientSecret=$(appSecret) -P$(azureArtifactsMavenProfile)"  # -PazureDevOps profile defined in pom.xml
+        # Optional. Specify any Maven command-line options you want to use.
+      ${{ else }}:
+        options: "$(MAVEN_OPTIONS) -DskipTests -DclientId=$(clientId) -DclientSecret=$(appSecret)"
+        # Optional. Specify any Maven command-line options you want to use.
+      #-Dskip.unit.tests=true -Dskip.it.tests=true"
+      publishJUnitResults: false
+      testResultsFiles: '**/surefire-reports/TEST-*.xml'
+      testRunTitle: 'mytests'
+      javaHomeOption: 'JDKVersion'
+      jdkVersionOption: $(task_maven3_jdkVersionOption)
+      mavenVersionSelection: 'Path'
+      mavenPath: $(System.DefaultWorkingDirectory)/maven
+      mavenSetM2Home: true
+      mavenAuthenticateFeed: true
+      sonarQubeRunAnalysis: true
+      sqMavenPluginVersionChoice: 'latest' # Required when sonarQubeRunAnalysis == True# Options: latest, pom
+      goals: 'package'
+      codeCoverageToolOption: 'None' # Optional. Options: none, cobertura, jaCoCo. Enabling code coverage inserts the `clean` goal into the Maven goals list when Maven runs.
+- task: CopyFiles@2
+  displayName: 'Copy Files to artifact staging directory'
+  inputs:
+    SourceFolder: '$(System.DefaultWorkingDirectory)'
+    Contents: '**/target/*.?(jar|exe)'
+    TargetFolder: $(Build.ArtifactStagingDirectory)
+- task: PublishPipelineArtifact@1
+  displayName: 'Publish integration-service-onpremise-$(integration-serviceRelease).jar & integration-service-onpremise-$(integration-serviceRelease).exe Artifacts in drop folder'
+  inputs:
+    targetPath: $(Build.ArtifactStagingDirectory)/target/
+    artifactName: 'drop'
+- script: ls -l $(Build.ArtifactStagingDirectory)/target/
+  displayName: 'ls -l Build.ArtifactStagingDirectory/target/'

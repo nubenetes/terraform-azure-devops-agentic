@@ -1,0 +1,145 @@
+# https://kubernetes.io/docs/concepts/workloads/controllers/job/
+# https://levelup.gitconnected.com/understanding-jobs-in-kubernetes-68ac21b272d8
+# https://learn.microsoft.com/en-us/azure/aks/operator-best-practices-advanced-scheduler
+
+# apiVersion: batch/v1
+# kind: Job
+# metadata:
+#   name: pi
+#   namespace: Enterprise
+# spec:
+#   template:
+#     spec:
+#       containers:
+#       - name: pi
+#         image: perl:5.34.0
+#         command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+#       restartPolicy: Never
+#   backoffLimit: 4
+
+
+#       nodeSelector:
+#         nodepool-type: user
+
+
+# https://devopscube.com/create-kubernetes-jobs-cron-jobs/
+apiVersion: batch/v1 
+kind: Job 
+metadata:
+  #name: kubernetes-job-example
+  generateName: kubernetes-job-example-
+  namespace: Enterprise
+  labels:     
+    jobgroup: jobexample
+    app: appcore
+spec:
+  completions: 1 #100 # Execute Job More Than Once https://phoenixnap.com/kb/kubernetes-job
+  parallelism: 1 #5
+  template:     
+    metadata:       
+      name: kubejob       
+      labels:         
+        jobgroup: jobexample     
+    spec:
+      nodeSelector:
+        app: app-analysis
+        agentpool: appspool002
+        # https://kubernetes.io/docs/tasks/configure-pod-container/assign-pods-nodes/      
+      # affinity:
+      #   # https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+      #   nodeAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #       nodeSelectorTerms:
+      #       - matchExpressions:
+      #         - key: nodepool
+      #           operator: In
+      #           values:
+      #           - appspool001
+      #     preferredDuringSchedulingIgnoredDuringExecution:
+      #     - weight: 1
+      #       preference:
+      #         matchExpressions:
+      #         - key: nodepool-type
+      #           operator: In
+      #           values:
+      #           - user            
+      containers:       
+      # - name: c         
+      #   image: devopscube/kubernetes-job-demo:latest         
+      #   args: ["100"]
+      #   command: ["/bin/sh", "-ec", "sleep 1000"]   # sleep command
+      #   #resources:       
+      #     # https://azureprice.net/vm/Standard_E8as_v4
+      #     # https://kubernetes.io/docs/concepts/workloads/pods/pod-qos/#besteffort
+      #     #limits:
+      #       #cpu: "4" #"1" #"4"  (qosClass: Burstable if this is disabled, otherwise guaranteed)
+      #       #memory: "30Gi" #6000Mi #16000Mi
+      #     #requests:
+      #       #cpu: "4" #"4" #"1" #"4"
+      #       #memory: "30Gi" #160Mi #6000Mi #16000Mi                
+      - name: stress         
+        image: progrium/stress
+        #args: ["--cpu 20","--io 2","--vm 10","--vm-bytes 1600M"]
+        args: ["--cpu","4","--io","1","--vm","20","--vm-bytes","40M","--timeout","10s"]
+        resources:
+          #https://azureprice.net/vm/Standard_E8as_v4
+          #https://kubernetes.io/docs/concepts/workloads/pods/pod-qos/#besteffort
+          # limits:
+          #   cpu: "4" #"1" #"4"  (qosClass: Burstable if this is disabled, otherwise guaranteed)
+          #   memory: "30Gi" #6000Mi #16000Mi
+          requests:
+            cpu: "2000m" #"4" #"1" #"4"
+            memory: "1000Mi" #160Mi #6000Mi #16000Mi                
+      restartPolicy: Never #OnFailure
+      
+# for i in {1..5}; do kubectl create -f job.yml; done  
+      
+# Delete all jobs:
+# kubectl delete jobs `kubectl get jobs -o custom-columns=:.metadata.name`
+
+# Show node taints:
+# kubectl get nodes -o json | jq '.items[].spec'  
+
+
+# Taints and Tolerations
+# https://github.com/infracloudio/kubernetes-scheduling-examples/blob/master/taints/README.md
+
+# Node Affinity
+# https://github.com/infracloudio/kubernetes-scheduling-examples/tree/master/nodeAffinity
+
+# Pod Affinity & AntiAffinity
+# https://github.com/infracloudio/kubernetes-scheduling-examples/blob/master/podAffinity/README.md
+
+# https://learn.microsoft.com/en-us/azure/aks/operator-best-practices-advanced-scheduler
+
+# https://hub.docker.com/r/progrium/stress/
+
+# https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/
+
+
+# https://containersolutions.github.io/runbooks/posts/kubernetes/0-nodes-available-insufficient/
+
+
+
+
+# kubectl describe nodes
+# Allocated resources:
+#   (Total limits may be over 100 percent, i.e., overcommitted.)
+#   Resource           Requests      Limits
+#   --------           --------      ------
+#   cpu                870m (45%)    10700m (563%)
+#   memory             1210Mi (26%)  8108Mi (177%)
+#   ephemeral-storage  0 (0%)        0 (0%)
+#   hugepages-1Gi      0 (0%)        0 (0%)
+#   hugepages-2Mi      0 (0%)        0 (0%)
+
+
+
+
+
+# % kubectl get pods
+# NAME                                 READY   STATUS      RESTARTS   AGE
+# kubernetes-job-example-vlhz8-dk99s   0/1     OOMKilled   0          88s
+# kubernetes-job-example-vlhz8-fpj5l   0/1     OOMKilled   0          3m8s
+# kubernetes-job-example-vlhz8-pzkrt   1/1     Running     0          36s
+# kubernetes-job-example-vlhz8-vb2sh   0/1     OOMKilled   0          2m13s

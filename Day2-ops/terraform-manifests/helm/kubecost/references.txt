@@ -1,0 +1,5 @@
+https://blog.kubecost.com/blog/aks-cost/
+https://www.returngis.net/2022/05/saber-el-coste-de-tus-aplicaciones-en-kubernetes-con-kubecost-en-microsoft-azure/
+https://thenewstack.io/kubecost-monitor-kubernetes-costs-with-kubectl/
+https://github.com/kubecost/kubectl-cost
+https://www.infracloud.io/blogs/kubernetes-cost-reporting-using-kubecost/

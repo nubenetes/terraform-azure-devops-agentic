@@ -1,0 +1,6 @@
+{
+  "clientId": "${clientId}",
+  "beScope": "${beScope}",
+  "applinkScope": "${applinkScope}",
+  "showDemoDisclaimer": true
+}

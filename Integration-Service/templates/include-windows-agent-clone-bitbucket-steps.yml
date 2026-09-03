@@ -1,0 +1,48 @@
+# File: templates\include-windows-agent-clone-bitbucket-steps.yml 
+
+steps:
+- checkout: self
+  clean: true
+- checkout: integration-service-Bitbucket-Repo   
+  clean: true
+  env:
+    autocrlf: true      # CRLF issue (see details in README file). We leave this enabled just in case .gitattributes is not setup on bitbucket repo.
+- script: git config --system -l 
+  displayName: git config system wide   
+- powershell: 'ls env:'
+  displayName: 'Show env'
+- bash: |
+    echo "Bitbucket ref: $TOOLS_REF"
+  displayName: Bitbucket ref   # https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/multi-repo-checkout
+- script: ls -la $(Build.SourcesDirectory)
+  displayName: Show folders with multi repo checkouts
+- powershell: Get-ChildItem '$(Build.SourcesDirectory)\integration-service\src\' | Remove-Item -Recurse -Force -Verbose
+  displayName: delete the content of integration-service/src/ folder and make it empty
+- script: ls -la $(Build.SourcesDirectory)/integration-service/src/
+  displayName: Show files in integration-service/src/ folder
+- powershell: Move-Item "$(Build.SourcesDirectory)\data_router\src\main" -Destination "$(Build.SourcesDirectory)\integration-service\src\" -Verbose
+  displayName: Move content of src\main folder from Bitbucket Cloud to Azure Repo 
+- powershell: Move-Item "$(Build.SourcesDirectory)\data_router\src\test" -Destination "$(Build.SourcesDirectory)\integration-service\src\" -Verbose
+  displayName: Move content of src\test folder from Bitbucket Cloud to Azure Repo
+- script: ls -la $(Build.SourcesDirectory)/integration-service/src/
+  displayName: Show files in integration-service/src/ folder
+- task: CopyFiles@2
+  displayName: 'Copy pom.xml from Bitbucket Folder to integration-service Folder'
+  condition:  eq(variables['enableConditionCopyPomFileFromBitBucket'], 'true')
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)\data_router\'
+    Contents: 'pom.xml'
+    TargetFolder: '$(Build.SourcesDirectory)\integration-service\'
+    OverWrite: true
+- powershell: Get-ChildItem -Path "$(Build.SourcesDirectory)\integration-service\*" -Recurse -Force | Move-Item -Destination "$(Build.SourcesDirectory)\" -Force -Verbose
+  displayName: Moving updated content from integration-service/ folder to current working directory (root folder)
+- script: ls -la $(Build.SourcesDirectory)/integration-service/
+  displayName: Show remaining files in integration-service/ folder    
+- powershell: Remove-Item -Path $(Build.SourcesDirectory)\integration-service -Recurse -Verbose -Force 
+  displayName: delete integration-service/ folder
+- powershell: Remove-Item -Path $(Build.SourcesDirectory)\data_router -Recurse -Verbose -Force 
+  displayName: delete data_router/ folder        
+- script: ls -la 
+  displayName: Show files in root folder
+- script: ls -la src/
+  displayName: Show files in src/ folder

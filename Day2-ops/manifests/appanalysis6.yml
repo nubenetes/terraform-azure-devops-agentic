@@ -1,0 +1,136 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName:  app-analysis-
+  #name: app-analysis #Enterprise-Enterpriseapp-analysis-63f7dac2
+  namespace: Enterprise
+  labels:
+    jobgroup: app-analysis
+    app: appcore
+spec:
+  #completions: 1
+  parallelism: 1
+  #completionMode: Indexed #NonIndexed
+  #backoffLimit: 1
+  #suspend: false
+  template:
+    metadata:
+      name: kubejob
+      labels:
+        jobgroup: jobexampleapp-analysis
+    spec:
+      nodeSelector:
+        app: mljobs
+        agentpool: appspool002
+        #nvidia/gpu: "true"
+        # https://kubernetes.io/docs/tasks/configure-pod-container/assign-pods-nodes/
+      restartPolicy: Never
+      #priorityClassName: high-priority
+      #dnsPolicy: ClusterFirst
+      #schedulerName: default-scheduler
+      #securityContext: {}
+      #terminationGracePeriodSeconds: 30
+      # imagePullSecrets:
+      #   - {}
+      initContainers:
+        - name: normalizer #normalizer-job-v0-2-0
+          image: enterprisedevappcr.azurecr.io/normalizer_job:0.2.0
+          imagePullPolicy: IfNotPresent
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          env:
+            - name: applink_VOLUME_SUBPATH
+              valueFrom:
+                configMapKeyRef:
+                  name: ml-config
+                  key: assetrelativepath
+          resources:
+            limits:
+              cpu: "1"
+              memory: 200Mi #2000Mi
+            requests:
+              cpu: "1"
+              memory: 200Mi #2000Mi
+          volumeMounts:
+            - name: storage
+              mountPath: /asset
+              subPathExpr: $(applink_VOLUME_SUBPATH)
+      containers:
+        - name: app-analysis #app-analysis-vupdate-common-lib-fa5e687
+          image: enterprisedevappcr.azurecr.io/app-analysis-service:update_common-lib-fa5e687
+          imagePullPolicy: IfNotPresent
+          args: ["$(applink_JSON)", "$(applink_TOKEN)"]
+          # https://stackoverflow.com/questions/31870222/how-can-i-keep-a-container-running-on-kubernetes
+          #command: ["/bin/sh", "-ec", "sleep 1000"]   # sleep command
+          command: ["/bin/sh", "-ec", "while :; do echo '.'; sleep 5 ; done"]   # infinite loop enabled for debugging purposes
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          env:
+            - name: applink_JSON
+              valueFrom:
+                configMapKeyRef:
+                  name: ml-config
+                  key: json
+            - name: applink_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: applink-cloud-secret
+                  key: token
+            - name: applink_VOLUME_SUBPATH
+              valueFrom:
+                configMapKeyRef:
+                  name: ml-config
+                  key: assetrelativepath
+          resources:
+            limits:
+              cpu: "1" #"4"
+              memory: 6000Mi #16000Mi
+            requests:
+              cpu: "1" #"4"
+              memory: 6000Mi #16000Mi
+          volumeMounts:
+            - mountPath: /asset
+              name: storage
+              subPathExpr: $(applink_VOLUME_SUBPATH)
+      volumes:
+      # - name: storage
+      #   azureFile:
+      #     secretName: stappcoreclient-anon
+      #     shareName: fs-appcore-client-anon-client-anon
+        - name: storage
+          persistentVolumeClaim:
+            claimName: client-anon
+  ttlSecondsAfterFinished: 86400
+
+# https://github.com/kubernetes/examples/blob/master/staging/volumes/azure_file/azure-2.yaml
+# https://fabianlee.org/2000/01/01/kubernetes-export-a-clean-yaml-manifest-that-can-be-re-imported/
+# https://github.com/Kyrremann/kubectl-eksporter
+# kubectl eksporter job Enterprise-Enterpriseapp-analysis-63f7dac0 -n Enterprise
+
+#input.json -> para sacar los datos para analizar
+#token -> para llamar de vuelta al endpoint de App-Link Cloud
+
+# https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/
+
+
+# https://developers.redhat.com/blog/2000/01/01/kubernetes-configuration-patterns-part-1-patterns-for-kubernetes-primitives
+
+# https://kubernetes.io/docs/tasks/job/indexed-parallel-processing-static/
+# https://kubernetes.io/docs/tasks/job/indexed-parallel-processing-static/
+
+
+# Is it possible to rerun kubernetes job?
+# https://serverfault.com/questions/809632/is-it-possible-to-rerun-kubernetes-job
+# kubectl create -f app-analysis6.yml
+
+# https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/
+
+
+
+# for i in {1..500}; do kubectl create -f app-analysis6.yml; done
+
+# Delete all jobs:
+# kubectl delete jobs `kubectl get jobs -o custom-columns=:.metadata.name`
+
+# Show node taints:
+# kubectl get nodes -o json | jq '.items[].spec'

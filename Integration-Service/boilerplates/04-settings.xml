@@ -1,0 +1,7 @@
+<servers>
+  <server>
+    <id>integration-service-Artifacts-Feed2</id>
+    <username>enterpriseDev-integration-service-Artifacts-Feed2</username>
+    <password>[paste your azure Personal Access Token with Packaging (Read & Write) from https://dev.azure.com/enterpriseDev/_usersSettings/tokens]</password>
+  </server>
+</servers>

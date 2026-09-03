@@ -1,0 +1,122 @@
+# https://stackoverflow.com/questions/57150346/is-there-a-way-where-terraform-ignores-resourcenotfoundexception-and-destroys-th
+# https://www.terraform.io/cli/commands/state/rm
+
+########################################################################################
+# This pipeline updates the terraform state file to match the the existing resources. 
+# Useful when an azure resource is already deleted.
+#
+# terraform state rm <your_azure_resource>
+########################################################################################
+
+trigger:
+- manual
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+parameters:
+- name: 'stateRmDEV'
+  displayName: 'Terraform state rm DEV App-Core (Development & Test)'
+  type: boolean
+  default: false
+- name: 'stateRmQA'
+  displayName: 'Terraform state rm QA App-Core (Integration Tests)'
+  type: boolean
+  default: false
+- name: 'stateRmUAT' 
+  displayName: 'Terraform state rm UAT App-Core (User Acceptance Testing)'
+  type: boolean
+  default: false
+- name: 'stateRmPRE' 
+  displayName: 'Terraform state rm PRE App-Core (Staging)'
+  type: boolean
+  default: false
+- name: 'stateRmPRO' 
+  displayName: 'Terraform state rm PRO App-Core (Production)'
+  type: boolean
+  default: false
+- name: 'stateRmDEMO' 
+  displayName: 'Terraform state rm DEM App-Core (Demo)'
+  type: boolean
+  default: false    
+- name: 'stateRmRES' 
+  displayName: 'Terraform state rm RES App-Core (RR&D DiscoveryD AppAnalysis)'
+  type: boolean
+  default: false
+- name: 'resourceAddress' 
+  displayName: 'Terraform will search the state for any instances matching the given resource address, and remove the record of each one so that Terraform will no 
+    longer be tracking the corresponding remote objects.'
+  type: string
+  default: 'module.us[0].<resource_name>.<resource_instance>'
+
+# Define Variables for Environments
+variables:
+- template: configuration/shared-azure-devops-pipeline-vars.yml
+- template: configuration/developbranch-service-connections.yml
+- ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+  - template: configuration/mainbranch-service-connections.yml
+
+stages: 
+- stage: TerraformStateRmDEV
+  displayName: Terraform stateRmDEV
+  condition: ${{parameters.stateRmDEV}}
+  jobs:
+    - template: templates/terraform-state-rm.yml
+      parameters: 
+        environment: ${{ variables.DEV_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        RESOURCE_ADDRESS: ${{ parameters.resourceAddress }}
+- stage: TerraformStateRmQA
+  displayName: Terraform stateRmQA
+  condition: ${{parameters.stateRmQA}}
+  jobs:
+    - template: templates/terraform-state-rm.yml
+      parameters: 
+        environment: ${{ variables.QA_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        RESOURCE_ADDRESS: ${{ parameters.resourceAddress }}
+- stage: TerraformStateRmUAT
+  displayName: Terraform stateRmUAT
+  condition: ${{parameters.stateRmUAT}}
+  jobs:
+    - template: templates/terraform-state-rm.yml
+      parameters: 
+        environment: ${{ variables.UAT_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        RESOURCE_ADDRESS: ${{ parameters.resourceAddress }}
+- stage: TerraformStateRmPRE
+  displayName: Terraform stateRmPRE
+  condition: ${{parameters.stateRmPRE}}
+  jobs:
+    - template: templates/terraform-state-rm.yml
+      parameters: 
+        environment: ${{ variables.PRE_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        RESOURCE_ADDRESS: ${{ parameters.resourceAddress }}
+- stage: TerraformStateRmPRO
+  displayName: Terraform stateRmPRO
+  condition: ${{parameters.stateRmPRO}}
+  jobs:
+    - template: templates/terraform-state-rm.yml
+      parameters: 
+        environment: ${{ variables.PRO_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        RESOURCE_ADDRESS: ${{ parameters.resourceAddress }}
+- stage: TerraformStateRmDEMO
+  displayName: Terraform stateRmDEMO
+  condition: ${{parameters.stateRmDEMO}}
+  jobs:
+    - template: templates/terraform-state-rm.yml
+      parameters: 
+        environment: ${{ variables.DEMO_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        RESOURCE_ADDRESS: ${{ parameters.resourceAddress }}
+- stage: TerraformStateRmRES
+  displayName: Terraform stateRmRES
+  condition: ${{parameters.stateRmRES}}
+  jobs:
+    - template: templates/terraform-state-rm.yml
+      parameters: 
+        environment: ${{ variables.RESEARCH_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        RESOURCE_ADDRESS: ${{ parameters.resourceAddress }}

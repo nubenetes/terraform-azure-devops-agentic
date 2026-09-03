@@ -1,0 +1,162 @@
+trigger:
+- manual
+
+pool:
+  vmImage: 'windows-2022'
+
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/process/runtime-parameters
+parameters:
+  - name: upn
+    displayName: User Principal Name (upn)
+    type: string
+    default: 'cloud-admin@example.com'     # 'cloud-admin@example.com' , 'cloud-admin@example.com' , 'cloud-admin@example.com' , etc
+  - name: AETitle     # Should NOT CONTAIN special symbols such as <>\'&    ---> Due to automatic character escape feature of ConvertTo-Json in 08-assign-customSecurityAttributes.ps1
+    displayName: Center Name - AETitle Custom Security Attribute
+    type: string
+    default: 'client-example'     # 'enterprise' , 'client-example' , etc
+  - name: environment
+    displayName: 'Environment: app-env-dev (Development & Development Test), app-env-qa (Integration Test), app-env-uat (User Acceptance Test), app-env-pre (Staging), app-env (Production)'
+    type: string
+    default: 'test-app' #'dev'
+    values:    # Only the following values are valid and accepted by the pipeline:
+      - 'app-env-dev' # DEV north europe - Development & Development Test
+      - 'app-env-qa'  # QA north europe - Integration Test
+      - 'app-env-uat' # UAT north europe - User Acceptance Test
+      - 'app-env-pre' # PRE north europe - aka Staging
+      - 'app-env'    # PRO north europe - Production
+      - 'app-env-res' # RES north europe - RR&D aka DiscoveryD aka AppAnalysis
+      - 'dev-app'  # Legacy dev env name
+      - 'test-app' # Legacy test env name
+      - 'core'     # Legacy production env name
+
+resources:
+  repositories:
+  - repository: integration-service-Bitbucket-Repo   # This repository with these settings is shared among all the environments defined on this pipeline (dev, qa, uat, pre, pro)
+    type: bitbucket
+    endpoint: svccon-bitbucket
+    name: enterprise/data_router
+    #ref: master    # check out a specific ref/branch (master)
+    #ref: gitattributes_poc    # check out a specific ref/branch
+    ref: refs/tags/1.1.2     # check out a specific tag (controlled by integration-service team)
+
+# Define Variables for Environments
+variables:
+  - ${{ if eq(parameters.environment, 'app-env-dev') }}:
+    - template: configuration/app-env-dev.yml
+      parameters:
+        upn: ${{ lower(parameters.upn) }}
+        AETitle: ${{ lower(parameters.AETitle) }}
+  - ${{ if eq(parameters.environment, 'app-env-qa') }}:
+    - template: configuration/app-env-qa.yml
+      parameters:
+        upn: ${{ lower(parameters.upn) }}
+        AETitle: ${{ lower(parameters.AETitle) }}
+  - ${{ if eq(parameters.environment, 'app-env-uat') }}:
+    - template: configuration/app-env-uat.yml
+      parameters:
+        upn: ${{ lower(parameters.upn) }}
+        AETitle: ${{ lower(parameters.AETitle) }}
+  - ${{ if eq(parameters.environment, 'app-env-pre') }}:
+    - template: configuration/app-env-pre.yml
+      parameters:
+        upn: ${{ lower(parameters.upn) }}
+        AETitle: ${{ lower(parameters.AETitle) }}
+  - ${{ if eq(parameters.environment, 'app-env') }}:
+    - template: configuration/app-env.yml
+      parameters:
+        upn: ${{ lower(parameters.upn) }}
+        AETitle: ${{ lower(parameters.AETitle) }}
+  - ${{ if eq(parameters.environment, 'app-env-res') }}:
+    - template: configuration/app-env-res.yml
+      parameters:
+        upn: ${{ lower(parameters.upn) }}
+        AETitle: ${{ lower(parameters.AETitle) }}
+  # Legacy environments - to be removed once terraform pipelines are up&running:
+  - ${{ if eq(parameters.environment, 'dev-app') }}:
+    - template: configuration/dev-app.yml
+      parameters:
+        upn: ${{ lower(parameters.upn) }}
+        AETitle: ${{ lower(parameters.AETitle) }}
+  - ${{ if eq(parameters.environment, 'test-app') }}:
+    - template: configuration/test-app.yml
+      parameters:
+        upn: ${{ lower(parameters.upn) }}
+        AETitle: ${{ lower(parameters.AETitle) }}
+  - ${{ if eq(parameters.environment, 'core') }}:
+    - template: configuration/core.yml
+      parameters:
+        upn: ${{ lower(parameters.upn) }}
+        AETitle: ${{ lower(parameters.AETitle) }}
+
+stages:
+- stage: Stage_1      # get keys from KeyVault and Start Message
+  displayName: 'START in Queue'
+  jobs:
+  - job: sendMessage
+    timeoutInMinutes: 15 # how long to run the job before automatically cancelling
+    cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+    steps:
+      - template: templates/include-start-steps.yml       # Template reference
+- stage: Stage_2      # register App in AAD
+  displayName: AAD App Register
+  dependsOn: Stage_1
+  jobs:
+  - job: appRegister
+    timeoutInMinutes: 15
+    cancelTimeoutInMinutes: 0
+    variables:
+      storageAccount: $[ stageDependencies.Stage_1.sendMessage.outputs['ProduceVarStorageAccount.storageAccountOutput'] ]
+    steps:
+      - template: templates/include-aad-app-register-steps.yml       # Template reference
+- stage: Stage_3     # Java Build
+  displayName: Java Build
+  dependsOn: [Stage_1,Stage_2]
+  jobs:
+  - job: mavenBuild
+    timeoutInMinutes: 15
+    cancelTimeoutInMinutes: 0
+    # pool:
+      #vmImage: 'ubuntu-latest'
+      #vmImage: 'macOS-12'
+    variables:
+      # Use outputs in a different stage (pass variables between stages):
+      # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=azure-devops&tabs=yaml%2Cbatch#use-outputs-in-a-different-stage
+      clientId: $[ stageDependencies.Stage_2.appRegister.outputs['ProduceVarAppReg.clientIdOutput'] ]
+      appSecret: $[ stageDependencies.Stage_2.appRegister.outputs['ProduceVarAppReg.appSecretOutput'] ]
+    steps:
+      - ${{ if eq(variables.enableConditionGitCloneSrcFromBitBucket, true) }}:
+        #- template: templates/include-ubuntu-agent-clone-bitbucket-steps.yml       # Template reference
+        - template: templates/include-windows-agent-clone-bitbucket-steps.yml       # Template reference
+      - template: templates/include-java-build-steps.yml                            # Template reference
+        parameters:
+          sonarQubeRunAnalysis: ${{ variables.enableConditionSonarQubeRunAnalysis }}
+          #showEnv: 'env'  # valid for Ubuntu and MacOS agents
+          enableConditionAzureArtifacts: ${{ variables.enableConditionAzureArtifacts }}
+          azureArtifactsMavenProfile: ${{ variables.azureArtifactsMavenProfile }}
+          task_maven3_jdkVersionOption: ${{ variables.task_maven3_jdkVersionOption }}
+- stage: Stage_4     # InnoSetup Build. Upload integration-service Installer to Storage Container. Create Download URL with SAS token
+  displayName: InnoSetup Build
+  dependsOn: [Stage_1,Stage_2,Stage_3]
+  jobs:
+  - job: createintegration-serviceExe
+    timeoutInMinutes: 25
+    cancelTimeoutInMinutes: 0
+    variables:
+      storageAccount: $[ stageDependencies.Stage_1.sendMessage.outputs['ProduceVarStorageAccount.storageAccountOutput'] ]
+      appRegisterTimestamp: $[ stageDependencies.Stage_2.appRegister.outputs['ProduceVarAppReg.appRegisterTimestampOutput'] ]
+      spName: $[ stageDependencies.Stage_2.appRegister.outputs['ProduceVarAppReg.spNameOutput'] ]
+      integration-serviceRelease: $[ stageDependencies.Stage_3.mavenBuild.outputs['ProduceVarintegration-serviceRelease.integration-serviceReleaseOutput'] ]
+    steps:
+      - template: templates/include-innosetup-build-steps.yml       # Template reference
+- stage: Stage_5     # End Message with URL
+  displayName: 'END in Queue'
+  dependsOn: [Stage_1,Stage_4]
+  jobs:
+  - job: sendMessage
+    timeoutInMinutes: 15
+    cancelTimeoutInMinutes: 0
+    variables:
+        BlobFileDownloadUrl: $[ stageDependencies.Stage_4.createintegration-serviceExe.outputs['ProduceVarBlobFileDownloadUrlOutput.BlobFileDownloadUrlOutput'] ]
+        storageAccount: $[ stageDependencies.Stage_1.sendMessage.outputs['ProduceVarStorageAccount.storageAccountOutput'] ]
+    steps:
+      - template: templates/include-stop-steps.yml       # Template reference

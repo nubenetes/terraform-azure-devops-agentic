@@ -1,0 +1,355 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName:  app-analysis-
+  #name: app-analysis #Enterprise-Enterpriseapp-analysis-63f7dac2
+  namespace: app-env-dev-client-anon
+  labels:
+    jobgroup: app-analysis
+    app: appcore
+spec:
+  #completions: 1
+  parallelism: 1
+  #completionMode: Indexed #NonIndexed
+  #backoffLimit: 1
+  #suspend: false
+  #ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      name: kubejob
+      labels:
+        jobgroup: jobexampleapp-analysis
+    spec:
+      #terminationGracePeriodSeconds: 180
+      nodeSelector:
+        #app: mljobs
+        agentpool: appspool002
+        #nvidia/gpu: "true"
+        # https://kubernetes.io/docs/tasks/configure-pod-container/assign-pods-nodes/
+      restartPolicy: Never
+      #priorityClassName: high-priority
+      #dnsPolicy: ClusterFirst
+      #schedulerName: default-scheduler
+      #securityContext: {}
+      #terminationGracePeriodSeconds: 30
+      # imagePullSecrets:
+      #   - {}
+      initContainers:
+        - name: normalizer #normalizer-job-v0-2-0
+          image: enterprisedevappcr.azurecr.io/normalizer_job:0.2.0
+          imagePullPolicy: IfNotPresent
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          env:
+            - name: applink_VOLUME_SUBPATH
+              valueFrom:
+                configMapKeyRef:
+                  name: ml-config
+                  key: assetrelativepath
+          resources:
+            limits:
+              cpu: 200m #"1"
+              memory: 350Mi #500Mi #1000Mi #2000Mi
+                #200Mi (OOMKilled)
+            requests:
+              cpu: 100m #"1"
+              memory: 50Mi #200Mi #2000Mi
+          volumeMounts:
+            - name: storage
+              mountPath: /asset
+              subPathExpr: $(applink_VOLUME_SUBPATH)
+      containers:
+        - name: app-analysis #app-analysis-vupdate-common-lib-fa5e687
+          image: enterprisedevappcr.azurecr.io/app-analysis-service:update_common-lib-fa5e687
+          imagePullPolicy: IfNotPresent
+          args: ["$(applink_JSON)", "$(applink_TOKEN)"]
+          # https://stackoverflow.com/questions/31870222/how-can-i-keep-a-container-running-on-kubernetes
+          #command: ["/bin/sh", "-ec", "sleep 1000"]   # sleep command
+          #command: ["/bin/sh", "-ec", "while :; do echo 'infinite loop enabled for debugging purposes'; sleep 5 ; done"]   # infinite loop enabled for debugging purposes
+          #terminationMessagePath: /dev/termination-log
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          env:
+            - name: applink_JSON
+              valueFrom:
+                configMapKeyRef:
+                  name: ml-config
+                  key: json
+            - name: applink_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: applink-cloud-secret
+                  key: token
+            - name: applink_VOLUME_SUBPATH
+              valueFrom:
+                configMapKeyRef:
+                  name: ml-config
+                  key: assetrelativepath
+          resources:
+            limits:
+              cpu: 1500m #"3" #"1"
+              memory: 2000Mi #16000Mi #6000Mi
+            requests:
+              cpu: 1000m #"3" #"4"
+              memory: 1000Mi #16000Mi #16000Mi
+          volumeMounts:
+            - name: storage
+              mountPath: /asset
+              subPathExpr: $(applink_VOLUME_SUBPATH)
+        # - name: sidecar-container # https://www.airplane.dev/blog/kubernetes-sidecar-container
+        #   image: busybox
+        #   # https://blog.knoldus.com/how-to-use-kubernetes-sidecar-container/
+        #   # https://hub.docker.com/_/busybox
+        #   # https://stackoverflow.com/questions/31870222/how-can-i-keep-a-container-running-on-kubernetes
+        #   #command: ["sh","-c","while true; do cat /var/log/nginx/access.log; sleep 30; done"]
+        #   command: ['sh', '-c', 'while true; do date; sleep 3; done']
+      volumes:
+      # - name: storage
+      #   azureFile:
+      #     secretName: stappcoreclient-anon
+      #     shareName: fs-appcore-client-anon-client-anon
+        - name: storage
+          persistentVolumeClaim:
+            claimName: client-anon
+  ttlSecondsAfterFinished: 86400
+
+# https://github.com/kubernetes/examples/blob/master/staging/volumes/azure_file/azure-2.yaml
+# https://fabianlee.org/2000/01/01/kubernetes-export-a-clean-yaml-manifest-that-can-be-re-imported/
+# https://github.com/Kyrremann/kubectl-eksporter
+# kubectl eksporter job Enterprise-Enterpriseapp-analysis-63f7dac0 -n Enterprise
+
+#####################################################################################################################
+# input.json -> para sacar los datos para analizar
+
+# token -> para llamar de vuelta al endpoint de App-Link Cloud !!!!!!!
+# Generate this token with Postman; if it is not valid, we get a "ValueError: Invalid header value b'Bearer"
+
+####################################################################################################################
+
+##################################################################
+# Kubernetes Jobs: A Deeper Look
+# https://www.vultr.com/docs/kubernetes-jobs-a-deeper-look/
+##################################################################
+
+# https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/
+
+
+# https://developers.redhat.com/blog/2000/01/01/kubernetes-configuration-patterns-part-1-patterns-for-kubernetes-primitives
+
+# https://kubernetes.io/docs/tasks/job/indexed-parallel-processing-static/
+# https://kubernetes.io/docs/tasks/job/indexed-parallel-processing-static/
+
+
+# Is it possible to rerun kubernetes job?
+# https://serverfault.com/questions/809632/is-it-possible-to-rerun-kubernetes-job
+# kubectl create -f app-analysis6.yml
+
+# https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/
+
+
+
+###############################################################################
+# How to run this manifest for load testing purposes:
+# One single instance:
+# for i in {1..1}; do kubectl create -f app-analysis7.yml; done
+#
+# Many instances:
+# for i in {1..500}; do kubectl create -f app-analysis7.yml; done
+###############################################################################
+
+# Delete all jobs (try with one click on OpenLens instead):
+# kubectl delete jobs `kubectl get jobs -o custom-columns=:.metadata.name`
+
+# Show node taints:
+# kubectl get nodes -o json | jq '.items[].spec'
+
+###############################################################################
+# Troubleshooting without busybox sidecar container:
+# kubectl get pods -A
+# kubectl logs -f app-analysis-fdt5c-ctlnr -n app-env-dev-client-anon
+# kubectl logs -f app-analysis-fdt5c-ctlnr -n app-env-dev-client-anon -c normalizer
+# kubectl logs -f app-analysis-fdt5c-ctlnr -n app-env-dev-client-anon -c app-analysis
+##############################################################################
+
+###############################################################################
+# Troubleshooting with busybox sidecar container:
+# kubectl logs -f app-analysis-njcpn-krfhx -n app-envdev-client-anon
+# kubectl logs -f app-analysis-njcpn-krfhx -n app-envdev-client-anon -c normalizer
+# kubectl logs -f app-analysis-njcpn-krfhx -n app-envdev-client-anon -c app-analysis 
+###############################################################################
+
+
+
+# ~ % kubectl logs -f app-analysis-fdt5c-ctlnr -n app-env-dev-client-anon -c normalizer
+# 2000/01/01 09:42:39 | __main__         | INFO     | Parallelization: True
+# 2000/01/01 09:42:39 | normalizer_job   | INFO     | Asset path: /asset
+# 2000/01/01 09:42:45 | normalizer_job   | INFO     | Skipped already normalized series: /asset/2.25.122886890373578319610193543476732508984
+# 2000/01/01 09:42:45 | normalizer_job   | INFO     | Skipped already normalized series: /asset/2.25.127609523657304562651992905723459944075
+# 2000/01/01 09:42:46 | normalizer_job   | INFO     | Skipped already normalized series: /asset/2.25.14708088534297389668055697433094610303
+# 2000/01/01 09:42:46 | utils            | INFO     | Reading series directory: /asset/pipeline/000000000000000000000000
+# 2000/01/01 09:42:46 | reader           | WARNING  | Manufacturer tag not found!
+# 2000/01/01 09:42:46 | utils            | WARNING  | Unknown vendor matched!
+# 2000/01/01 09:42:46 | reader           | WARNING  | ManufacturerModelName tag not found!
+# 2000/01/01 09:42:46 | reader           | INFO     | Error reading /asset/pipeline/000000000000000000000000/KOS.dcm. Skipped!
+# 2000/01/01 09:42:46 | normalizer_job   | ERROR    | Error reading series /asset/pipeline/000000000000000000000000: Invalid data dimension: 0
+# 2000/01/01 09:42:46 | normalizer_job   | INFO     | Skipped already normalized series: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358279528.9550626806963240
+# 2000/01/01 09:42:46 | normalizer_job   | INFO     | Skipped already normalized series: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358280536.2877088204094793
+# 2000/01/01 09:42:46 | normalizer_job   | INFO     | Skipped already normalized series: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358283066.6171482772640806
+# 2000/01/01 09:42:47 | normalizer_job   | INFO     | Skipped already normalized series: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358285319.7844229726288623
+# 2000/01/01 09:43:01 | normalizer_job   | INFO     | Skipped already normalized series: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358290499.1677164667439869
+# 2000/01/01 09:43:03 | normalizer_job   | INFO     | Skipped already normalized series: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358348842.5423546626327610
+# 2000/01/01 09:43:20 | normalizer_job   | INFO     | Skipped already normalized series: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358450315.1131827503651043
+# 2000/01/01 09:43:21 | normalizer_job   | INFO     | Skipped already normalized series: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358559840.8276683232406458
+# 2000/01/01 09:43:38 | normalizer_job   | INFO     | Skipped already normalized series: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358698945.8174510096932112
+# 2000/01/01 09:43:38 | normalizer_job   | INFO     | Skipped already normalized series: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358759109.1923736207483015
+# 2000/01/01 09:43:39 | normalizer_job   | INFO     | Skipped already normalized series: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358778590.5862548068343416
+# 2000/01/01 09:43:39 | normalizer_job   | INFO     | Skipped already normalized series: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358780266.7033323319794744
+# 2000/01/01 09:43:40 | normalizer_job   | INFO     | Skipped already normalized series: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358783712.4378510732136665
+# 2000/01/01 09:43:40 | normalizer_job   | INFO     | Skipped already normalized series: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358821478.6741697944931811
+# 2000/01/01 09:43:41 | normalizer_job   | INFO     | Skipped already normalized series: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358822807.7335694473582005
+# 2000/01/01 09:43:41 | normalizer_job   | INFO     | Skipped already normalized series: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358824075.8969321859351456
+# 2000/01/01 09:43:42 | normalizer_job   | INFO     | Skipped already normalized series: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358827510.7862443847636591
+# 2000/01/01 09:43:42 | normalizer_job   | INFO     | Skipped already normalized series: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358834214.4644138760069769
+# 2000/01/01 09:43:43 | normalizer_job   | INFO     | Skipped already normalized series: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358836323.981043604912185
+# 2000/01/01 09:43:44 | normalizer_job   | INFO     | Skipped already normalized series: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358839121.5395712300937138
+# 2000/01/01 09:43:44 | normalizer_job   | INFO     | Skipped already normalized series: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358848641.2712523376283165
+# 2000/01/01 09:43:44 | normalizer_job   | INFO     | Skipped already normalized series: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358851564.7405881881800199
+# 2000/01/01 09:43:44 | utils            | INFO     | Reading series directory: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358856289.2290112031716024
+# 2000/01/01 09:43:44 | reader           | INFO     | Error reading /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358856289.2290112031716024/127.0.0.1.3.99999999.5.1678358856289.2290112031716024.1.dcm. Skipped!
+# 2000/01/01 09:43:44 | normalizer_job   | ERROR    | Error reading series /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358856289.2290112031716024: Invalid data dimension: 0
+# 2000/01/01 09:43:44 | utils            | INFO     | Reading series directory: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358858396.791609861520567
+# 2000/01/01 09:43:44 | utils            | WARNING  | Unknown vendor matched!
+# 2000/01/01 09:43:44 | reader           | WARNING  | ManufacturerModelName tag not found!
+# 2000/01/01 09:43:44 | reader           | INFO     | Error reading /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358858396.791609861520567/0001.dcm. Skipped!
+# 2000/01/01 09:43:44 | normalizer_job   | ERROR    | Error reading series /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358858396.791609861520567: Invalid data dimension: 0
+# 2000/01/01 09:43:45 | utils            | INFO     | Reading series directory: /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358858700.4126437596444012
+# 2000/01/01 09:43:45 | utils            | WARNING  | Unknown vendor matched!
+# 2000/01/01 09:43:45 | reader           | WARNING  | ManufacturerModelName tag not found!
+# 2000/01/01 09:43:45 | reader           | INFO     | Error reading /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358858700.4126437596444012/0001.dcm. Skipped!
+# 2000/01/01 09:43:45 | normalizer_job   | ERROR    | Error reading series /asset/pipeline/000000000000000000000000/127.0.0.1.3.99999999.5.1678358858700.4126437596444012: Invalid data dimension: 0
+# 2000/01/01 09:43:51 | normalizer_job   | INFO     | Normalization finished.
+# 2000/01/01 09:43:51 | __main__         | INFO     | Execution time: 71.67547130584717 s
+
+
+
+# ~ % kubectl logs -f app-analysis-fdt5c-ctlnr -n app-env-dev-client-anon -c app-analysis
+# 2000/01/01 09:43:55 | __main__         | WARNING  | Token header not provided. Using "Bearer" by default.
+# 2000/01/01 09:43:55 | app-analysis-service      | INFO     | Version: 1.0.6
+# 2000/01/01 09:43:55 | utils            | INFO     | Advanced config not present in input.json
+# 2000/01/01 09:43:55 | app-analysis-service      | INFO     | Reading images
+# Using TensorFlow backend.
+# /usr/local/lib/python3.6/dist-packages/tensorflow/python/framework/dtypes.py:526: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+#   _np_qint8 = np.dtype([("qint8", np.int8, 1)])
+# /usr/local/lib/python3.6/dist-packages/tensorflow/python/framework/dtypes.py:527: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+#   _np_quint8 = np.dtype([("quint8", np.uint8, 1)])
+# /usr/local/lib/python3.6/dist-packages/tensorflow/python/framework/dtypes.py:528: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+#   _np_qint16 = np.dtype([("qint16", np.int16, 1)])
+# /usr/local/lib/python3.6/dist-packages/tensorflow/python/framework/dtypes.py:529: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+#   _np_quint16 = np.dtype([("quint16", np.uint16, 1)])
+# /usr/local/lib/python3.6/dist-packages/tensorflow/python/framework/dtypes.py:530: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+#   _np_qint32 = np.dtype([("qint32", np.int32, 1)])
+# /usr/local/lib/python3.6/dist-packages/tensorflow/python/framework/dtypes.py:535: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+#   np_resource = np.dtype([("resource", np.ubyte, 1)])
+# Traceback (most recent call last):
+#   File "/usr/lib/python3.6/runpy.py", line 193, in _run_module_as_main
+#     "__main__", mod_spec)
+#   File "/usr/lib/python3.6/runpy.py", line 85, in _run_code
+#     exec(code, run_globals)
+#   File "/module/app-analysis-service/__main__.py", line 27, in <module>
+#     app.main(input_json_path, token_api)
+#   File "/module/app-analysis-service/app-analysis-service.py", line 61, in main
+#     feedback.send_log()
+#   File "/module/app-analysis-service/output.py", line 389, in send_log
+#     self.enterprise_engine.send_log(self.log)
+#   File "/module/common-lib/common-lib/pipelines/platform/enterprise_engine.py", line 44, in send_log
+#     self._patch(url, self.headers, '')
+#   File "/module/common-lib/common-lib/pipelines/platform/enterprise_engine.py", line 67, in _patch
+#     r = requests.patch(url, headers=self.headers, data=data)
+#   File "/usr/local/lib/python3.6/dist-packages/requests/api.py", line 147, in patch
+#     return request('patch', url, data=data, **kwargs)
+#   File "/usr/local/lib/python3.6/dist-packages/requests/api.py", line 61, in request
+#     return session.request(method=method, url=url, **kwargs)
+#   File "/usr/local/lib/python3.6/dist-packages/requests/sessions.py", line 542, in request
+#     resp = self.send(prep, **send_kwargs)
+#   File "/usr/local/lib/python3.6/dist-packages/requests/sessions.py", line 655, in send
+#     r = adapter.send(request, **kwargs)
+#   File "/usr/local/lib/python3.6/dist-packages/requests/adapters.py", line 449, in send
+#     timeout=timeout
+#   File "/usr/local/lib/python3.6/dist-packages/urllib3/connectionpool.py", line 706, in urlopen
+#     chunked=chunked,
+#   File "/usr/local/lib/python3.6/dist-packages/urllib3/connectionpool.py", line 394, in _make_request
+#     conn.request(method, url, **httplib_request_kw)
+#   File "/usr/local/lib/python3.6/dist-packages/urllib3/connection.py", line 239, in request
+#     super(HTTPConnection, self).request(method, url, body=body, headers=headers)
+#   File "/usr/lib/python3.6/http/client.py", line 1285, in request
+#     self._send_request(method, url, body, headers, encode_chunked)
+#   File "/usr/lib/python3.6/http/client.py", line 1326, in _send_request
+#     self.putheader(hdr, value)
+#   File "/usr/local/lib/python3.6/dist-packages/urllib3/connection.py", line 224, in putheader
+#     _HTTPConnection.putheader(self, header, *values)
+#   File "/usr/lib/python3.6/http/client.py", line 1263, in putheader
+#     raise ValueError('Invalid header value %r' % (values[i],))
+# ValueError: Invalid header value b'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ii1LSTNROW5OUjdiUm9meG1lWm9YcWJIWkdldyIsImtpZCI6Ii1LSTNROW5OUjdiUm9meG1lWm9YcWJIWkdldyJ9.eyJhdWQiOiJhcGk6Ly9hcHByLXFwY2FyZS1x..........l5rJi5Hj1Zy58kb6_B_gm_A\n'
+
+
+
+
+# ~ % kubectl logs -f app-analysis-fdt5c-ctlnr -n app-env-dev-client-anon
+# Defaulted container "app-analysis" out of: app-analysis, normalizer (init)
+# 2000/01/01 09:43:55 | __main__         | WARNING  | Token header not provided. Using "Bearer" by default.
+# 2000/01/01 09:43:55 | app-analysis-service      | INFO     | Version: 1.0.6
+# 2000/01/01 09:43:55 | utils            | INFO     | Advanced config not present in input.json
+# 2000/01/01 09:43:55 | app-analysis-service      | INFO     | Reading images
+# Using TensorFlow backend.
+# /usr/local/lib/python3.6/dist-packages/tensorflow/python/framework/dtypes.py:526: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+#   _np_qint8 = np.dtype([("qint8", np.int8, 1)])
+# /usr/local/lib/python3.6/dist-packages/tensorflow/python/framework/dtypes.py:527: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+#   _np_quint8 = np.dtype([("quint8", np.uint8, 1)])
+# /usr/local/lib/python3.6/dist-packages/tensorflow/python/framework/dtypes.py:528: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+#   _np_qint16 = np.dtype([("qint16", np.int16, 1)])
+# /usr/local/lib/python3.6/dist-packages/tensorflow/python/framework/dtypes.py:529: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+#   _np_quint16 = np.dtype([("quint16", np.uint16, 1)])
+# /usr/local/lib/python3.6/dist-packages/tensorflow/python/framework/dtypes.py:530: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+#   _np_qint32 = np.dtype([("qint32", np.int32, 1)])
+# /usr/local/lib/python3.6/dist-packages/tensorflow/python/framework/dtypes.py:535: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+#   np_resource = np.dtype([("resource", np.ubyte, 1)])
+# Traceback (most recent call last):
+#   File "/usr/lib/python3.6/runpy.py", line 193, in _run_module_as_main
+#     "__main__", mod_spec)
+#   File "/usr/lib/python3.6/runpy.py", line 85, in _run_code
+#     exec(code, run_globals)
+#   File "/module/app-analysis-service/__main__.py", line 27, in <module>
+#     app.main(input_json_path, token_api)
+#   File "/module/app-analysis-service/app-analysis-service.py", line 61, in main
+#     feedback.send_log()
+#   File "/module/app-analysis-service/output.py", line 389, in send_log
+#     self.enterprise_engine.send_log(self.log)
+#   File "/module/common-lib/common-lib/pipelines/platform/enterprise_engine.py", line 44, in send_log
+#     self._patch(url, self.headers, '')
+#   File "/module/common-lib/common-lib/pipelines/platform/enterprise_engine.py", line 67, in _patch
+#     r = requests.patch(url, headers=self.headers, data=data)
+#   File "/usr/local/lib/python3.6/dist-packages/requests/api.py", line 147, in patch
+#     return request('patch', url, data=data, **kwargs)
+#   File "/usr/local/lib/python3.6/dist-packages/requests/api.py", line 61, in request
+#     return session.request(method=method, url=url, **kwargs)
+#   File "/usr/local/lib/python3.6/dist-packages/requests/sessions.py", line 542, in request
+#     resp = self.send(prep, **send_kwargs)
+#   File "/usr/local/lib/python3.6/dist-packages/requests/sessions.py", line 655, in send
+#     r = adapter.send(request, **kwargs)
+#   File "/usr/local/lib/python3.6/dist-packages/requests/adapters.py", line 449, in send
+#     timeout=timeout
+#   File "/usr/local/lib/python3.6/dist-packages/urllib3/connectionpool.py", line 706, in urlopen
+#     chunked=chunked,
+#   File "/usr/local/lib/python3.6/dist-packages/urllib3/connectionpool.py", line 394, in _make_request
+#     conn.request(method, url, **httplib_request_kw)
+#   File "/usr/local/lib/python3.6/dist-packages/urllib3/connection.py", line 239, in request
+#     super(HTTPConnection, self).request(method, url, body=body, headers=headers)
+#   File "/usr/lib/python3.6/http/client.py", line 1285, in request
+#     self._send_request(method, url, body, headers, encode_chunked)
+#   File "/usr/lib/python3.6/http/client.py", line 1326, in _send_request
+#     self.putheader(hdr, value)
+#   File "/usr/local/lib/python3.6/dist-packages/urllib3/connection.py", line 224, in putheader
+#     _HTTPConnection.putheader(self, header, *values)
+#   File "/usr/lib/python3.6/http/client.py", line 1263, in putheader
+#     raise ValueError('Invalid header value %r' % (values[i],))
+# ValueError: Invalid header value b'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ii1LSTNROW5OUjdiUm9meG1lWm9YcWJI.....j1Zy58kb6_B_gm_A\n'

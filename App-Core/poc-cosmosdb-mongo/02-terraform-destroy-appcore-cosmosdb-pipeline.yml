@@ -1,0 +1,172 @@
+trigger:
+- manual
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+resources:
+  repositories:
+  - repository: MongoDB-Bitbucket-Repo    # https://bitbucket.org/enterprise_org/enterprise_app_appcore_database/
+    type: bitbucket
+    endpoint: svccon-bitbucket
+    name: enterprise/enterprise_app_appcore_database
+    ref: refs/tags/2.2.1     # check out a specific tag 
+    #ref: master    # check out a specific ref/branch (master)
+    #ref: gitattributes_poc    # check out a specific ref/branch 
+  - repository: MongoDB-Bitbucket-Repo-dev    # https://bitbucket.org/enterprise_org/enterprise_app_appcore_database/
+    type: bitbucket
+    endpoint: svccon-bitbucket
+    name: enterprise/enterprise_app_appcore_database
+    ref: refs/tags/dev
+  - repository: MongoDB-Bitbucket-Repo-uat    # https://bitbucket.org/enterprise_org/enterprise_app_appcore_database/
+    type: bitbucket
+    endpoint: svccon-bitbucket
+    name: enterprise/enterprise_app_appcore_database
+    ref: refs/tags/uat
+
+parameters:
+- name: 'destroyDEV'
+  displayName: 'Destroy DEV App-Core (Development & Test)'
+  type: boolean
+  default: false
+- name: 'destroyQA'
+  displayName: 'Destroy QA App-Core (Integration Tests)'
+  type: boolean
+  default: false
+- name: 'destroyUAT' 
+  displayName: 'Destroy UAT App-Core (User Acceptance Testing)'
+  type: boolean
+  default: false
+- name: 'destroyPRE' 
+  displayName: 'Destroy PRE App-Core (Staging)'
+  type: boolean
+  default: false
+- name: 'destroyPRO' 
+  displayName: 'Destroy PRO App-Core (Production)'
+  type: boolean
+  default: false
+- name: 'destroyDEMO' # DEMO env
+  displayName: 'Destroy DEM App-Core (Demo)'
+  type: boolean
+  default: false
+- name: 'destroyRES' # RESEARCH env
+  displayName: 'Destroy RES App-Core (Catalog aka R&D)'
+  type: boolean
+  default: false
+
+# Define Variables for Environments
+variables:
+- name: FOLDER_WITH_TERRAFORM_FILES
+  value: "$(System.DefaultWorkingDirectory)/App-Core/poc-cosmosdb-mongo/terraform-manifests"
+- name: INFRA_NAME
+  value: "appcore-cosmosdb"
+- template: ../configuration/shared-azure-devops-pipeline-vars.yml
+- template: ../configuration/developbranch-service-connections.yml
+- ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+  - template: ../configuration/mainbranch-service-connections.yml
+
+stages:
+- stage: TerraformDEV
+  displayName: Terraform DEV
+  condition: ${{parameters.destroyDEV}}
+  jobs:
+    - template: ../templates/terraform-validate.yml
+      parameters: 
+        environment: ${{ variables.DEV_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        MONGODB_REPO: MongoDB-Bitbucket-Repo-dev
+    - template: ../templates/terraform-destroy.yml
+      parameters: 
+        environment: ${{ variables.DEV_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_DEV }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+- stage: TerraformQA
+  dependsOn: []    # this removes the implicit dependency on previous stage and causes this to run in parallel
+  displayName: Terraform QA
+  condition: ${{parameters.destroyQA}}
+  jobs:
+    - template: ../templates/terraform-validate.yml
+      parameters: 
+        environment: ${{ variables.QA_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        MONGODB_REPO: MongoDB-Bitbucket-Repo-uat
+    - template: ../templates/terraform-destroy.yml
+      parameters: 
+        environment: ${{ variables.QA_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_QA }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+- stage: TerraformUAT
+  dependsOn: []    # this removes the implicit dependency on previous stage and causes this to run in parallel
+  displayName: Terraform UAT
+  condition: ${{parameters.destroyUAT}}
+  jobs:
+    - template: ../templates/terraform-validate.yml
+      parameters:
+        environment: ${{ variables.UAT_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        MONGODB_REPO: MongoDB-Bitbucket-Repo-uat
+    - template: ../templates/terraform-destroy.yml
+      parameters: 
+        environment: ${{ variables.UAT_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_UAT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+- stage: TerraformPRE
+  dependsOn: []    # this removes the implicit dependency on previous stage and causes this to run in parallel
+  displayName: Terraform PRE
+  condition: ${{parameters.destroyPRE}}
+  jobs:
+    - template: ../templates/terraform-validate.yml
+      parameters:
+        environment: ${{ variables.PRE_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        MONGODB_REPO: MongoDB-Bitbucket-Repo
+    - template: ../templates/terraform-destroy.yml
+      parameters: 
+        environment: ${{ variables.PRE_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_PRE }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+- stage: TerraformPRO
+  dependsOn: []    # this removes the implicit dependency on previous stage and causes this to run in parallel
+  displayName: Terraform PRO
+  condition: ${{parameters.destroyPRO}}
+  jobs:
+    - template: ../templates/terraform-validate.yml
+      parameters:
+        environment: ${{ variables.PRO_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        MONGODB_REPO: MongoDB-Bitbucket-Repo
+    - template: ../templates/terraform-destroy.yml
+      parameters: 
+        environment: ${{ variables.PRO_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_PRO }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+- stage: TerraformDEMO
+  dependsOn: []    # this removes the implicit dependency on previous stage and causes this to run in parallel
+  displayName: Terraform DEMO
+  condition: ${{parameters.destroyDEMO}}
+  jobs:
+    - template: ../templates/terraform-validate.yml
+      parameters: 
+        environment: ${{ variables.DEMO_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        MONGODB_REPO: MongoDB-Bitbucket-Repo
+    - template: ../templates/terraform-destroy.yml
+      parameters: 
+        environment: ${{ variables.DEMO_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_DEMO }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+- stage: TerraformRESEARCH
+  dependsOn: []    # this removes the implicit dependency on previous stage and causes this to run in parallel
+  displayName: Terraform RESEARCH
+  condition: ${{parameters.destroyRES}}
+  jobs:
+    - template: ../templates/terraform-validate.yml
+      parameters:
+        environment: ${{ variables.RESEARCH_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        MONGODB_REPO: MongoDB-Bitbucket-Repo
+    - template: ../templates/terraform-destroy.yml
+      parameters: 
+        environment: ${{ variables.RESEARCH_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_RESEARCH }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}

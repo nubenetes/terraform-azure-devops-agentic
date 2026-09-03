@@ -1,0 +1,51 @@
+trigger:
+- manual
+
+pool:
+  vmImage: 'ubuntu-latest' #'ubuntu-20.04' #'ubuntu-latest' # MongoDB is not available for Ubuntu 22 at the moment
+  # https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted
+
+parameters:
+- name: gitref
+  displayName: Check out a specific ref/branch or tag on App-Core-Users-YAML repo when running this pipeline on Main Branch. Defaults to 'main' branch
+  type: string
+  default: main
+
+resources:
+  repositories:
+    # Access to Azure DevOps App-Core-User-YAML project, with Personal Access Token (PAT) created by a dedicated Service User (cloud-admin@example.com).
+    # This PAT only grants "code read" access to App-Core-Users-YAML repo
+  - repository: App-Core-Users-YAML
+    type: git # The git type refers to Azure Repos Git repos.
+    endpoint: svccon-appcore-users-yaml
+    name: GitOps/App-Core-Users-YAML
+    ref: ${{parameters.gitref}} # ref name to checkout; defaults to 'refs/heads/main'. The branch checked out by default whenever the resource trigger fires.
+    #ref: feature/poc1     # check out a specific ref/branch
+    #ref: refs/tags/v1.0   # check out a specific tag
+    # https://learn.microsoft.com/en-us/azure/devops/pipelines/process/templates?view=azure-devops#use-other-repositories
+
+# Define Variables for Environments
+variables:
+- template: configuration/shared-azure-devops-pipeline-vars.yaml
+- template: configuration/developbranch-service-connections.yaml
+- ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+  - template: configuration/mainbranch-service-connections.yaml
+- template: configuration/variable-group.yaml
+
+stages:
+- stage: TerraformProvision
+  displayName: TerraformProvision
+  jobs:
+    - template: templates/terraform-validate.yaml
+      parameters:
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+    - template: templates/terraform-plan.yaml
+      parameters:
+        environment: ${{ variables.ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_DEV }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+    - template: templates/terraform-apply.yaml
+      parameters:
+        environment: ${{ variables.ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_DEV }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}

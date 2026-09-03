@@ -1,0 +1,97 @@
+trigger:
+- manual
+
+pool:
+  vmImage: 'windows-2022'
+
+resources:
+  repositories:
+  - repository: integration-service-Bitbucket-Repo
+    type: bitbucket
+    endpoint: svccon-bitbucket
+    name: enterprise/data_router
+    #ref: master    # check out a specific ref/branch (master)
+    ref: refs/tags/1.0.0     # check out a specific tag
+
+parameters:
+  - name: upn
+    displayName: User Principal Name (upn)
+    type: string
+    default: 'cloud-admin@example.com'
+  - name: AETitle     # Should NOT CONTAIN special symbols such as <>\'&    ---> Due to automatic character escape feature of ConvertTo-Json in 09-assign-customSecurityAttributes.ps1
+    displayName: Center Name - AETitle Custom Security Attribute
+    type: string
+    default: 'enterprise'
+  - name: environment
+    displayName: Environment
+    type: string
+    default: 'dev-app'
+
+variables:
+  MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
+  MAVEN_JVM_OPTS: "-Xmx3072m" # maven jvm params
+  MAVEN_OPTIONS: "-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -DskipTests"  #-Dskip.unit.tests=true -Dskip.it.tests=true" # Skipping Tests since they have already passed in bitbucket repo
+  # Placeholders found in templates/application-properties.j2
+  # Download URLs of Public Artifacts
+  WINSW_DOWNLOAD_URL: 'https://github.com/winsw/winsw/releases/download/v2.12.0/WinSW-x64.exe'
+  JRE_DOWNLOAD_URL: 'https://github.com/adoptium/temurin11-binaries/releases/download/jdk-127.0.0.1%2B1/OpenJDK11U-jre_x64_windows_hotspot_11.0.14.1_1.zip'
+  MAVEN_DOWNLOAD_URL: "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.6.3/apache-maven-3.6.3-bin.zip"
+  # Conditions
+  enableConditionOptionalStages: 'false' # true/false  - do we enable all the optional stages ?
+  enableConditionAzureArtifacts: 'false' # true/false - do we download public artifacts from internet instead of azure artifact repo ?
+  enableConditionGitCloneSrcFromBitBucket: 'false' # true/false  - do we enable a git clone from bitbucket repo with integration-service source code obtained from there?
+  # integration-service On-Premise App Security:
+  serviceConnection: 'svccon-integration-service-devtest'  # Connected to 'enterprise Example-Dev-Subscription' with RG 'dev-appcResourceGroup' (app-core DevTest environment)
+  resourceGroup: 'dev-appcResourceGroup'
+  rgLocation: 'northeurope'
+  appName: "appr-integration-service-onprem-${{ lower(parameters.AETitle) }}-${{ lower(parameters.environment) }}"  # Application Name in AAD - Based on AETitle and Environment
+  storageContainerName: "co-integration-service-onprem-${{ lower(parameters.AETitle) }}-${{ lower(parameters.environment) }}"
+  blobName: "blob_integration-service_${{ lower(parameters.AETitle) }}_${{ lower(parameters.environment) }}"
+  storageAccountTags: "env=${{ lower(parameters.environment) }}"
+  upnName: ${{ lower(parameters.upn) }}    # lower() -> change to lowercase (capital letters can arise errors when creating azure resources)
+  centerName: ${{ lower(parameters.AETitle) }}   # $centerName should NOT CONTAIN special symbols such as <>\'&    ---> Due to automatic character escape feature of ConvertTo-Json in 09-assign-customSecurityAttributes.ps1
+  environment: ${{ lower(parameters.environment) }}
+
+stages:
+- stage: JavaBuild
+  displayName: Java Build with jinja2 template and maven
+  jobs:
+  - job: jinjaJavaBuild
+    timeoutInMinutes: 15 # how long to run the job before automatically cancelling
+    cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+    steps:
+      - checkout: self
+        clean: true
+        env:
+          autocrlf: true  # Solution to this issue: spring-io/spring-javaformat Requiring LF line separators isn't Windows-friendly. https://github.com/spring-io/spring-javaformat/issues/202
+      - checkout: integration-service-Bitbucket-Repo
+        clean: true
+        condition:  eq(variables['enableConditionGitCloneSrcFromBitBucket'], 'true')
+      - script: ls -la $(Build.SourcesDirectory)
+        displayName: Show folders with multi repo checkouts
+      - powershell: Get-ChildItem $(Build.SourcesDirectory)\integration-service\src\ | Remove-Item -Recurse -Force -Verbose
+        displayName: delete the content of integration-service/src/ folder and make it empty
+        condition:  eq(variables['enableConditionGitCloneSrcFromBitBucket'], 'true')
+      - script: ls -la $(Build.SourcesDirectory)\integration-service\src\
+        displayName: Show files in integration-service/src/ folder
+      - powershell: Move-Item "$(Build.SourcesDirectory)\data_router\src\main" -Destination "$(Build.SourcesDirectory)\integration-service\src\" -Verbose
+        displayName: Move content of src/main folder from Bitbucket Cloud to Azure Repo
+        condition:  eq(variables['enableConditionGitCloneSrcFromBitBucket'], 'true')
+      - powershell: Move-Item "$(Build.SourcesDirectory)\data_router\src\test" -Destination "$(Build.SourcesDirectory)\integration-service\src\" -Verbose
+        displayName: Move content of src/test folder from Bitbucket Cloud to Azure Repo
+        condition:  eq(variables['enableConditionGitCloneSrcFromBitBucket'], 'true')
+      - script: ls -la $(Build.SourcesDirectory)/integration-service/src/
+        displayName: Show files in integration-service/src/ folder
+        condition:  eq(variables['enableConditionGitCloneSrcFromBitBucket'], 'true')
+      - powershell: Get-ChildItem -Path "$(Build.SourcesDirectory)\integration-service\*" -Recurse -Force | Move-Item -Destination "$(Build.SourcesDirectory)\" -Force -Verbose
+        displayName: Moving updated content from integration-service/ folder to current working directory (root folder)
+      - script: ls -la $(Build.SourcesDirectory)/integration-service/
+        displayName: Show remaining files in integration-service/ folder
+      - powershell: Remove-Item -Path $(Build.SourcesDirectory)\integration-service -Recurse -Verbose -Force
+        displayName: delete integration-service/ folder
+      - powershell: Remove-Item -Path $(Build.SourcesDirectory)\data_router -Recurse -Verbose -Force
+        displayName: delete data_router/ folder
+      - script: ls -la
+        displayName: Show files in root folder
+      - script: ls -la src/
+        displayName: Show files in src/ folder

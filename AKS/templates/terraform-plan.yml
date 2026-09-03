@@ -1,0 +1,173 @@
+# File: templates/terraform-plan.yml
+# https://github.com/microsoft/azure-pipelines-terraform/tree/main/Tasks/TerraformTask/TerraformTaskV2
+# https://github.com/microsoft/azure-pipelines-terraform/tree/main/Tasks/TerraformTask/TerraformTaskV3
+
+# Environments:
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/process/environments
+
+# Define approvals and checks: https://learn.microsoft.com/en-us/azure/devops/pipelines/process/approvals
+# Manual approval in an Azure DevOps YAML-pipeline : https://erwinstaal.nl/posts/manual-approval-in-an-azure-devops-yaml-pipeline/
+# Azure DevOps: Define approvals & checks https://learn.microsoft.com/en-us/azure/devops/pipelines/process/approvals
+
+parameters:
+- name: 'environment'
+  type: string
+  default: 'eng'
+- name: 'SERVICE_CONNECTION_NAME'
+  type: string
+  default: 'svccon-sharedinfra-dev'
+- name: 'SERVICE_CONNECTION_NAME_TFSTATE'
+  type: string
+  default: 'svccon-sharedinfra-dev'
+
+# Stage-2: Terraform Plan Stage
+## Step-1: Define Variables for environments
+## Step-2: Terraform Initialize (State Storage to store in Azure Storage Account, 1 per environment)
+## Step-3: Terraform Plan (Create Plan)
+## Step-4: Manual Approval
+
+jobs:
+- deployment: TerraformPlanJob
+  dependsOn: TerraformValidateJob
+  displayName: Plan ${{ upper(parameters.environment) }} AKS
+  environment: ${{ parameters.environment }}
+  variables:  # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/deployment-jobs
+    - template: ../configuration/variable-group-with-secrets.yml
+      parameters:
+        environment: ${{ lower(parameters.environment) }}
+  timeoutInMinutes: 90 # how long to run the job before automatically cancelling
+  cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - task: CopyFiles@2
+          displayName: Copy Files to Staging Directory
+          inputs:
+            SourceFolder: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            targetFolder: $(Build.ArtifactStagingDirectory)
+        - script: ls -la $(Build.ArtifactStagingDirectory)
+          displayName: Show Build.ArtifactStagingDirectory
+        ######################################################
+        # Download SSH Key
+        ######################################################
+        - task: DownloadSecureFile@1
+          displayName: Download SSH Key
+          name: sshkey
+          inputs:
+            secureFile: '$(AZURE_DEVOPS_LIBRARY_SECURE_FILE)'
+        ######################################################
+        # Terraform Install
+        ######################################################
+        - task: TerraformInstaller@0
+          displayName: Terraform Install
+          inputs:
+            terraformVersion: $(TERRAFORM_VERSION)
+        ######################################################
+        # Terraform Init: aks-<branch>-<env>.tfstate
+        ######################################################
+        - task: TerraformTaskV3@3
+          displayName: Terraform Init
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            #commandOptions: '-flag'
+            backendServiceArm: ${{ PARAMETERS.SERVICE_CONNECTION_NAME_TFSTATE }}
+            backendAzureRmResourceGroupName: $(RESOURCE_GROUP_NAME_TERRAFORM_STATE)
+            backendAzureRmStorageAccountName: $(STORAGE_ACCOUNT_NAME)
+            backendAzureRmContainerName: $(CONTAINER_NAME)
+            backendAzureRmKey: '$(INFRA_NAME)-$(GIT_BRANCH)branch-${{ parameters.environment }}.tfstate'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+        ############################################
+        # Terraform Plan - DENG
+        ############################################
+        - task: TerraformTaskV3@3
+          displayName: Terraform plan DENG
+          condition: and(eq(variables['TERRAFORM_ENV'], 'eng'),ne(variables['Build.SourceBranchName'],'main'))
+          inputs:
+            provider: 'azurerm'
+            command: 'plan'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            commandOptions: >
+              -refresh=false
+              -var environment=${{ parameters.environment }}
+              -var gitbranch=$(GIT_BRANCH)
+              -var ssh_public_key=$(sshkey.secureFilePath)
+              -var-file="$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)/${{ parameters.environment }}-$(GIT_BRANCH)branch.tfvars"
+              -out=$(Build.ArtifactStagingDirectory)/${{ parameters.environment }}-$(Build.BuildId).out
+        ############################################
+        # Terraform Plan - ENG
+        ############################################
+        - task: TerraformTaskV3@3
+          displayName: Terraform plan ENG
+          condition: and(eq(variables['TERRAFORM_ENV'], 'eng'),eq(variables['Build.SourceBranchName'],'main'))
+          inputs:
+            provider: 'azurerm'
+            command: 'plan'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            commandOptions: >
+              -refresh=false
+              -var environment=${{ parameters.environment }}
+              -var gitbranch=$(GIT_BRANCH)
+              -var ssh_public_key=$(sshkey.secureFilePath)
+              -var-file="$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)/${{ parameters.environment }}-$(GIT_BRANCH)branch.tfvars"
+              -out=$(Build.ArtifactStagingDirectory)/${{ parameters.environment }}-$(Build.BuildId).out
+        ############################################
+        # Terraform Plan - PRO
+        ############################################
+        - task: TerraformTaskV3@3
+          displayName: Terraform plan PRO
+          condition: eq(variables['TERRAFORM_ENV'], 'pro')
+          inputs:
+            provider: 'azurerm'
+            command: 'plan'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
+            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
+            commandOptions: >
+              -refresh=false
+              -var environment=${{ parameters.environment }}
+              -var gitbranch=$(GIT_BRANCH)
+              -var ssh_public_key=$(sshkey.secureFilePath)
+              -var-file="$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)/${{ parameters.environment }}-$(GIT_BRANCH)branch.tfvars"
+              -out=$(Build.ArtifactStagingDirectory)/${{ parameters.environment }}-$(Build.BuildId).out
+        ################################################################################################################
+        # Publish Artifacts to Pipeline
+        # (Pipeline artifacts provide a way to share files between stages in a pipeline or between different pipelines)
+        ################################################################################################################
+        - script: ls -la $(Build.ArtifactStagingDirectory)
+          displayName: Show Build.ArtifactStagingDirectory
+        - task: PublishPipelineArtifact@1
+          displayName: Publish Terraform Files Artifacts
+          inputs:
+            targetPath: $(Build.ArtifactStagingDirectory)
+            artifactName: $(ARTIFACTS_FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN)-${{ parameters.environment }}
+            artifactType: 'pipeline'
+################################################################################################################################################################
+# Manual validation v0 - Pause a pipeline run to wait for manual interaction. Works only with YAML pipelines.
+# https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/manual-validation-v0
+# https://www.youtube.com/watch?v=sfb3d100JPo
+# Deployment approvals in YAML are pre-deployment, meaning that it’s a “confirmation” that the deployment can start.
+# And there is no “post-deployment “ approvals in YAML like there are in the classic pipelines.
+# The manual validation instead can be placed anywhere in a stage… and doesn’t need to be related to a deployment or an environment.
+# So I’d say they are more flexible, but at the same time they are less integrated.
+#
+# notifyUsers: Sends a manual validation pending email to specific users (or groups). Only users with queue build permission can act on a manual validation.
+# You can send an email to a group using the [org name]\group name syntax.
+################################################################################################################################################################
+- job: WaitForValidationJob
+  displayName: "Manual validation of terraform plan results"
+  dependsOn: TerraformPlanJob
+  pool: server
+  timeoutInMinutes: 4320 # job times out in 3 days (must be higher than the below task)
+  steps:
+  - task: ManualValidation@0
+    timeoutInMinutes: 1440 # task times out in 1 day
+    condition: eq(variables['Build.SourceBranchName'],'main')
+    inputs:
+      notifyUsers: |
+        cloud-admin@example.com
+        cloud-admin@example.com
+      instructions: 'Please validate the terraform plan and resume'
+      onTimeout: 'reject' #'resume' | 'resume'. On timeout. Default: reject.

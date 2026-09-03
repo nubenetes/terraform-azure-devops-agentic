@@ -1,0 +1,36 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  var1: 'example'
+
+stages:
+- stage: JavaBuild
+  jobs:
+  - job: JavaBuild
+    steps:
+    # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/package/maven-authenticate?view=azure-devops
+    # To do: Create an Azure Key Vault and Use secrects from Azure Key Vault
+    # https://docs.microsoft.com/en-us/azure/devops/pipelines/release/key-vault-in-own-project?view=azure-devops&tabs=portal
+    - task: MavenAuthenticate@0
+      displayName: 'Maven Authenticate'
+      inputs:
+        artifactsFeeds: integration-service-Artifacts-Feed2
+
+    - task: Maven@3
+      inputs:
+        mavenPomFile: 'pom-azure-pipelines.xml'
+        #     mavenOptions: '-Xmx3072m'
+        publishJUnitResults: true
+        testResultsFiles: '**/surefire-reports/TEST-*.xml'
+        testRunTitle: 'mytests'
+        javaHomeOption: 'JDKVersion'
+        jdkVersionOption: '1.11'
+        mavenVersionOption: 'Default'
+        mavenAuthenticateFeed: true
+        effectivePomSkip: false
+        sonarQubeRunAnalysis: false
+        goals: 'deploy'

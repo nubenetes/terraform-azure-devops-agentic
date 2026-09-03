@@ -1,0 +1,157 @@
+trigger:
+- manual
+
+pool:
+  vmImage: 'ubuntu-latest' #'ubuntu-22.04' #'ubuntu-latest' # MongoDB is not available for Ubuntu 22 at the moment
+
+resources:
+  repositories:
+  - repository: MongoDB-Bitbucket-Repo    # https://bitbucket.org/enterprise_org_org/enterprise_engine_database/
+    type: bitbucket
+    endpoint: svccon-bitbucket-mongodb-collections
+    name: Enterprise/enterprise_engine_database
+    ref: master    # check out a specific ref/branch (master)
+    #ref: gitattributes_poc    # check out a specific ref/branch
+    #ref: refs/tags/1.0.2     # check out a specific tag
+  - repository: MongoDB-Bitbucket-Repo-dev
+    type: bitbucket
+    endpoint: svccon-bitbucket-mongodb-collections
+    name: Enterprise/enterprise_engine_database
+    ref: master    # check out a specific ref/branch (master)
+    #ref: refs/tags/dev
+  - repository: MongoDB-Bitbucket-Repo-uat
+    type: bitbucket
+    endpoint: svccon-bitbucket-mongodb-collections
+    name: Enterprise/enterprise_engine_database
+    ref: master    # check out a specific ref/branch (master)
+    #ref: refs/tags/uat
+
+parameters:
+- name: 'createDEV'
+  displayName: 'Create DEV AppAnalysis (Development & Test)'
+  type: boolean
+  default: false
+- name: 'createQA'
+  displayName: 'Create QA AppAnalysis (Integration Tests)'
+  type: boolean
+  default: false
+- name: 'createUAT'
+  displayName: 'Create UAT AppAnalysis (User Acceptance Testing)'
+  type: boolean
+  default: false
+- name: 'createPRE'
+  displayName: 'Create PRE AppAnalysis (Staging)'
+  type: boolean
+  default: false
+- name: 'createPRO'
+  displayName: 'Create PRO AppAnalysis (Production)'
+  type: boolean
+  default: false
+
+# Define Variables for Environments
+variables:
+- template: configuration/shared-azure-devops-pipeline-vars.yml
+- template: configuration/developbranch-service-connections.yml
+- ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+  - template: configuration/mainbranch-service-connections.yml
+
+stages:
+- stage: TerraformDEV
+  displayName: Terraform DEV
+  condition: ${{parameters.createDEV}}
+  jobs:
+    - template: templates/terraform-validate.yml
+      parameters:
+        environment: ${{ variables.DEV_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        MONGODB_REPO: MongoDB-Bitbucket-Repo-dev
+    - template: templates/terraform-plan.yml
+      parameters:
+        environment: ${{ variables.DEV_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_DEV }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+    - template: templates/terraform-apply.yml
+      parameters:
+        environment: ${{ variables.DEV_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_DEV }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+- stage: TerraformQA
+  dependsOn: []    # this removes the implicit dependency on previous stage and causes this to run in parallel
+  displayName: Terraform QA
+  condition: ${{parameters.createQA}}
+  jobs:
+    - template: templates/terraform-validate.yml
+      parameters:
+        environment: ${{ variables.QA_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        MONGODB_REPO: MongoDB-Bitbucket-Repo-uat
+    - template: templates/terraform-plan.yml
+      parameters:
+        environment: ${{ variables.QA_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_QA }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+    - template: templates/terraform-apply.yml
+      parameters:
+        environment: ${{ variables.QA_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_QA }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+- stage: TerraformUAT
+  dependsOn: []    # this removes the implicit dependency on previous stage and causes this to run in parallel
+  displayName: Terraform UAT
+  condition: ${{parameters.createUAT}}
+  jobs:
+    - template: templates/terraform-validate.yml
+      parameters:
+        environment: ${{ variables.UAT_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        MONGODB_REPO: MongoDB-Bitbucket-Repo-uat
+    - template: templates/terraform-plan.yml
+      parameters:
+        environment: ${{ variables.UAT_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_UAT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+    - template: templates/terraform-apply.yml
+      parameters:
+        environment: ${{ variables.UAT_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_UAT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+- stage: TerraformPRE
+  dependsOn: []    # this removes the implicit dependency on previous stage and causes this to run in parallel
+  displayName: Terraform PRE
+  condition: ${{parameters.createPRE}}
+  jobs:
+    - template: templates/terraform-validate.yml
+      parameters:
+        environment: ${{ variables.PRE_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        MONGODB_REPO: MongoDB-Bitbucket-Repo
+    - template: templates/terraform-plan.yml
+      parameters:
+        environment: ${{ variables.PRE_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_PRE }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+    - template: templates/terraform-apply.yml
+      parameters:
+        environment: ${{ variables.PRE_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_PRE }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+- stage: TerraformPRO
+  dependsOn: []    # this removes the implicit dependency on previous stage and causes this to run in parallel
+  displayName: Terraform PRO
+  condition: ${{parameters.createPRO}}
+  jobs:
+    - template: templates/terraform-validate.yml
+      parameters:
+        environment: ${{ variables.PRO_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+        MONGODB_REPO: MongoDB-Bitbucket-Repo
+    - template: templates/terraform-plan.yml
+      parameters:
+        environment: ${{ variables.PRO_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_PRO }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+    - template: templates/terraform-apply.yml
+      parameters:
+        environment: ${{ variables.PRO_ENVIRONMENT }}
+        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_PRO }}
+        SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
