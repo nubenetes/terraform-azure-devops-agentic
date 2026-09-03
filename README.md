@@ -284,7 +284,7 @@ flowchart TB
         KeyVault["Azure Key Vault<br/>(RBAC & Purge Protection)"]
         AppGW -->|Private Routing| Front_SPA
         AppGW -->|API Traffic| Back_API
-        Back_API -->|Private Link / Secretless Token| KeyVault
+        Back_API -->|Private Link / Token| KeyVault
         Back_API -->|Blob Storage API| Blob_Storage
     end
     subgraph MongoDB_Cloud ["External Data Tier: MongoDB Atlas Managed Cloud"]
@@ -307,9 +307,9 @@ flowchart TB
     AppGW -->|Cluster Ingress| Ingress_Nginx
     Hub_VNet <-->|VNet Peering| Spoke_AKS
     Hub_VNet <-->|VNet Peering| Spoke_AppCore
-    Back_API -->|Standard SRV Connection String| Atlas_Cluster
+    Back_API -->|SRV Connection| Atlas_Cluster
     Microservices -->|Workload Identity| KeyVault
-    Microservices -->|Standard SRV| Atlas_Cluster
+    Microservices -->|SRV Connection| Atlas_Cluster
     Entra_ID -.->|"Federated Token (OIDC)"| AKS_Identity
 ```
 
@@ -491,67 +491,58 @@ The DevSecOps pipeline lifecycle establishes an auditable, compliant release wor
 <summary><b>📊 Click to expand Diagram: State Boundary Architecture</b></summary>
 
 ```mermaid
-flowchart TD
-    classDef hub fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
-    classDef spoke fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
-    classDef app fill:#fff3e0,stroke:#f57c00,stroke-width:2px;
-    classDef ops fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
-    classDef state fill:#f5f5f5,stroke:#424242,stroke-width:1.5px,stroke-dasharray: 4 4;
-    classDef title fill:none,stroke:none,font-weight:bold,font-size:14px;
+flowchart LR
+    classDef foundation fill:#1f4e79,stroke:#0d233a,stroke-width:2px,color:#fff;
+    classDef identity fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff;
+    classDef compute fill:#1565c0,stroke:#0d47a1,stroke-width:2px,color:#fff;
+    classDef app fill:#e65100,stroke:#bf360c,stroke-width:2px,color:#fff;
+    classDef ops fill:#6a1b9a,stroke:#4a148c,stroke-width:2px,color:#fff;
+    classDef state fill:#f8f9fa,stroke:#424242,stroke-width:1.5px,stroke-dasharray: 4 4,color:#212121;
 
-    subgraph L1 [" "]
+    subgraph Col1 ["Tier 1: Foundations"]
         direction TB
-        T1["Layer 1: Foundational Backbone"]:::title
-        SI["Shared-Infra<br/>(Hub VNet, DNS Zones,<br/>Defender and Monitoring)"]
-        S_SI[["State: sharedinfra.tfstate"]]
-        T1 --- SI ==> S_SI
+        SI["Shared-Infra<br/>(Hub VNet, DNS, Firewall)"]
+        S_SI[["sharedinfra.tfstate"]]
+        SI ==> S_SI
+        
+        AU["App-Users<br/>(Entra ID Groups, Roles)"]
+        S_AU[["appusers.tfstate"]]
+        AU ==> S_AU
     end
 
-    subgraph L2 [" "]
+    subgraph Col2 ["Tier 2: Platforms and Core"]
         direction TB
-        T2["Layer 2: Identity and Compute Platforms"]:::title
-        AU["App-Users<br/>(Entra ID Groups, Users,<br/>Directory Roles and CAP)"]
-        S_AU[["State: appusers.tfstate"]]
-        AKS["AKS Hub<br/>(Kubernetes Clusters,<br/>Nodepools and Azure CNI)"]
-        S_AKS[["State: aks.tfstate"]]
-        T2 --- AU ==> S_AU
-        T2 --- AKS ==> S_AKS
+        AKS["AKS Hub<br/>(K8s Cluster, Azure CNI)"]
+        S_AKS[["aks.tfstate"]]
+        AKS ==> S_AKS
+
+        AC["App-Core<br/>(App Gateway, Web Apps, KV)"]
+        S_AC[["appcore.tfstate"]]
+        AC ==> S_AC
     end
 
-    subgraph L3 [" "]
+    subgraph Col3 ["Tier 3: Workloads and Day-2"]
         direction TB
-        T3["Layer 3: Mission-Critical Application Core"]:::title
-        AC["App-Core<br/>(App Gateway WAF v2, Linux Web Apps,<br/>Azure Key Vault and Atlas DB)"]
-        S_AC[["State: appcore.tfstate"]]
-        T3 --- AC ==> S_AC
+        CAT["App-Catalog<br/>(Catalog App, Atlas DB)"]
+        S_CAT[["appcatalog.tfstate"]]
+        CAT ==> S_CAT
+
+        D2["Day2-Ops<br/>(NGINX Ingress, Monitoring)"]
+        S_D2[["day2ops.tfstate"]]
+        D2 ==> S_D2
     end
 
-    subgraph L4 [" "]
-        direction TB
-        T4["Layer 4: Application Catalog and Services"]:::title
-        CAT["App-Catalog<br/>(AppAnalysis Catalog Service,<br/>Client MongoDB Clusters)"]
-        S_CAT[["State: appcatalog.tfstate"]]
-        T4 --- CAT ==> S_CAT
-    end
+    S_SI -.->|"Subnet IDs"| AKS
+    S_SI -.->|"Private DNS & VIP"| AC
+    S_AU -.->|"Group IDs & Roles"| AC
+    S_AKS -.->|"Cluster CA & OIDC"| AC
+    S_AKS -.->|"Kubeconfig"| D2
+    S_AC -.->|"Key Vault & DB Secrets"| CAT
+    S_AC -.->|"WAF Probes"| D2
 
-    subgraph L5 [" "]
-        direction TB
-        T5["Layer 5: Day-2 Operations and Workloads"]:::title
-        D2["Day2-Ops<br/>(Ingress-NGINX Controller,<br/>Helm Charts and Monitoring)"]
-        S_D2[["State: day2ops.tfstate"]]
-        T5 --- D2 ==> S_D2
-    end
-
-    S_SI -.->|"Subnet IDs / Peering"| AKS
-    S_SI -.->|"Private DNS / WAF IP"| AC
-    S_AU -.->|"Group IDs / Roles"| AC
-    S_AKS -.->|"Cluster CA / OIDC"| AC
-    S_AC -.->|"Key Vault / DB Strings"| CAT
-    S_AKS -.->|"Kubeconfig / Endpoint"| D2
-    S_AC -.->|"WAF Health Probes"| D2
-
-    class SI hub;
-    class AU,AKS spoke;
+    class SI foundation;
+    class AU identity;
+    class AKS compute;
     class AC,CAT app;
     class D2 ops;
     class S_SI,S_AU,S_AKS,S_AC,S_CAT,S_D2 state;
@@ -602,33 +593,33 @@ flowchart LR
     classDef ado fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
     classDef azure fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
 
-    subgraph ADO_Pipeline ["Azure DevOps CI/CD Pipeline"]
+    subgraph ADO_Pipeline ["1. CI/CD Plane: Azure DevOps"]
         direction TB
         Agent["Pipeline Runner<br/>(ubuntu-latest)"]
         OIDCToken["ADO OIDC Token<br/>(Ephemeral JWT)"]
         Agent -->|"1. Generate JWT"| OIDCToken
     end
 
-    subgraph Entra ["Microsoft Entra ID (Identity Plane)"]
+    subgraph Entra ["2. Identity Plane: Microsoft Entra ID"]
         direction TB
         FedCred["Federated Identity Credentials<br/>(OIDC Trust Binding)"]
-        SP["Service Principals<br/>(Workload Managed Identities)"]
+        SP["Service Principals &<br/>Managed Identities"]
         AppReg["App Registrations<br/>(SPA Front / API Back)"]
-        CSA["Custom Security Attributes<br/>(Tenant ABAC Metadata)"]
+        CSA["Custom Security Attributes<br/>(Fine-Grained ABAC)"]
+        FedCred -->|"3. Assume Identity"| SP
         AppReg -->|"Scope Validation"| CSA
     end
 
-    subgraph Azure_Resources ["Azure Landing Zone (Target Resources)"]
+    subgraph Azure_Resources ["3. Target Plane: Azure Landing Zone"]
         direction TB
         AKV["Azure Key Vault<br/>(Compound Auth: App + User)"]
         AKS_Pod["AKS Workload Pods<br/>(Azure CNI Overlay)"]
         Blob["Azure Storage Containers<br/>(Client Data Isolation)"]
     end
 
-    OIDCToken -->|"2. Exchange JWT Token"| FedCred
-    FedCred -->|"3. Issue Scoped ARM Token"| AKV
-    Agent ==>|"4. Secretless Deployment"| AKV
-    AKS_Pod -.->|"OIDC Workload Auth"| SP
+    OIDCToken -->|"2. Exchange Token"| FedCred
+    SP ==>|"4. Secretless Deployment"| AKV
+    AKS_Pod -.->|"Workload Identity Auth"| SP
     SP -->|"Secret Access"| AKV
     CSA -.->|"Attribute Enforcement"| Blob
 
@@ -709,9 +700,9 @@ flowchart TD
             R_Title["mongodbatlas_advanced_cluster (Replica Set M10)"]:::title
             subgraph Nodes [" "]
                 direction LR
-                Primary["Primary Electable Node<br/>(Priority 7)"]
-                Secondary1["Secondary Node 1<br/>(Priority 7)"]
-                Secondary2["Secondary Node 2<br/>(Priority 7)"]
+                Primary["Primary Electable Node<br/>(Priority 7 / Electable)"]
+                Secondary1["Secondary Node 1<br/>(Priority 7 / Electable)"]
+                Secondary2["Secondary Node 2<br/>(Priority 7 / Electable)"]
                 Primary <--> Secondary1
                 Primary <--> Secondary2
             end
@@ -722,21 +713,19 @@ flowchart TD
         PLS -.-> Secondary2
     end
 
-    subgraph Atlas_Governance ["MongoDB Atlas Security and Resilience Plane"]
+    subgraph Atlas_Governance ["MongoDB Atlas Security and Resilience"]
         direction TB
         DB_Users["Database Users<br/>(Admin & ReadWrite)"]
-        Cloud_Backup["Automated Continuous<br/>Cloud Backup"]
-        Oplog["Custom Oplog Window<br/>(Point-in-Time Restore)"]
-        Oplog -.-> Cloud_Backup
+        Cloud_Backup["Continuous Cloud Backup<br/>(Oplog Point-in-Time)"]
     end
 
     PE_Subnet ==>|"Microsoft Global Backbone"| PLS
     DB_Users -.->|"SCRAM-SHA-256"| Primary
-    Cloud_Backup -.->|"Continuous Snapshot"| Primary
+    Cloud_Backup -.->|"Backup Snapshots"| Secondary2
 
     class WebApps,PE,PE_Subnet azure;
     class PLS,Primary,Secondary1,Secondary2 mongo;
-    class DB_Users,Cloud_Backup,Oplog sec;
+    class DB_Users,Cloud_Backup sec;
 ```
 
 </details>
