@@ -1,4 +1,4 @@
-[ Previous: 821. FinOps Arch Analysis](821-FINOPS_ARCH_ANALYSIS.md) | [ Home](../README.md) | [ Next: 999. Future Roadmap and Backlog](999-FUTURE_ROADMAP_AND_IMPROVEMENT_BACKLOG.md)
+[⬅️ Previous: 821. FinOps Arch Analysis](821-FINOPS_ARCH_ANALYSIS.md) | [🏠 Home](../README.md) | [➡️ Next: 999. Future Roadmap and Strategic Architectural Backlog](999-FUTURE_ROADMAP_AND_IMPROVEMENT_BACKLOG.md)
 
 ---
 
@@ -146,7 +146,7 @@ az role assignment list --assignee <kubelet_object_id> --scope <acr_resource_id>
 
 ---
 
-[ Previous: 821. FinOps Arch Analysis](821-FINOPS_ARCH_ANALYSIS.md) | [ Home](../README.md) | [ Next: 999. Future Roadmap and Backlog](999-FUTURE_ROADMAP_AND_IMPROVEMENT_BACKLOG.md)
+[⬅️ Previous: 821. FinOps Arch Analysis](821-FINOPS_ARCH_ANALYSIS.md) | [🏠 Home](../README.md) | [➡️ Next: 999. Future Roadmap and Strategic Architectural Backlog](999-FUTURE_ROADMAP_AND_IMPROVEMENT_BACKLOG.md)
 
 ---
 

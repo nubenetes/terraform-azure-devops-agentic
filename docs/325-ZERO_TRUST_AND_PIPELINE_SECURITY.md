@@ -1,8 +1,9 @@
-# 321. Zero-Trust Architecture & Pipeline Security Hardening
-
-[⬅️ Back to README](../README.md) | [Previous: 211. Terraform Modernization Guide](211-TERRAFORM_MODERNIZATION_GUIDE.md) | [Next: 341. MongoDB Atlas Modernization](341-MONGODB_ATLAS_MODERNIZATION.md)
+[⬅️ Previous: 324. Security-by-Design Checklist](324-SECURITY_BY_DESIGN_CHECKLIST.md) | [🏠 Home](../README.md) | [➡️ Next: 331. AKS Compute Hub](331-AKS_COMPUTE_HUB_AND_ML_ORCHESTRATION.md)
 
 ---
+
+# 325. Zero-Trust and Pipeline Security
+
 
 ## 1. Security Architecture Overview
 
@@ -104,3 +105,11 @@ access_policy {
 ---
 
 *Enterprise Architecture Blueprint | Vision 2026*
+
+---
+
+[⬅️ Previous: 324. Security-by-Design Checklist](324-SECURITY_BY_DESIGN_CHECKLIST.md) | [🏠 Home](../README.md) | [➡️ Next: 331. AKS Compute Hub](331-AKS_COMPUTE_HUB_AND_ML_ORCHESTRATION.md)
+
+---
+
+*Technical Documentation: Zero-Trust Architecture and Pipeline Security Hardening | Vision 2026 Architectural Guide*

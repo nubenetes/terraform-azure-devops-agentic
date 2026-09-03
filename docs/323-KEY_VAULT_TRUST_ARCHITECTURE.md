@@ -1,4 +1,4 @@
-[ Previous: 322. Identity Governance Automation](322-ENTRA_ID_IDENTITY_GOVERNANCE_AUTOMATION.md) | [ Home](../README.md) | [ Next: 324. Security-by-Design Checklist](324-SECURITY_BY_DESIGN_CHECKLIST.md)
+[⬅️ Previous: 322. Identity Governance Automation](322-ENTRA_ID_IDENTITY_GOVERNANCE_AUTOMATION.md) | [🏠 Home](../README.md) | [➡️ Next: 324. Security-by-Design Checklist](324-SECURITY_BY_DESIGN_CHECKLIST.md)
 
 ---
 
@@ -157,8 +157,8 @@ Every vault is configured with production-grade security:
 
 ---
 
-[ Previous: 322. Identity Governance Automation](322-ENTRA_ID_IDENTITY_GOVERNANCE_AUTOMATION.md) | [ Home](../README.md) | [ Next: 324. Security-by-Design Checklist](324-SECURITY_BY_DESIGN_CHECKLIST.md)
+[⬅️ Previous: 322. Identity Governance Automation](322-ENTRA_ID_IDENTITY_GOVERNANCE_AUTOMATION.md) | [🏠 Home](../README.md) | [➡️ Next: 324. Security-by-Design Checklist](324-SECURITY_BY_DESIGN_CHECKLIST.md)
 
 ---
 
-*Technical Documentation: Azure Key Vault: Trust Architecture and Compound Identity Deep-Dive | Vision 2026 Architectural Guide*
+*Technical Documentation: Azure Key Vault: Trust Architecture and Compound Identity | Vision 2026 Architectural Guide*

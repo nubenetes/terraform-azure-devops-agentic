@@ -1,4 +1,4 @@
-[ Previous: 141. Architecture Adoption and IPAM Guide](141-ARCHITECTURE_ADOPTION_AND_IPAM_GUIDE.md) | [ Home](../README.md) | [ Next: 212. Variable Architecture](212-TERRAFORM_VARIABLE_ARCHITECTURE_AND_DATA_STRATEGY.md)
+[⬅️ Previous: 141. Architecture Adoption and IPAM Guide](141-ARCHITECTURE_ADOPTION_AND_IPAM_GUIDE.md) | [🏠 Home](../README.md) | [➡️ Next: 212. Variable Architecture](212-TERRAFORM_VARIABLE_ARCHITECTURE_AND_DATA_STRATEGY.md)
 
 ---
 
@@ -112,7 +112,7 @@ module "vnet_backbone" {
 
 ---
 
-[ Previous: 141. Architecture Adoption and IPAM Guide](141-ARCHITECTURE_ADOPTION_AND_IPAM_GUIDE.md) | [ Home](../README.md) | [ Next: 212. Variable Architecture](212-TERRAFORM_VARIABLE_ARCHITECTURE_AND_DATA_STRATEGY.md)
+[⬅️ Previous: 141. Architecture Adoption and IPAM Guide](141-ARCHITECTURE_ADOPTION_AND_IPAM_GUIDE.md) | [🏠 Home](../README.md) | [➡️ Next: 212. Variable Architecture](212-TERRAFORM_VARIABLE_ARCHITECTURE_AND_DATA_STRATEGY.md)
 
 ---
 

@@ -1,4 +1,4 @@
-[ Previous: 111. Architecture Strategy](111-ARCHITECTURE_2026.md) | [ Home](../README.md) | [ Next: 121. Provenance and Legal](121-PROVENANCE_AND_LEGAL.md)
+[⬅️ Previous: 111. Architecture Strategy](111-ARCHITECTURE_2026.md) | [🏠 Home](../README.md) | [➡️ Next: 113. Agentic Architecture Blueprint](113-ARCHITECTURE_2026_AGENTIC.md)
 
 ---
 
@@ -92,7 +92,7 @@ The code has a clear and professional genealogy, based on authoritative sources:
 
 ---
 
-[ Previous: 111. Architecture Strategy](111-ARCHITECTURE_2026.md) | [ Home](../README.md) | [ Next: 121. Provenance and Legal](121-PROVENANCE_AND_LEGAL.md)
+[⬅️ Previous: 111. Architecture Strategy](111-ARCHITECTURE_2026.md) | [🏠 Home](../README.md) | [➡️ Next: 113. Agentic Architecture Blueprint](113-ARCHITECTURE_2026_AGENTIC.md)
 
 ---
 

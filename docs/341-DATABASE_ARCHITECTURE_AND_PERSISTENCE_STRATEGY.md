@@ -1,4 +1,4 @@
-[ Previous: 332. AKS Networking Masterclass](332-AKS_NETWORKING_MASTERCLASS.md) | [ Home](../README.md) | [ Next: 342. Storage Governance](342-STORAGE_GOVERNANCE_AND_LIFECYCLE.md)
+[⬅️ Previous: 332. AKS Networking Masterclass](332-AKS_NETWORKING_MASTERCLASS.md) | [🏠 Home](../README.md) | [➡️ Next: 342. Storage Governance](342-STORAGE_GOVERNANCE_AND_LIFECYCLE.md)
 
 ---
 
@@ -236,7 +236,7 @@ Connection strings are constructed using Terraform `replace()` and stored in Key
 
 ---
 
-[ Previous: 332. AKS Networking Masterclass](332-AKS_NETWORKING_MASTERCLASS.md) | [ Home](../README.md) | [ Next: 342. Storage Governance](342-STORAGE_GOVERNANCE_AND_LIFECYCLE.md)
+[⬅️ Previous: 332. AKS Networking Masterclass](332-AKS_NETWORKING_MASTERCLASS.md) | [🏠 Home](../README.md) | [➡️ Next: 342. Storage Governance](342-STORAGE_GOVERNANCE_AND_LIFECYCLE.md)
 
 ---
 

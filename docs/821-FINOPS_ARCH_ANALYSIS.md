@@ -1,4 +1,4 @@
-[ Previous: 811. DR and BCP Arch Analysis](811-DR_BCP_ARCH_ANALYSIS.md) | [ Home](../README.md) | [ Next: 911. Troubleshooting and Runbooks](911-TROUBLESHOOTING_AND_OPERATIONAL_RUNBOOKS.md)
+[⬅️ Previous: 811. DR and BCP Arch Analysis](811-DR_BCP_ARCH_ANALYSIS.md) | [🏠 Home](../README.md) | [➡️ Next: 911. Troubleshooting and Runbooks](911-TROUBLESHOOTING_AND_OPERATIONAL_RUNBOOKS.md)
 
 ---
 
@@ -408,7 +408,7 @@ quadrantChart
 
 ---
 
-[ Previous: 811. DR and BCP Arch Analysis](811-DR_BCP_ARCH_ANALYSIS.md) | [ Home](../README.md) | [ Next: 911. Troubleshooting and Runbooks](911-TROUBLESHOOTING_AND_OPERATIONAL_RUNBOOKS.md)
+[⬅️ Previous: 811. DR and BCP Arch Analysis](811-DR_BCP_ARCH_ANALYSIS.md) | [🏠 Home](../README.md) | [➡️ Next: 911. Troubleshooting and Runbooks](911-TROUBLESHOOTING_AND_OPERATIONAL_RUNBOOKS.md)
 
 ---
 

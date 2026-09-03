@@ -1,4 +1,4 @@
-[ Previous: 314. Azure WAF Improvements](314-AZURE_WAF_IMPROVEMENTS.md) | [ Home](../README.md) | [ Next: 322. Identity Governance Automation](322-ENTRA_ID_IDENTITY_GOVERNANCE_AUTOMATION.md)
+[⬅️ Previous: 314. Azure WAF Improvements](314-AZURE_WAF_IMPROVEMENTS.md) | [🏠 Home](../README.md) | [➡️ Next: 322. Identity Governance Automation](322-ENTRA_ID_IDENTITY_GOVERNANCE_AUTOMATION.md)
 
 ---
 
@@ -105,7 +105,7 @@ Naming conventions for security groups are environment-aware:
 
 ---
 
-[ Previous: 314. Azure WAF Improvements](314-AZURE_WAF_IMPROVEMENTS.md) | [ Home](../README.md) | [ Next: 322. Identity Governance Automation](322-ENTRA_ID_IDENTITY_GOVERNANCE_AUTOMATION.md)
+[⬅️ Previous: 314. Azure WAF Improvements](314-AZURE_WAF_IMPROVEMENTS.md) | [🏠 Home](../README.md) | [➡️ Next: 322. Identity Governance Automation](322-ENTRA_ID_IDENTITY_GOVERNANCE_AUTOMATION.md)
 
 ---
 

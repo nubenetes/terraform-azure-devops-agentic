@@ -1,4 +1,4 @@
-[ Previous: 324. Security-by-Design Checklist](324-SECURITY_BY_DESIGN_CHECKLIST.md) | [ Home](../README.md) | [ Next: 332. AKS Networking Masterclass](332-AKS_NETWORKING_MASTERCLASS.md)
+[⬅️ Previous: 325. Zero-Trust and Pipeline Security](325-ZERO_TRUST_AND_PIPELINE_SECURITY.md) | [🏠 Home](../README.md) | [➡️ Next: 332. AKS Networking Masterclass](332-AKS_NETWORKING_MASTERCLASS.md)
 
 ---
 
@@ -143,7 +143,7 @@ Beyond cluster provisioning, this repository leverages the **Kubernetes** and **
 
 ---
 
-[ Previous: 324. Security-by-Design Checklist](324-SECURITY_BY_DESIGN_CHECKLIST.md) | [ Home](../README.md) | [ Next: 332. AKS Networking Masterclass](332-AKS_NETWORKING_MASTERCLASS.md)
+[⬅️ Previous: 325. Zero-Trust and Pipeline Security](325-ZERO_TRUST_AND_PIPELINE_SECURITY.md) | [🏠 Home](../README.md) | [➡️ Next: 332. AKS Networking Masterclass](332-AKS_NETWORKING_MASTERCLASS.md)
 
 ---
 

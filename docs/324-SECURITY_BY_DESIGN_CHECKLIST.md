@@ -1,4 +1,4 @@
-[ Previous: 323. Key Vault Trust Architecture](323-KEY_VAULT_TRUST_ARCHITECTURE.md) | [ Home](../README.md) | [ Next: 331. AKS Compute Hub](331-AKS_COMPUTE_HUB_AND_ML_ORCHESTRATION.md)
+[⬅️ Previous: 323. Key Vault Trust Architecture](323-KEY_VAULT_TRUST_ARCHITECTURE.md) | [🏠 Home](../README.md) | [➡️ Next: 325. Zero-Trust and Pipeline Security](325-ZERO_TRUST_AND_PIPELINE_SECURITY.md)
 
 ---
 
@@ -142,8 +142,8 @@ graph TD
 
 ---
 
-[ Previous: 323. Key Vault Trust Architecture](323-KEY_VAULT_TRUST_ARCHITECTURE.md) | [ Home](../README.md) | [ Next: 331. AKS Compute Hub](331-AKS_COMPUTE_HUB_AND_ML_ORCHESTRATION.md)
+[⬅️ Previous: 323. Key Vault Trust Architecture](323-KEY_VAULT_TRUST_ARCHITECTURE.md) | [🏠 Home](../README.md) | [➡️ Next: 325. Zero-Trust and Pipeline Security](325-ZERO_TRUST_AND_PIPELINE_SECURITY.md)
 
 ---
 
-*Technical Documentation: Security-by-Design Checklist: Hardening and Perimeter Defense | Vision 2026 Architectural Guide*
+*Technical Documentation: Security-by-Design Checklist: Hardening and Perimeter | Vision 2026 Architectural Guide*

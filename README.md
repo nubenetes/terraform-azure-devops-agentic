@@ -1,4 +1,4 @@
-# Enterprise Cloud Infrastructure and DevSecOps Patterns: Agentic Reference Architecture & Modernization Blueprint
+# Enterprise Cloud Infrastructure and DevSecOps Patterns: Agentic Reference Architecture and Modernization Blueprint
 
 [![Architecture: Blueprint & PoC](https://img.shields.io/badge/Architecture-Blueprint%20%26%20PoC-blue.svg)](https://github.com/nubenetes/terraform-azure-devops-agentic)
 [![Agent: Antigravity Gemini 3.8 Flash](https://img.shields.io/badge/Generated%20By-Antigravity%20Gemini%203.8%20Flash-8A2BE2.svg)](https://github.com/nubenetes/terraform-azure-devops-agentic)
@@ -57,51 +57,54 @@
 
 ## Table of Contents
 
-1. [Executive Summary & Vision 2026 Modernization](#1-executive-summary--vision-2026-modernization)
+1. [Executive Summary and Vision 2026 Modernization](#1-executive-summary-and-vision-2026-modernization)
 2. [Why Terraform Stacks is NOT Available on this Architecture](#2-why-terraform-stacks-is-not-available-on-this-architecture)
     - [2.1 The Concept of Terraform Stacks](#21-the-concept-of-terraform-stacks)
     - [2.2 Four Architectural Reasons Why Stacks is Incompatible Here](#22-four-architectural-reasons-why-stacks-is-incompatible-here)
     - [2.3 Comparison: Pipeline-Driven Orchestration vs. HCP Terraform Stacks](#23-comparison-pipeline-driven-orchestration-vs-hcp-terraform-stacks)
-3. [System Architecture & Landing Zone Topology](#3-system-architecture--landing-zone-topology)
+3. [System Architecture and Landing Zone Topology](#3-system-architecture-and-landing-zone-topology)
     - [3.1 Global Enterprise Architecture Diagram (Mermaid)](#31-global-enterprise-architecture-diagram-mermaid)
     - [3.2 Multi-Region Hub-and-Spoke Topology](#32-multi-region-hub-and-spoke-topology)
     - [3.3 Decoupled Module Tiering Strategy](#33-decoupled-module-tiering-strategy)
-4. [DevSecOps Pipeline Orchestration & Gate Flow](#4-devsecops-pipeline-orchestration--gate-flow)
-    - [4.1 Pipeline Lifecycle & Decision Flow (Mermaid)](#41-pipeline-lifecycle--decision-flow-mermaid)
-    - [4.2 Security Gating & Manual Approval Mechanism](#42-security-gating--manual-approval-mechanism)
-5. [Terraform State Isolation & Inter-Module Dependency Graph](#5-terraform-state-isolation--inter-module-dependency-graph)
-    - [5.1 State Boundary Architecture (Mermaid)](#51-state-boundary-architecture-mermaid)
-    - [5.2 Dynamic Data Resolution Across Layers](#52-dynamic-data-resolution-across-layers)
-6. [Zero-Trust Identity & Access Governance](#6-zero-trust-identity--access-governance)
-    - [6.1 Identity Plane Architecture (Mermaid)](#61-identity-plane-architecture-mermaid)
-    - [6.2 Workload Identity Federation (OIDC)](#62-workload-identity-federation-oidc)
-    - [6.3 Compound Authentication (App-Plus-User)](#63-compound-authentication-app-plus-user)
-    - [6.4 Entra ID Custom Security Attributes (CSA)](#64-entra-id-custom-security-attributes-csa)
-7. [MongoDB Atlas Modernization (September 2026 Standards)](#7-mongodb-atlas-modernization-september-2026-standards)
-    - [7.1 Advanced Cluster Architecture (Mermaid)](#71-advanced-cluster-architecture-mermaid)
-    - [7.2 Migration from `mongodbatlas_cluster` to `mongodbatlas_advanced_cluster`](#72-migration-from-mongodbatlas_cluster-to-mongodbatlas_advanced_cluster)
-    - [7.3 Private Endpoint & Network Security](#73-private-endpoint--network-security)
-8. [DevSecOps Pipeline Security Review & Hardening Guide](#8-devsecops-pipeline-security-review--hardening-guide)
-    - [8.1 Elimination of Plaintext CLI Secrets](#81-elimination-of-plaintext-cli-secrets)
-    - [8.2 Modernization of Pipeline Runners (Ubuntu 24.04 LTS)](#82-modernization-of-pipeline-runners-ubuntu-2404-lts)
-    - [8.3 Secure Tooling & Hash-Verified Downloads](#83-secure-tooling--hash-verified-downloads)
-    - [8.4 Automated Static Security Scanning](#84-automated-static-security-scanning)
-9. [Comprehensive Modernization & Difference Matrix](#9-comprehensive-modernization--difference-matrix)
-    - [9.1 Deep-Dive Comparison: Base Repo vs. Agentic Modernized Repo](#91-deep-dive-comparison-base-repo-vs-agentic-modernized-repo)
-10. [Repository Structure & Component Catalog](#10-repository-structure--component-catalog)
-11. [Onboarding, Prerequisites & Operational Runbooks](#11-onboarding-prerequisites--operational-runbooks)
-12. [Troubleshooting & Known Failure Modes](#12-troubleshooting--known-failure-modes)
-13. [Public References & Curated Learning Library](#13-public-references--curated-learning-library)
-    - [13.1 Terraform & HashiCorp Architecture](#131-terraform--hashicorp-architecture)
-    - [13.2 Microsoft Azure & AzureRM Provider v4.x](#132-microsoft-azure--azurerm-provider-v4x)
-    - [13.3 Microsoft Entra ID & Zero-Trust Identity](#133-microsoft-entra-id--zero-trust-identity)
-    - [13.4 Azure Kubernetes Service (AKS) & Cloud-Native Compute](#134-azure-kubernetes-service-aks--cloud-native-compute)
-    - [13.5 MongoDB Atlas Cloud & Data Tier](#135-mongodb-atlas-cloud--data-tier)
-    - [13.6 DevSecOps, Azure Pipelines & Static Security Governance](#136-devsecops-azure-pipelines--static-security-governance)
+4. [Document Inventory](#4-document-inventory)
+5. [DevSecOps Pipeline Orchestration and Gate Flow](#5-devsecops-pipeline-orchestration-and-gate-flow)
+    - [5.1 Pipeline Lifecycle and Decision Flow (Mermaid)](#51-pipeline-lifecycle-and-decision-flow-mermaid)
+    - [5.2 Security Gating and Manual Approval Mechanism](#52-security-gating-and-manual-approval-mechanism)
+6. [Terraform State Isolation and Inter-Module Dependency Graph](#6-terraform-state-isolation-and-inter-module-dependency-graph)
+    - [6.1 State Boundary Architecture (Mermaid)](#61-state-boundary-architecture-mermaid)
+    - [6.2 Dynamic Data Resolution Across Layers](#62-dynamic-data-resolution-across-layers)
+7. [Zero-Trust Identity and Access Governance](#7-zero-trust-identity-and-access-governance)
+    - [7.1 Identity Plane Architecture (Mermaid)](#71-identity-plane-architecture-mermaid)
+    - [7.2 Workload Identity Federation (OIDC)](#72-workload-identity-federation-oidc)
+    - [7.3 Compound Authentication (App-Plus-User)](#73-compound-authentication-app-plus-user)
+    - [7.4 Entra ID Custom Security Attributes (CSA)](#74-entra-id-custom-security-attributes-csa)
+8. [MongoDB Atlas Modernization (September 2026 Standards)](#8-mongodb-atlas-modernization-september-2026-standards)
+    - [8.1 Advanced Cluster Architecture (Mermaid)](#81-advanced-cluster-architecture-mermaid)
+    - [8.2 Migration from `mongodbatlas_cluster` to `mongodbatlas_advanced_cluster`](#82-migration-from-mongodbatlas_cluster-to-mongodbatlas_advanced_cluster)
+    - [8.3 Private Endpoint and Network Security](#83-private-endpoint-and-network-security)
+9. [DevSecOps Pipeline Security Review and Hardening Guide](#9-devsecops-pipeline-security-review-and-hardening-guide)
+    - [9.1 Elimination of Plaintext CLI Secrets](#91-elimination-of-plaintext-cli-secrets)
+    - [9.2 Modernization of Pipeline Runners (Ubuntu 24.04 LTS)](#92-modernization-of-pipeline-runners-ubuntu-2404-lts)
+    - [9.3 Secure Tooling and Hash-Verified Downloads](#93-secure-tooling-and-hash-verified-downloads)
+    - [9.4 Automated Static Security Scanning](#94-automated-static-security-scanning)
+10. [Comprehensive Modernization and Difference Matrix](#10-comprehensive-modernization-and-difference-matrix)
+    - [10.1 Deep-Dive Comparison: Base Repo vs. Agentic Modernized Repo](#101-deep-dive-comparison-base-repo-vs-agentic-modernized-repo)
+11. [Repository Structure and Component Catalog](#11-repository-structure-and-component-catalog)
+12. [Onboarding, Prerequisites and Operational Runbooks](#12-onboarding-prerequisites-and-operational-runbooks)
+    - [12.1 Local Engineering Prerequisites](#121-local-engineering-prerequisites)
+    - [12.2 Deployment Sequence](#122-deployment-sequence)
+13. [Troubleshooting and Known Failure Modes](#13-troubleshooting-and-known-failure-modes)
+14. [Public References and Curated Learning Library](#14-public-references-and-curated-learning-library)
+    - [14.1 Terraform and HashiCorp Architecture](#141-terraform-and-hashicorp-architecture)
+    - [14.2 Microsoft Azure and AzureRM Provider v4.x](#142-microsoft-azure-and-azurerm-provider-v4x)
+    - [14.3 Microsoft Entra ID and Zero-Trust Identity](#143-microsoft-entra-id-and-zero-trust-identity)
+    - [14.4 Azure Kubernetes Service (AKS) and Cloud-Native Compute](#144-azure-kubernetes-service-aks-and-cloud-native-compute)
+    - [14.5 MongoDB Atlas Cloud and Data Tier](#145-mongodb-atlas-cloud-and-data-tier)
+    - [14.6 DevSecOps, Azure Pipelines and Static Security Governance](#146-devsecops-azure-pipelines-and-static-security-governance)
 
 ---
 
-## 1. Executive Summary & Vision 2026 Modernization
+## 1. Executive Summary and Vision 2026 Modernization
 
 This repository, [`nubenetes/terraform-azure-devops-agentic`](https://github.com/nubenetes/terraform-azure-devops-agentic), establishes a next-generation **enterprise reference architecture and DevSecOps blueprint** for multi-tenant, multi-region cloud workloads deployed across **Microsoft Azure**, **Microsoft Entra ID**, and **MongoDB Atlas Cloud**.
 
@@ -146,7 +149,7 @@ In enterprise environments, cloud infrastructure deployment is deeply integrated
 
 Adopting Terraform Stacks would require stripping all deployment logic from Azure DevOps YAML and delegating orchestration to HCP Stacks streams, breaking the corporate governance and compliance trail.
 
-#### 3. Imperative Script Interleaving & Heterogeneous Workflows
+#### 3. Imperative Script Interleaving and Heterogeneous Workflows
 This repository coordinates a complex ecosystem spanning multiple cloud providers and non-declarative operational scripts:
 *   **Entra ID Custom Security Attribute Provisioning**: Executed via Azure PowerShell scripts (`scripts/01-assign-customSecurityAttributes.ps1`) following `App-Core` apply to assign fine-grained directory attributes to dynamically generated users.
 *   **Kubelogin Token Negotiation**: Dynamic authentication plugin execution for AKS cluster admin access before Helm deployments.
@@ -154,7 +157,7 @@ This repository coordinates a complex ecosystem spanning multiple cloud provider
 
 Terraform Stacks is strictly **declarative**. It does not provide hooks to pause between component applies to execute arbitrary PowerShell scripts, run external Git checkouts, or manipulate Entra ID directory metadata via CLI scripts.
 
-#### 4. Data Sovereignty, Compliance & Private Perimeter Isolation
+#### 4. Data Sovereignty, Compliance and Private Perimeter Isolation
 Under strict regulatory frameworks (financial services, healthcare, European GDPR, public sector), infrastructure state files and cloud credentials must never leave the organization's private perimeter:
 *   This architecture stores Terraform state files inside **private Azure Blob Storage accounts** (`azurerm` backend) locked behind private endpoints, IP firewalls, and customer-managed encryption keys.
 *   Terraform Stacks streams state files, speculative plans, and sensitive variable values to HashiCorp's multi-tenant SaaS cloud infrastructure, violating zero-trust and data sovereignty mandates for air-gapped or strictly private Azure environments.
@@ -210,7 +213,7 @@ flowchart TB
 
 </details>
 
-#### Diagram 1 Description & Architectural Breakdown
+#### Diagram 1 Description and Architectural Breakdown
 *   **HashiCorp Terraform Stacks Architecture (Left Column)**:
     *   Relies strictly on **HCP Terraform SaaS** as the central execution control plane.
     *   Orchestration logic is split into `.tfstack.hcl` (declaring components and deferred input/output contracts) and `.tfdeploy.hcl` (declaring environment deployment streams).
@@ -222,7 +225,7 @@ flowchart TB
     *   Maintains state files exclusively inside **private Azure Blob Storage containers** protected by customer-managed keys and private network perimeters.
     *   Enables smooth execution of imperative operational hooks (e.g., Azure PowerShell for Entra ID Custom Security Attributes, kubelogin AAD token negotiation, Bitbucket schema synchronization) directly between deployment stages.
 
-#### Summary & Key Takeaways
+#### Summary and Key Takeaways
 *   **Governance Parity**: Simulated Stacks preserves enterprise ITIL governance, corporate approval matrices, and audit tracking inside Azure DevOps.
 *   **Vendor Independence**: Eliminates commercial SaaS lock-in by executing standard HCL with the open-source CLI.
 *   **Operational Flexibility**: Bridges the gap between purely declarative IaC and the imperative tasks required in real enterprise landing zones.
@@ -241,7 +244,7 @@ While HashiCorp Terraform Stacks provides an elegant HCL-native graph for HCP Cl
 
 ---
 
-## 3. System Architecture & Landing Zone Topology
+## 3. System Architecture and Landing Zone Topology
 
 ### 3.1 Global Enterprise Architecture Diagram (Mermaid)
 
@@ -312,7 +315,7 @@ flowchart TB
 
 </details>
 
-#### Diagram 2 Description & Architectural Breakdown
+#### Diagram 2 Description and Architectural Breakdown
 *   **Client & Ingress Layer**:
     *   `End Users / Client Applications` access platform services over HTTPS (port 443) routed through `Azure Public DNS / Traffic Manager`.
     *   Ingress traffic is inspected and routed by `Application Gateway WAF v2`, which enforces SSL/TLS termination and OWASP Core Rule Sets.
@@ -334,7 +337,7 @@ flowchart TB
     *   Issues cryptographically verified federated OIDC tokens to AKS Workload Identities.
     *   Governs service registration, tenant tagging, and MFA compliance through `Conditional Access Policies` and `Custom Security Attributes`.
 
-#### Summary & Key Takeaways
+#### Summary and Key Takeaways
 *   **Zero Public Attack Surface**: Database, compute nodes, and state stores reside in private subnets with no public ingress.
 *   **Strict Decoupling**: Egress routing, identity policies, application containers, and databases reside in distinct lifecycle boundaries.
 *   **Multi-Region Symmetrical Design**: Topology scales identically across North Europe (`ne`) and Central US (`cus`) landing zones.
@@ -360,9 +363,50 @@ To minimize blast radius, the repository is split into 6 decoupled lifecycle tie
 
 ---
 
-## 4. DevSecOps Pipeline Orchestration & Gate Flow
+## 4. Document Inventory
 
-### 4.1 Pipeline Lifecycle & Decision Flow (Mermaid)
+The following master index provides a structured inventory of the 32 architectural manuals, design documents, and operational guides available in the [`docs/`](./docs/) directory. Organized according to the 3-digit Scalable Tiered Centenas model, each document features bidirectional sequential navigation (`[⬅️ Previous]` and `[➡️ Next]`) and direct return links to this root `README.md`.
+
+| Code | Primary Category | Sub-Category | Document | Description |
+| :---: | :--- | :--- | :--- | :--- |
+| **111** | Foundations and Strategy | Vision | [Architecture Strategy](./docs/111-ARCHITECTURE_2026.md) | Enterprise Architecture Strategy and evolution towards AI-assisted engineering. |
+| **112** | Foundations and Strategy | Vision | [Presentation Notebook](./docs/112-PRESENTATION_NOTEBOOK.md) | High-level summary and reference architecture for notebook environments. |
+| **113** | Foundations and Strategy | Vision | [Agentic Blueprint](./docs/113-ARCHITECTURE_2026_AGENTIC.md) | Agentic Reference Architecture and Modernization Blueprint specifications. |
+| **121** | Foundations and Strategy | Legal | [Provenance and Legal](./docs/121-PROVENANCE_AND_LEGAL.md) | Code provenance, technical references, and legal disclaimers. |
+| **131** | Foundations and Strategy | Platform | [Internal Developer Platform](./docs/131-INTERNAL_DEVELOPER_PLATFORM.md) | Platform Engineering strategy and IDP for elevating Developer Experience. |
+| **141** | Foundations and Strategy | Adoption | [IPAM and Adaptation](./docs/141-ARCHITECTURE_ADOPTION_AND_IPAM_GUIDE.md) | Guide for de-obfuscating network CIDRs and adapting the blueprint for production. |
+| **211** | IaC Engineering and Patterns | Terraform Architecture | [Module Design Patterns](./docs/211-TERRAFORM_MODULE_DESIGN_PATTERNS.md) | Deep-dive into module philosophy: Composite vs. Atomic patterns. |
+| **212** | IaC Engineering and Patterns | Terraform Architecture | [Variable Architecture](./docs/212-TERRAFORM_VARIABLE_ARCHITECTURE_AND_DATA_STRATEGY.md) | Orchestration of variables, dynamic locals, and YAML-driven data. |
+| **213** | IaC Engineering and Patterns | Terraform Architecture | [Configuration Inventory](./docs/213-TERRAFORM_ENVIRONMENT_CONFIGURATION_AND_TFVARS_INVENTORY.md) | Inventory of environment configurations (.tfvars), provisioning sequence, and safety standards. |
+| **214** | IaC Engineering and Patterns | Modernization | [Terraform Modernization Guide](./docs/214-TERRAFORM_MODERNIZATION_GUIDE.md) | Upgrading Terraform Core to >= 1.9, OpenTofu compatibility, and check blocks. |
+| **221** | IaC Engineering and Patterns | Visualization | [Visualizations](./docs/221-TERRAFORM_VISUALIZATIONS_AND_DEPENDENCY_GRAPHS.md) | Visualizing infrastructure dependencies and resource graphing. |
+| **311** | Infrastructure Pillars | Networking | [Hub-Spoke Backbone](./docs/311-SHARED_INFRA_NETWORKING_HUB_SPOKE_BACKBONE.md) | Hub-Spoke network backbone and shared infrastructure design. |
+| **312** | Infrastructure Pillars | Networking | [DNS Ecosystem](./docs/312-NETWORKING_AND_DNS_ECOSYSTEM.md) | Private DNS orchestration and global resolution strategy. |
+| **313** | Infrastructure Pillars | Networking | [App Gateway Deep Dive](./docs/313-APP_GATEWAY_DEEP_DIVE.md) | Advanced L7 traffic orchestration and Application Gateway v2. |
+| **314** | Infrastructure Pillars | Networking | [Azure WAF Improvements](./docs/314-AZURE_WAF_IMPROVEMENTS.md) | Web Application Firewall policies and edge security hardening. |
+| **321** | Infrastructure Pillars | Identity and Security | [Microsoft Entra ID Integration](./docs/321-MICROSOFT_ENTRA_ID_INTEGRATION.md) | Modern Auth, RBAC governance, and Identity Perimeter design. |
+| **322** | Infrastructure Pillars | Identity and Security | [Identity Governance Automation](./docs/322-ENTRA_ID_IDENTITY_GOVERNANCE_AUTOMATION.md) | YAML-driven user provisioning and lifecycle automation. |
+| **323** | Infrastructure Pillars | Identity and Security | [Key Vault Trust Architecture](./docs/323-KEY_VAULT_TRUST_ARCHITECTURE.md) | Secret management, RBAC vs Access Policies, and Compound Identity. |
+| **324** | Infrastructure Pillars | Identity and Security | [Security-by-Design Checklist](./docs/324-SECURITY_BY_DESIGN_CHECKLIST.md) | Technical deep-dive into hardening, Private Link, and DDoS protection. |
+| **325** | Infrastructure Pillars | Identity and Security | [Zero-Trust & Pipeline Security](./docs/325-ZERO_TRUST_AND_PIPELINE_SECURITY.md) | Workload Identity Federation (OIDC) and secretless CI/CD parameterization. |
+| **331** | Infrastructure Pillars | Compute | [AKS Compute Hub](./docs/331-AKS_COMPUTE_HUB_AND_ML_ORCHESTRATION.md) | Managed Kubernetes, specialized node pools, and ML workloads. |
+| **332** | Infrastructure Pillars | Compute | [AKS Networking Masterclass](./docs/332-AKS_NETWORKING_MASTERCLASS.md) | CNI Overlay, API Server integration, and advanced K8s networking. |
+| **341** | Infrastructure Pillars | Data | [Database Architecture](./docs/341-DATABASE_ARCHITECTURE_AND_PERSISTENCE_STRATEGY.md) | Hybrid data orchestration (Atlas vs Cosmos DB). |
+| **342** | Infrastructure Pillars | Data | [Storage Governance](./docs/342-STORAGE_GOVERNANCE_AND_LIFECYCLE.md) | Data persistence, isolation, and recovery service vaults. |
+| **343** | Infrastructure Pillars | Data | [MongoDB Atlas Modernization](./docs/343-MONGODB_ATLAS_MODERNIZATION.md) | Upgrading to mongodbatlas_advanced_cluster, Private Link, and continuous backup. |
+| **411** | DevSecOps and Operations | Orchestration and Security | [Azure DevOps Pipelines](./docs/411-AZURE_DEVOPS_PIPELINES_ORCHESTRATION.md) | Global CI/CD orchestration and multi-layer lifecycle management. |
+| **412** | DevSecOps and Operations | Orchestration and Security | [Pipeline Security and Governance](./docs/412-AZURE_DEVOPS_PIPELINE_SECURITY_AND_GOVERNANCE.md) | Pipeline hardening, branch policies, and environment gates. |
+| **421** | DevSecOps and Operations | Day 2 Ops | [Observability and Day2 Operations](./docs/421-OBSERVABILITY_AND_DAY2_OPERATIONS.md) | Unified monitoring, logging, and self-healing infrastructure. |
+| **811** | Analytical and Governance (GRC) | Resilience | [DR and BCP Arch Analysis](./docs/811-DR_BCP_ARCH_ANALYSIS.md) | Disaster Recovery and Business Continuity architectural audit. |
+| **821** | Analytical and Governance (GRC) | Economics | [FinOps Arch Analysis](./docs/821-FINOPS_ARCH_ANALYSIS.md) | Cloud financial management and cost reverse engineering. |
+| **911** | Reference and Closure | SRE and Runbooks | [Troubleshooting and Runbooks](./docs/911-TROUBLESHOOTING_AND_OPERATIONAL_RUNBOOKS.md) | SRE guide for diagnosing and resolving complex failures. |
+| **999** | Reference and Closure | Roadmap and Backlog | [Future Roadmap and Strategic Architectural Backlog](./docs/999-FUTURE_ROADMAP_AND_IMPROVEMENT_BACKLOG.md) | Strategic evolution path and engineering improvement backlog. |
+
+---
+
+## 5. DevSecOps Pipeline Orchestration and Gate Flow
+
+### 5.1 Pipeline Lifecycle and Decision Flow (Mermaid)
 
 <details>
 <summary><b>📊 Click to expand Diagram: Pipeline Lifecycle & Decision Flow</b></summary>
@@ -405,7 +449,7 @@ sequenceDiagram
 
 </details>
 
-#### Diagram 3 Description & Pipeline Flow Breakdown
+#### Diagram 3 Description and Pipeline Flow Breakdown
 *   **Stage 1: Pull Request & Automated Quality Assurance**:
     *   Triggered when a developer opens a GitOps Pull Request or pushes code to the repository.
     *   The pipeline agent executes `terraform fmt -check` and `terraform validate` to enforce syntax standards.
@@ -425,7 +469,7 @@ sequenceDiagram
     *   Executes Azure PowerShell (`assign-customSecurityAttributes.ps1`) to tag provisioned identities with Entra ID Custom Security Attributes.
     *   Executes `kubelogin convert-kubeconfig` to acquire short-lived AAD tokens and verify Kubernetes API server readiness.
 
-#### Summary & Key Takeaways
+#### Summary and Key Takeaways
 *   **Defense-in-Depth Quality Gates**: Integrates static security scanning, automated validation, and human sign-offs before execution.
 *   **Immutable Execution**: Enforces that only the pre-computed, verified `tfplan.out` binary is applied, eliminating plan-to-apply drift.
 *   **Secretless Authentication**: OIDC workload federation eliminates long-lived client secrets and certificate maintenance overhead.
@@ -433,15 +477,15 @@ sequenceDiagram
 #### Conclusion
 The DevSecOps pipeline lifecycle establishes an auditable, compliant release workflow that bridges automated code quality checks with enterprise ITIL governance, ensuring that zero unvetted or insecure infrastructure modifications reach live Azure environments.
 
-### 4.2 Security Gating & Manual Approval Mechanism
+### 5.2 Security Gating and Manual Approval Mechanism
 *   **Non-Production Environments (`dev`, `qa`, `uat`, `pre`)**: Automatically execute validation and speculative planning upon pull request creation. Deployment apply is gated behind branch policy checks.
 *   **Production Environment (`pro`, `dem`)**: Executed strictly from the protected `main` branch. Every apply stage is protected by an explicit `WaitForValidationJob` utilizing the `ManualValidation@0` task, requiring verified approval from designated cloud administrators.
 
 ---
 
-## 5. Terraform State Isolation & Inter-Module Dependency Graph
+## 6. Terraform State Isolation and Inter-Module Dependency Graph
 
-### 5.1 State Boundary Architecture (Mermaid)
+### 6.1 State Boundary Architecture (Mermaid)
 
 <details>
 <summary><b>📊 Click to expand Diagram: State Boundary Architecture</b></summary>
@@ -497,7 +541,7 @@ graph TD
 
 </details>
 
-#### Diagram 4 Description & State Partitioning Breakdown
+#### Diagram 4 Description and State Partitioning Breakdown
 *   **Layer 1: Foundational Hub Infrastructure (`sharedinfra.tfstate`)**:
     *   Provisions regional Hub Virtual Networks, subnets, centralized Azure Firewalls, and Private DNS Zones.
     *   Exposes Subnet IDs, VNet Peering targets, Private DNS Zone resource IDs, and WAF Public IPs to downstream consumers.
@@ -514,7 +558,7 @@ graph TD
     *   Orchestrates Helm charts (Ingress-NGINX, cert-manager, Prometheus, Grafana).
     *   Consumes live cluster endpoints from `aks.tfstate` and health probe paths from `appcore.tfstate`.
 
-#### Summary & Key Takeaways
+#### Summary and Key Takeaways
 *   **Blast-Radius Containment**: An operational error or failed apply in an application tier cannot corrupt or lock the foundational networking state file.
 *   **Decoupled Lifecycle Velocity**: Networking, identity, compute, and applications can be modified, tested, and released on distinct cadence schedules.
 *   **Data Integrity via Read-Only Lookups**: Layers exchange metadata via typed AzureRM data sources and pipeline output variables rather than brittle monoliths.
@@ -522,14 +566,14 @@ graph TD
 #### Conclusion
 The State Boundary Architecture establishes strict blast-radius isolation where each Terraform state file represents a distinct lifecycle boundary, ensuring foundational networking and security controls remain completely protected against upstream or downstream application failures.
 
-### 5.2 Dynamic Data Resolution Across Layers
+### 6.2 Dynamic Data Resolution Across Layers
 Because state files are strictly partitioned, downstream layers reference upstream resources through **referential naming conventions** and **AzureRM data sources** (`data "azurerm_subnet"`, `data "azurerm_kubernetes_cluster"`). This guarantees that a corrupted state or failed apply in `App-Catalog` can never destroy or lock the core virtual network backbone in `Shared-Infra`.
 
 ---
 
-## 6. Zero-Trust Identity & Access Governance
+## 7. Zero-Trust Identity and Access Governance
 
-### 6.1 Identity Plane Architecture (Mermaid)
+### 7.1 Identity Plane Architecture (Mermaid)
 
 <details>
 <summary><b>📊 Click to expand Diagram: Identity Plane Architecture</b></summary>
@@ -566,7 +610,7 @@ flowchart LR
 
 </details>
 
-#### Diagram 5 Description & Identity Flow Breakdown
+#### Diagram 5 Description and Identity Flow Breakdown
 *   **Microsoft Entra ID Identity Plane**:
     *   Acts as the central trust authority for human identities, automation agents, and runtime workloads.
     *   Manages `App Registrations` (FrontEnd SPA / BackEnd API), `Managed Service Principals`, `Custom Security Attributes`, and `Federated Identity Credentials`.
@@ -579,7 +623,7 @@ flowchart LR
     *   `Azure Key Vault` implements **Compound Authentication (App-Plus-User)**, requiring simultaneous validation of both application identity and user identity for secret access.
     *   `Azure Storage Accounts` enforce Attribute-Based Access Control (ABAC) using Entra ID `Custom Security Attributes` to isolate tenant data.
 
-#### Summary & Key Takeaways
+#### Summary and Key Takeaways
 *   **Zero Static Passwords**: Long-lived client secrets are eliminated from pipeline variable groups and codebase repositories.
 *   **Short-Lived Cryptographic Tokens**: Authentication tokens are ephemeral, strictly scoped to the executing pipeline run or pod replica.
 *   **Directory-Level Multi-Tenancy**: Custom Security Attributes enforce tenant boundary isolation directly within the identity plane.
@@ -587,27 +631,27 @@ flowchart LR
 #### Conclusion
 The Identity Plane Architecture establishes a secretless Zero-Trust environment where CI/CD runners, Kubernetes pods, and storage accounts authenticate dynamically via cryptographically verified OIDC federations, eliminating credential leakage attack vectors.
 
-### 6.2 Workload Identity Federation (OIDC)
+### 7.2 Workload Identity Federation (OIDC)
 In this modernized blueprint, all long-lived service principal client secrets are deprecated in favor of **OpenID Connect (OIDC) Workload Identity Federation**:
 *   The Azure DevOps service connection establishes a cryptographic federated trust with Microsoft Entra ID.
 *   The pipeline agent dynamically requests a short-lived JSON Web Token (JWT) from Azure DevOps.
 *   Entra ID validates the token's subject (`sc:<org>:<project>:<service_connection>`) and exchanges it for an Azure Resource Manager bearer token.
 *   Zero credentials or client secrets are stored in Azure DevOps variable groups.
 
-### 6.3 Compound Authentication (App-Plus-User)
+### 7.3 Compound Authentication (App-Plus-User)
 To enforce multi-tenant isolation, Key Vault access policies leverage the **App-Plus-User compound identity pattern**:
 *   The application must authenticate with its Managed Identity (`application_id`).
 *   The user principal (`object_id`) must authenticate simultaneously.
 *   Neither the user alone nor the application alone can decrypt customer secrets.
 
-### 6.4 Entra ID Custom Security Attributes (CSA)
+### 7.4 Entra ID Custom Security Attributes (CSA)
 Customer tenancy and center names (e.g., `AETitle`, `centerName`) are stored as immutable Custom Security Attributes in Microsoft Entra ID. Storage accounts and backend APIs enforce Attribute-Based Access Control (ABAC), preventing cross-tenant data exfiltration even if an access token is compromised.
 
 ---
 
-## 7. MongoDB Atlas Modernization (September 2026 Standards)
+## 8. MongoDB Atlas Modernization (September 2026 Standards)
 
-### 7.1 Advanced Cluster Architecture (Mermaid)
+### 8.1 Advanced Cluster Architecture (Mermaid)
 
 <details>
 <summary><b>📊 Click to expand Diagram: Advanced Cluster Architecture</b></summary>
@@ -651,7 +695,7 @@ flowchart TB
 
 </details>
 
-#### Diagram 6 Description & Database Architecture Breakdown
+#### Diagram 6 Description and Database Architecture Breakdown
 *   **Azure Spoke VNet Private Connectivity**:
     *   `Linux Web Apps (App-Core API)` initiate all database queries internally within the private spoke subnet (10.2.0.0/16).
     *   Traffic routes through an `Azure Private Endpoint` deployed in a dedicated private endpoint subnet.
@@ -665,7 +709,7 @@ flowchart TB
     *   Manages least-privilege `Database Users` with separated administrative and transactional roles.
     *   `Automated Continuous Cloud Backup` manages snapshot policies, oplog retention windows, and Point-in-Time Recovery (PITR).
 
-#### Summary & Key Takeaways
+#### Summary and Key Takeaways
 *   **Zero Public IP Footprint**: The database cluster exposes no public endpoints or public IP ingress.
 *   **Schema Modernization**: Implements modern `mongodbatlas_advanced_cluster` schema with multi-region electable specs.
 *   **Disaster Recovery Assurance**: Continuous cloud backup and oplog tracking guarantee minimal Recovery Point Objectives (RPO).
@@ -673,7 +717,7 @@ flowchart TB
 #### Conclusion
 The Advanced Cluster Architecture delivers a hardened, highly available MongoDB persistence layer that combines the modernized configuration model of MongoDB Atlas provider v1.25+ with Azure Private Link network isolation.
 
-### 7.2 Migration from `mongodbatlas_cluster` to `mongodbatlas_advanced_cluster`
+### 8.2 Migration from `mongodbatlas_cluster` to `mongodbatlas_advanced_cluster`
 The legacy `mongodbatlas_cluster` resource is fully deprecated in modern MongoDB Atlas provider versions ($>1.14$ through $1.25+$). This repository replaces it with `mongodbatlas_advanced_cluster`:
 
 ```hcl
@@ -712,14 +756,14 @@ resource "mongodbatlas_advanced_cluster" "cluster" {
 }
 ```
 
-### 7.3 Private Endpoint & Network Security
+### 8.3 Private Endpoint and Network Security
 Public IP access lists are restricted to corporate egress gateways. Production environments interface with MongoDB Atlas via **Azure Private Link endpoints**, keeping database traffic off the public internet and routing entirely through Microsoft's internal optical network.
 
 ---
 
-## 8. DevSecOps Pipeline Security Review & Hardening Guide
+## 9. DevSecOps Pipeline Security Review and Hardening Guide
 
-### 8.1 Elimination of Plaintext CLI Secrets
+### 9.1 Elimination of Plaintext CLI Secrets
 In the base repository, sensitive values (such as database passwords, service principal credentials, and SSL certificates) were injected directly as command-line arguments:
 ```yaml
 # ❌ VULNERABLE PATTERN (Base Repo)
@@ -743,20 +787,20 @@ commandOptions: >
 ```
 Terraform automatically loads `TF_VAR_*` variables directly into memory without exposing them on the command-line interface.
 
-### 8.2 Modernization of Pipeline Runners (Ubuntu 24.04 LTS)
+### 9.2 Modernization of Pipeline Runners (Ubuntu 24.04 LTS)
 All pipeline definitions have been migrated from the end-of-life `ubuntu-20.04` runner to `ubuntu-latest` (Ubuntu 24.04 LTS), providing up-to-date OpenSSL 3.x libraries, updated kernel security mitigations, and native support for modern CLI tooling.
 
-### 8.3 Secure Tooling & Hash-Verified Downloads
+### 9.3 Secure Tooling and Hash-Verified Downloads
 Insecure `wget $(KUBELOGIN_DOWNLOAD_URL) && unzip && sudo mv` steps have been audited and replaced with secure task installers or verified execution pathways, eliminating potential supply-chain tampering.
 
-### 8.4 Automated Static Security Scanning
+### 9.4 Automated Static Security Scanning
 The validation stages incorporate automated security inspection points for **Checkov** and **Trivy**, halting the pipeline if unencrypted storage accounts or overly permissive network security groups are introduced.
 
 ---
 
-## 9. Comprehensive Modernization & Difference Matrix
+## 10. Comprehensive Modernization and Difference Matrix
 
-### 9.1 Deep-Dive Comparison: Base Repo vs. Agentic Modernized Repo
+### 10.1 Deep-Dive Comparison: Base Repo vs. Agentic Modernized Repo
 
 | Architectural Dimension | Base Repository (`nubenetes/terraform-azure-devops`) | Modernized Agentic Repository (`terraform-azure-devops-agentic`) | Architectural Rationale & Benefit |
 | :--- | :--- | :--- | :--- |
@@ -776,7 +820,7 @@ The validation stages incorporate automated security inspection points for **Che
 
 ---
 
-## 10. Repository Structure & Component Catalog
+## 11. Repository Structure and Component Catalog
 
 ```text
 terraform-azure-devops-agentic/
@@ -808,11 +852,12 @@ terraform-azure-devops-agentic/
 │   ├── manifests/                    # Kubernetes ConfigMaps, Namespaces, Pods
 │   ├── templates/                    # Day2 pipeline templates
 │   └── terraform-manifests/          # Helm releases (NGINX Ingress, Prometheus Stack)
-├── docs/                             # In-depth architectural whitepapers written from scratch
-│   ├── 111-ARCHITECTURE_2026_AGENTIC.md
-│   ├── 211-TERRAFORM_MODERNIZATION_GUIDE.md
-│   ├── 321-ZERO_TRUST_AND_PIPELINE_SECURITY.md
-│   └── 341-MONGODB_ATLAS_MODERNIZATION.md
+├── docs/                             # Comprehensive 32-document architectural guide & runbooks
+│   ├── 111-ARCHITECTURE_2026.md        # Strategy and vision
+│   ├── 112-PRESENTATION_NOTEBOOK.md    # Executive presentation notebook
+│   ├── 113-ARCHITECTURE_2026_AGENTIC.md # Agentic architecture blueprint
+│   ├── ... (See Section 4 Document Inventory for full 32-doc suite)
+│   └── 999-FUTURE_ROADMAP_AND_IMPROVEMENT_BACKLOG.md
 ├── Integration-Service/              # Hybrid connector service & Maven build definitions
 ├── Shared-Infra/                     # Core Hub VNet, DNS Zones, Defender for Cloud
 │   ├── configuration/                # Shared pipeline variables
@@ -826,16 +871,16 @@ terraform-azure-devops-agentic/
 
 ---
 
-## 11. Onboarding, Prerequisites & Operational Runbooks
+## 12. Onboarding, Prerequisites and Operational Runbooks
 
-### 11.1 Local Engineering Prerequisites
+### 12.1 Local Engineering Prerequisites
 Before running or testing any Terraform code locally:
 *   **Terraform CLI**: `v1.9.0` or higher (`v1.15+` recommended).
 *   **Azure CLI**: `v2.60.0` or higher.
 *   **Kubelogin**: Latest release (`kubelogin convert-kubeconfig -l azurecli`).
 *   **MongoDB Atlas CLI / mongosh**: For database verification.
 
-### 11.2 Deployment Sequence
+### 12.2 Deployment Sequence
 Due to inter-layer dependencies, the infrastructure tiers must be applied in strict sequential order:
 1.  **Shared-Infra**: Provisions the regional Hub VNets, Private DNS Zones, and Defender policies.
 2.  **App-Users**: Configures Entra ID groups and identity boundaries.
@@ -846,7 +891,7 @@ Due to inter-layer dependencies, the infrastructure tiers must be applied in str
 
 ---
 
-## 12. Troubleshooting & Known Failure Modes
+## 13. Troubleshooting and Known Failure Modes
 
 Because this codebase is an **untested agentic reference architecture**, engineering teams adapting it may encounter the following common failure modes during initial deployment:
 
@@ -865,11 +910,11 @@ Because this codebase is an **untested agentic reference architecture**, enginee
 
 ---
 
-## 13. Public References & Curated Learning Library
+## 14. Public References and Curated Learning Library
 
 To acquire the necessary knowledge and master the bleeding-edge cloud engineering, IaC, and security practices demonstrated in this blueprint, explore the following curated public documentation, whitepapers, and official references:
 
-### 13.1 Terraform & HashiCorp Architecture
+### 14.1 Terraform and HashiCorp Architecture
 *   **HashiCorp Terraform Documentation**:
     *   [Terraform Configuration Language Reference](https://developer.hashicorp.com/terraform/language): Comprehensive documentation covering HCL syntax, expressions, meta-arguments, lifecycle controls, and input/output contracts.
     *   [Continuous Validation with `check` Blocks](https://developer.hashicorp.com/terraform/language/tests): Official guide on writing assertions and validations to monitor infrastructure state continuously without modifying live resources.
@@ -879,7 +924,7 @@ To acquire the necessary knowledge and master the bleeding-edge cloud engineerin
 *   **Architectural Frameworks**:
     *   [HashiCorp Well-Architected Framework](https://developer.hashicorp.com/well-architected-framework): Industry guidance on module design, state file partitioning, and blast-radius minimization.
 
-### 13.2 Microsoft Azure & AzureRM Provider v4.x
+### 14.2 Microsoft Azure and AzureRM Provider v4.x
 *   **AzureRM Terraform Provider**:
     *   [Terraform Registry - AzureRM Provider](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs): Up-to-date documentation on all Microsoft Azure resource schemas.
     *   [AzureRM Provider 4.0 Upgrade Guide](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/4.0-upgrade-guide): Complete guide on breaking changes, resource group auto-deletion removals, and API transitions in the v4.x series.
@@ -888,7 +933,7 @@ To acquire the necessary knowledge and master the bleeding-edge cloud engineerin
     *   [Azure Architecture Center: Hub-Spoke Network Topology](https://learn.microsoft.com/en-us/azure/architecture/reference-architectures/hybrid-networking/hub-spoke): In-depth design for regional hub networks, Azure Firewall egress routing, and cross-spoke peering.
     *   [Azure Application Gateway WAF v2 Documentation](https://learn.microsoft.com/en-us/azure/web-application-firewall/ag/ag-overview): Configuring L7 load balancing, SSL certificate offloading, and OWASP Core Rule Sets.
 
-### 13.3 Microsoft Entra ID & Zero-Trust Identity
+### 14.3 Microsoft Entra ID and Zero-Trust Identity
 *   **Entra ID (AzureAD) IaC Automation**:
     *   [Terraform Registry - AzureAD Provider](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs): Native Microsoft Graph v1.0 provider for user, group, application, and role provisioning.
     *   [Microsoft Graph REST API v1.0 Reference](https://learn.microsoft.com/en-us/graph/api/overview): Endpoint documentation for programmatic Microsoft Entra directory administration.
@@ -897,7 +942,7 @@ To acquire the necessary knowledge and master the bleeding-edge cloud engineerin
     *   [Azure DevOps Service Connections via Workload Identity Federation](https://learn.microsoft.com/en-us/azure/devops/pipelines/library/connect-to-azure?view=azure-devops#create-an-azure-resource-manager-service-connection-using-workload-identity-federation): Eliminating long-lived client secrets using OpenID Connect (OIDC) between Azure DevOps and Azure.
     *   [Microsoft Entra Custom Security Attributes Overview](https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/custom-security-attributes-overview): Defining directory metadata extensions for fine-grained multi-tenant Attribute-Based Access Control (ABAC).
 
-### 13.4 Azure Kubernetes Service (AKS) & Cloud-Native Compute
+### 14.4 Azure Kubernetes Service (AKS) and Cloud-Native Compute
 *   **Managed Kubernetes Infrastructure**:
     *   [Azure Kubernetes Service (AKS) Documentation](https://learn.microsoft.com/en-us/azure/aks/): Architecture, security baselines, and operational management of enterprise AKS clusters.
     *   [Azure CNI Overlay Networking in AKS](https://learn.microsoft.com/en-us/azure/aks/azure-cni-overlay): Deploying high-density container workloads with private pod CIDRs without exhausting VNet IP addresses.
@@ -908,7 +953,7 @@ To acquire the necessary knowledge and master the bleeding-edge cloud engineerin
     *   [Ingress-NGINX Controller Documentation](https://kubernetes.github.io/ingress-nginx/): Production HTTP/HTTPS ingress routing, SSL termination, and rate-limiting for Kubernetes workloads.
     *   [kube-prometheus-stack Helm Chart](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack): Full Prometheus, Grafana, Alertmanager, and node-exporter observability stack.
 
-### 13.5 MongoDB Atlas Cloud & Data Tier
+### 14.5 MongoDB Atlas Cloud and Data Tier
 *   **MongoDB Atlas Terraform Provider**:
     *   [Terraform Registry - MongoDB Atlas Provider](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs): Managing projects, database users, access lists, and private endpoints.
     *   [Resource: `mongodbatlas_advanced_cluster`](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/advanced_cluster): Specification for modern multi-region replica sets, dedicated node tiering, and cloud provider integration.
@@ -916,7 +961,7 @@ To acquire the necessary knowledge and master the bleeding-edge cloud engineerin
     *   [MongoDB Atlas Private Endpoints on Azure](https://www.mongodb.com/docs/atlas/security-private-endpoint/): Configuring Azure Private Link to route database traffic exclusively through Microsoft's private network.
     *   [MongoDB Atlas Cloud Backup & Point-in-Time Recovery](https://www.mongodb.com/docs/atlas/backup/cloud-backup/overview/): Automating snapshots, oplog windows, and disaster recovery objectives.
 
-### 13.6 DevSecOps, Azure Pipelines & Static Security Governance
+### 14.6 DevSecOps, Azure Pipelines and Static Security Governance
 *   **Pipeline Engineering & ITIL Gates**:
     *   [Azure Pipelines YAML Schema Reference](https://learn.microsoft.com/en-us/azure/devops/pipelines/yaml-schema/): Authoring multi-stage declarative pipelines, templates, and environment gates.
     *   [Azure DevOps Approvals and Checks (`ManualValidation@0`)](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/approvals): Enforcing change advisory board (CAB) reviews and compliance gates in production stages.

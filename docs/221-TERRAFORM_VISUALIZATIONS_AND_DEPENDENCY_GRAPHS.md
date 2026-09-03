@@ -1,4 +1,4 @@
-[ Previous: 213. Configuration Inventory](213-TERRAFORM_ENVIRONMENT_CONFIGURATION_AND_TFVARS_INVENTORY.md) | [ Home](../README.md) | [ Next: 311. Hub-Spoke Backbone](311-SHARED_INFRA_NETWORKING_HUB_SPOKE_BACKBONE.md)
+[⬅️ Previous: 214. Terraform Modernization Guide](214-TERRAFORM_MODERNIZATION_GUIDE.md) | [🏠 Home](../README.md) | [➡️ Next: 311. Hub-Spoke Backbone](311-SHARED_INFRA_NETWORKING_HUB_SPOKE_BACKBONE.md)
 
 ---
 
@@ -150,7 +150,7 @@ terraform graph | dot -Tpng > architecture_dependency_graph.png
 
 ---
 
-[ Previous: 213. Configuration Inventory](213-TERRAFORM_ENVIRONMENT_CONFIGURATION_AND_TFVARS_INVENTORY.md) | [ Home](../README.md) | [ Next: 311. Hub-Spoke Backbone](311-SHARED_INFRA_NETWORKING_HUB_SPOKE_BACKBONE.md)
+[⬅️ Previous: 214. Terraform Modernization Guide](214-TERRAFORM_MODERNIZATION_GUIDE.md) | [🏠 Home](../README.md) | [➡️ Next: 311. Hub-Spoke Backbone](311-SHARED_INFRA_NETWORKING_HUB_SPOKE_BACKBONE.md)
 
 ---
 

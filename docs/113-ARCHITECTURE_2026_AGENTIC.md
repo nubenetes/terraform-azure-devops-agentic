@@ -1,8 +1,9 @@
-# 111. Architecture Strategy 2026: Agentic Reference Architecture & Modernization Blueprint
-
-[⬅️ Back to README](../README.md) | [Next: 211. Terraform Modernization Guide](211-TERRAFORM_MODERNIZATION_GUIDE.md)
+[⬅️ Previous: 112. Presentation Notebook](112-PRESENTATION_NOTEBOOK.md) | [🏠 Home](../README.md) | [➡️ Next: 121. Provenance and Legal](121-PROVENANCE_AND_LEGAL.md)
 
 ---
+
+# 113. Agentic Architecture Blueprint
+
 
 ## Executive Overview
 
@@ -154,3 +155,11 @@ To obtain the blast-radius benefits of Stacks without its SaaS liabilities, this
 ---
 
 *Enterprise Architecture Blueprint | Vision 2026*
+
+---
+
+[⬅️ Previous: 112. Presentation Notebook](112-PRESENTATION_NOTEBOOK.md) | [🏠 Home](../README.md) | [➡️ Next: 121. Provenance and Legal](121-PROVENANCE_AND_LEGAL.md)
+
+---
+
+*Technical Documentation: Agentic Reference Architecture and Modernization Blueprint | Vision 2026 Architectural Guide*

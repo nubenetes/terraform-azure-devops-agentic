@@ -1,4 +1,4 @@
-[ Previous: 312. DNS Ecosystem](312-NETWORKING_AND_DNS_ECOSYSTEM.md) | [ Home](../README.md) | [ Next: 314. Azure WAF Improvements](314-AZURE_WAF_IMPROVEMENTS.md)
+[⬅️ Previous: 312. DNS Ecosystem](312-NETWORKING_AND_DNS_ECOSYSTEM.md) | [🏠 Home](../README.md) | [➡️ Next: 314. Azure WAF Improvements](314-AZURE_WAF_IMPROVEMENTS.md)
 
 ---
 
@@ -164,7 +164,7 @@ To manage this AGW in production, we monitor these 4 golden metrics:
 
 ---
 
-[ Previous: 312. DNS Ecosystem](312-NETWORKING_AND_DNS_ECOSYSTEM.md) | [ Home](../README.md) | [ Next: 314. Azure WAF Improvements](314-AZURE_WAF_IMPROVEMENTS.md)
+[⬅️ Previous: 312. DNS Ecosystem](312-NETWORKING_AND_DNS_ECOSYSTEM.md) | [🏠 Home](../README.md) | [➡️ Next: 314. Azure WAF Improvements](314-AZURE_WAF_IMPROVEMENTS.md)
 
 ---
 

@@ -1,4 +1,4 @@
-[ Previous: 342. Storage Governance](342-STORAGE_GOVERNANCE_AND_LIFECYCLE.md) | [ Home](../README.md) | [ Next: 412. Pipeline Security and Governance](412-AZURE_DEVOPS_PIPELINE_SECURITY_AND_GOVERNANCE.md)
+[⬅️ Previous: 343. MongoDB Atlas Modernization](343-MONGODB_ATLAS_MODERNIZATION.md) | [🏠 Home](../README.md) | [➡️ Next: 412. Pipeline Security and Governance](412-AZURE_DEVOPS_PIPELINE_SECURITY_AND_GOVERNANCE.md)
 
 ---
 
@@ -411,8 +411,8 @@ Each module maintains its own configuration set, mimicking the Azure DevOps Libr
 
 ---
 
-[ Previous: 342. Storage Governance](342-STORAGE_GOVERNANCE_AND_LIFECYCLE.md) | [ Home](../README.md) | [ Next: 412. Pipeline Security and Governance](412-AZURE_DEVOPS_PIPELINE_SECURITY_AND_GOVERNANCE.md)
+[⬅️ Previous: 343. MongoDB Atlas Modernization](343-MONGODB_ATLAS_MODERNIZATION.md) | [🏠 Home](../README.md) | [➡️ Next: 412. Pipeline Security and Governance](412-AZURE_DEVOPS_PIPELINE_SECURITY_AND_GOVERNANCE.md)
 
 ---
 
-*Technical Documentation: Azure DevOps Pipelines: Global Orchestration and Multi-Layer Lifecycle | Vision 2026 Architectural Guide*
+*Technical Documentation: Azure DevOps Pipelines: Global Orchestration and Multi-Layer | Vision 2026 Architectural Guide*

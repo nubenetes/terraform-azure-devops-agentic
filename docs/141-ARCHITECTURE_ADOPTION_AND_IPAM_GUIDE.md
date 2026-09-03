@@ -1,4 +1,4 @@
-[ Previous: 131. Internal Developer Platform](131-INTERNAL_DEVELOPER_PLATFORM.md) | [ Home](../README.md) | [ Next: 211. Module Design Patterns](211-TERRAFORM_MODULE_DESIGN_PATTERNS.md)
+[⬅️ Previous: 131. Internal Developer Platform](131-INTERNAL_DEVELOPER_PLATFORM.md) | [🏠 Home](../README.md) | [➡️ Next: 211. Module Design Patterns](211-TERRAFORM_MODULE_DESIGN_PATTERNS.md)
 
 ---
 
@@ -112,10 +112,8 @@ For security-hardened clusters, the AKS API Server uses **Authorized IP Ranges**
 
 ---
 
-[ Previous: 131. Internal Developer Platform](131-INTERNAL_DEVELOPER_PLATFORM.md) | [ Home](../README.md) | [ Next: 211. Module Design Patterns](211-TERRAFORM_MODULE_DESIGN_PATTERNS.md)
+[⬅️ Previous: 131. Internal Developer Platform](131-INTERNAL_DEVELOPER_PLATFORM.md) | [🏠 Home](../README.md) | [➡️ Next: 211. Module Design Patterns](211-TERRAFORM_MODULE_DESIGN_PATTERNS.md)
 
 ---
 
 *Technical Documentation: Architecture Adoption and IPAM Guide | Vision 2026 Architectural Guide*
-
----

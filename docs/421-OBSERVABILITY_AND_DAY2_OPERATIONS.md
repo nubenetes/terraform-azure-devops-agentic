@@ -1,4 +1,4 @@
-[ Previous: 412. Pipeline Security and Governance](412-AZURE_DEVOPS_PIPELINE_SECURITY_AND_GOVERNANCE.md) | [ Home](../README.md) | [ Next: 811. DR and BCP Arch Analysis](811-DR_BCP_ARCH_ANALYSIS.md)
+[⬅️ Previous: 412. Pipeline Security and Governance](412-AZURE_DEVOPS_PIPELINE_SECURITY_AND_GOVERNANCE.md) | [🏠 Home](../README.md) | [➡️ Next: 811. DR and BCP Arch Analysis](811-DR_BCP_ARCH_ANALYSIS.md)
 
 ---
 
@@ -143,8 +143,8 @@ The platform utilizes **Nginx Ingress Controller** for L7 traffic management wit
 
 ---
 
-[ Previous: 412. Pipeline Security and Governance](412-AZURE_DEVOPS_PIPELINE_SECURITY_AND_GOVERNANCE.md) | [ Home](../README.md) | [ Next: 811. DR and BCP Arch Analysis](811-DR_BCP_ARCH_ANALYSIS.md)
+[⬅️ Previous: 412. Pipeline Security and Governance](412-AZURE_DEVOPS_PIPELINE_SECURITY_AND_GOVERNANCE.md) | [🏠 Home](../README.md) | [➡️ Next: 811. DR and BCP Arch Analysis](811-DR_BCP_ARCH_ANALYSIS.md)
 
 ---
 
-*Technical Documentation: Observability and Day2 Operations: Unified Monitoring and Management | Vision 2026 Architectural Guide*
+*Technical Documentation: Observability and Day2 Operations: Unified Monitoring | Vision 2026 Architectural Guide*

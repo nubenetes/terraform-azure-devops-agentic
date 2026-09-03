@@ -1,4 +1,4 @@
-[ Previous: 313. App Gateway Deep Dive](313-APP_GATEWAY_DEEP_DIVE.md) | [ Home](../README.md) | [ Next: 321. Microsoft Entra ID Integration](321-MICROSOFT_ENTRA_ID_INTEGRATION.md)
+[⬅️ Previous: 313. App Gateway Deep Dive](313-APP_GATEWAY_DEEP_DIVE.md) | [🏠 Home](../README.md) | [➡️ Next: 321. Microsoft Entra ID Integration](321-MICROSOFT_ENTRA_ID_INTEGRATION.md)
 
 ---
 
@@ -146,7 +146,7 @@ AzureDiagnostics
 
 ---
 
-[ Previous: 313. App Gateway Deep Dive](313-APP_GATEWAY_DEEP_DIVE.md) | [ Home](../README.md) | [ Next: 321. Microsoft Entra ID Integration](321-MICROSOFT_ENTRA_ID_INTEGRATION.md)
+[⬅️ Previous: 313. App Gateway Deep Dive](313-APP_GATEWAY_DEEP_DIVE.md) | [🏠 Home](../README.md) | [➡️ Next: 321. Microsoft Entra ID Integration](321-MICROSOFT_ENTRA_ID_INTEGRATION.md)
 
 ---
 

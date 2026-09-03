@@ -1,4 +1,4 @@
-[ Previous: 911. Troubleshooting and Runbooks](911-TROUBLESHOOTING_AND_OPERATIONAL_RUNBOOKS.md) | [ Home](../README.md)
+[⬅️ Previous: 911. Troubleshooting and Runbooks](911-TROUBLESHOOTING_AND_OPERATIONAL_RUNBOOKS.md) | [🏠 Home](../README.md)
 
 ---
 
@@ -166,7 +166,7 @@ The transition from "Dashboards" to "Insights".
 
 ---
 
-[ Previous: 911. Troubleshooting and Runbooks](911-TROUBLESHOOTING_AND_OPERATIONAL_RUNBOOKS.md) | [ Home](../README.md)
+[⬅️ Previous: 911. Troubleshooting and Runbooks](911-TROUBLESHOOTING_AND_OPERATIONAL_RUNBOOKS.md) | [🏠 Home](../README.md)
 
 ---
 

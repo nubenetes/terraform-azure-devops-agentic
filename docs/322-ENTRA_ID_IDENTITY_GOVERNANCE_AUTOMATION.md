@@ -1,4 +1,4 @@
-[ Previous: 321. Microsoft Entra ID Integration](321-MICROSOFT_ENTRA_ID_INTEGRATION.md) | [ Home](../README.md) | [ Next: 323. Key Vault Trust Architecture](323-KEY_VAULT_TRUST_ARCHITECTURE.md)
+[⬅️ Previous: 321. Microsoft Entra ID Integration](321-MICROSOFT_ENTRA_ID_INTEGRATION.md) | [🏠 Home](../README.md) | [➡️ Next: 323. Key Vault Trust Architecture](323-KEY_VAULT_TRUST_ARCHITECTURE.md)
 
 ---
 
@@ -137,7 +137,7 @@ To fulfill Zero-Trust requirements, the environment enforces **Conditional Acces
 
 ---
 
-[ Previous: 321. Microsoft Entra ID Integration](321-MICROSOFT_ENTRA_ID_INTEGRATION.md) | [ Home](../README.md) | [ Next: 323. Key Vault Trust Architecture](323-KEY_VAULT_TRUST_ARCHITECTURE.md)
+[⬅️ Previous: 321. Microsoft Entra ID Integration](321-MICROSOFT_ENTRA_ID_INTEGRATION.md) | [🏠 Home](../README.md) | [➡️ Next: 323. Key Vault Trust Architecture](323-KEY_VAULT_TRUST_ARCHITECTURE.md)
 
 ---
 

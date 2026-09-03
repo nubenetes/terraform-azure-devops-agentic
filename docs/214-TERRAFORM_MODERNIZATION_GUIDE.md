@@ -1,8 +1,9 @@
-# 211. Terraform Ecosystem Modernization Guide (September 2026)
-
-[⬅️ Back to README](../README.md) | [Previous: 111. Architecture Strategy](111-ARCHITECTURE_2026_AGENTIC.md) | [Next: 321. Zero-Trust & Pipeline Security](321-ZERO_TRUST_AND_PIPELINE_SECURITY.md)
+[⬅️ Previous: 213. Configuration Inventory](213-TERRAFORM_ENVIRONMENT_CONFIGURATION_AND_TFVARS_INVENTORY.md) | [🏠 Home](../README.md) | [➡️ Next: 221. Visualizations](221-TERRAFORM_VISUALIZATIONS_AND_DEPENDENCY_GRAPHS.md)
 
 ---
+
+# 214. Terraform Modernization Guide
+
 
 ## 1. Modernization Overview
 
@@ -66,3 +67,11 @@ This document details the exact technical upgrades performed in [`nubenetes/terr
 ---
 
 *Enterprise Architecture Blueprint | Vision 2026*
+
+---
+
+[⬅️ Previous: 213. Configuration Inventory](213-TERRAFORM_ENVIRONMENT_CONFIGURATION_AND_TFVARS_INVENTORY.md) | [🏠 Home](../README.md) | [➡️ Next: 221. Visualizations](221-TERRAFORM_VISUALIZATIONS_AND_DEPENDENCY_GRAPHS.md)
+
+---
+
+*Technical Documentation: Terraform Ecosystem Modernization Guide | Vision 2026 Architectural Guide*

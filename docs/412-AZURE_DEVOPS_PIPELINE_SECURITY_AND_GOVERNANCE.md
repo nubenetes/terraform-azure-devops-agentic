@@ -1,4 +1,4 @@
-[ Previous: 411. Azure DevOps Pipelines](411-AZURE_DEVOPS_PIPELINES_ORCHESTRATION.md) | [ Home](../README.md) | [ Next: 421. Observability and Day2 Operations](421-OBSERVABILITY_AND_DAY2_OPERATIONS.md)
+[⬅️ Previous: 411. Azure DevOps Pipelines](411-AZURE_DEVOPS_PIPELINES_ORCHESTRATION.md) | [🏠 Home](../README.md) | [➡️ Next: 421. Observability and Day2 Operations](421-OBSERVABILITY_AND_DAY2_OPERATIONS.md)
 
 ---
 
@@ -234,7 +234,7 @@ jobs:
 
 ---
 
-[ Previous: 411. Azure DevOps Pipelines](411-AZURE_DEVOPS_PIPELINES_ORCHESTRATION.md) | [ Home](../README.md) | [ Next: 421. Observability and Day2 Operations](421-OBSERVABILITY_AND_DAY2_OPERATIONS.md)
+[⬅️ Previous: 411. Azure DevOps Pipelines](411-AZURE_DEVOPS_PIPELINES_ORCHESTRATION.md) | [🏠 Home](../README.md) | [➡️ Next: 421. Observability and Day2 Operations](421-OBSERVABILITY_AND_DAY2_OPERATIONS.md)
 
 ---
 

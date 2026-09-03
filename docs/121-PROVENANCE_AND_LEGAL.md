@@ -1,6 +1,9 @@
-[ Previous: 112. Presentation Notebook](112-PRESENTATION_NOTEBOOK.md) | [ Home](../README.md) | [ Next: 131. Internal Developer Platform](131-INTERNAL_DEVELOPER_PLATFORM.md)
+[⬅️ Previous: 113. Agentic Architecture Blueprint](113-ARCHITECTURE_2026_AGENTIC.md) | [🏠 Home](../README.md) | [➡️ Next: 131. Internal Developer Platform](131-INTERNAL_DEVELOPER_PLATFORM.md)
+
+---
 
 # 121. Provenance and Legal
+
 ---
 
 ##  Table of Contents
@@ -146,9 +149,8 @@ Any dispute arising from the use of this repository shall be governed by the **l
 
 ---
 
-[ Previous: 112. Presentation Notebook](112-PRESENTATION_NOTEBOOK.md) | [ Home](../README.md) | [ Next: 131. Internal Developer Platform](131-INTERNAL_DEVELOPER_PLATFORM.md)
+[⬅️ Previous: 113. Agentic Architecture Blueprint](113-ARCHITECTURE_2026_AGENTIC.md) | [🏠 Home](../README.md) | [➡️ Next: 131. Internal Developer Platform](131-INTERNAL_DEVELOPER_PLATFORM.md)
 
 ---
 
 *Technical Documentation: Code Provenance, References and Legal Disclaimer | Vision 2026 Architectural Guide*
-

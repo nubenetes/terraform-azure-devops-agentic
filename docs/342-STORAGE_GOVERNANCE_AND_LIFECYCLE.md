@@ -1,4 +1,4 @@
-[ Previous: 341. Database Architecture](341-DATABASE_ARCHITECTURE_AND_PERSISTENCE_STRATEGY.md) | [ Home](../README.md) | [ Next: 411. Azure DevOps Pipelines](411-AZURE_DEVOPS_PIPELINES_ORCHESTRATION.md)
+[⬅️ Previous: 341. Database Architecture](341-DATABASE_ARCHITECTURE_AND_PERSISTENCE_STRATEGY.md) | [🏠 Home](../README.md) | [➡️ Next: 343. MongoDB Atlas Modernization](343-MONGODB_ATLAS_MODERNIZATION.md)
 
 ---
 
@@ -134,7 +134,7 @@ Defined in [`10-file-share-clients-backup-policy.tf`](../App-Core/terraform-mani
 
 ---
 
-[ Previous: 341. Database Architecture](341-DATABASE_ARCHITECTURE_AND_PERSISTENCE_STRATEGY.md) | [ Home](../README.md) | [ Next: 411. Azure DevOps Pipelines](411-AZURE_DEVOPS_PIPELINES_ORCHESTRATION.md)
+[⬅️ Previous: 341. Database Architecture](341-DATABASE_ARCHITECTURE_AND_PERSISTENCE_STRATEGY.md) | [🏠 Home](../README.md) | [➡️ Next: 343. MongoDB Atlas Modernization](343-MONGODB_ATLAS_MODERNIZATION.md)
 
 ---
 

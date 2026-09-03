@@ -1,4 +1,4 @@
-[ Previous: 331. AKS Compute Hub](331-AKS_COMPUTE_HUB_AND_ML_ORCHESTRATION.md) | [ Home](../README.md) | [ Next: 341. Database Architecture](341-DATABASE_ARCHITECTURE_AND_PERSISTENCE_STRATEGY.md)
+[⬅️ Previous: 331. AKS Compute Hub](331-AKS_COMPUTE_HUB_AND_ML_ORCHESTRATION.md) | [🏠 Home](../README.md) | [➡️ Next: 341. Database Architecture](341-DATABASE_ARCHITECTURE_AND_PERSISTENCE_STRATEGY.md)
 
 ---
 
@@ -110,7 +110,7 @@ The cluster is fully hardened with identity-based security:
 
 ---
 
-[ Previous: 331. AKS Compute Hub](331-AKS_COMPUTE_HUB_AND_ML_ORCHESTRATION.md) | [ Home](../README.md) | [ Next: 341. Database Architecture](341-DATABASE_ARCHITECTURE_AND_PERSISTENCE_STRATEGY.md)
+[⬅️ Previous: 331. AKS Compute Hub](331-AKS_COMPUTE_HUB_AND_ML_ORCHESTRATION.md) | [🏠 Home](../README.md) | [➡️ Next: 341. Database Architecture](341-DATABASE_ARCHITECTURE_AND_PERSISTENCE_STRATEGY.md)
 
 ---
 

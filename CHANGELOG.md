@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Agentic PoC & Reference Architecture Baseline**: Complete modernization by **Antigravity Gemini 3.8 Flash agent** as an untested proof-of-concept and blueprint.
 - **In-Depth Terraform Stacks Incompatibility Analysis**: Added comprehensive documentation and architectural diagrams explaining why HashiCorp Terraform Stacks is unavailable on this architecture (HCP SaaS lock-in, CI/CD pipeline conflict, imperative script interleaving, data sovereignty).
 - **Native Mermaid Architecture Visualizations**: Replaced binary media with 6 rich Mermaid diagrams in `README.md` and `docs/` (Global Architecture, DevSecOps Multi-Stage Flow, State Dependency Graph, Zero-Trust OIDC Identity Flow, Stacks Comparison, MongoDB Atlas Topology).
-- **New Modernization Documentation Suite**: Added `docs/111-ARCHITECTURE_2026_AGENTIC.md`, `docs/211-TERRAFORM_MODERNIZATION_GUIDE.md`, `docs/321-ZERO_TRUST_AND_PIPELINE_SECURITY.md`, and `docs/341-MONGODB_ATLAS_MODERNIZATION.md`.
+- **New Modernization Documentation Suite**: Added `docs/113-ARCHITECTURE_2026_AGENTIC.md`, `docs/214-TERRAFORM_MODERNIZATION_GUIDE.md`, `docs/325-ZERO_TRUST_AND_PIPELINE_SECURITY.md`, and `docs/343-MONGODB_ATLAS_MODERNIZATION.md`.
 
 ### Changed
 - **Terraform Core Upgrade**: Modernized `required_version` across all root manifests and modules to `>= 1.9.0, < 2.0.0` (targeting 1.10+ / 1.15+ standards).

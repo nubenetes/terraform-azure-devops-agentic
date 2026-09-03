@@ -1,4 +1,4 @@
-[ Home](../README.md) | [ Next: 112. Presentation Notebook](112-PRESENTATION_NOTEBOOK.md)
+[🏠 Home](../README.md) | [➡️ Next: 112. Presentation Notebook](112-PRESENTATION_NOTEBOOK.md)
 
 ---
 
@@ -200,7 +200,7 @@ This repository is designed so that the data powering AI remains within the Azur
 
 ---
 
-[ Home](../README.md) | [ Next: 112. Presentation Notebook](112-PRESENTATION_NOTEBOOK.md)
+[🏠 Home](../README.md) | [➡️ Next: 112. Presentation Notebook](112-PRESENTATION_NOTEBOOK.md)
 
 ---
 

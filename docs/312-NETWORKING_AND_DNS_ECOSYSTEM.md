@@ -1,4 +1,4 @@
-[ Previous: 311. Hub-Spoke Backbone](311-SHARED_INFRA_NETWORKING_HUB_SPOKE_BACKBONE.md) | [ Home](../README.md) | [ Next: 313. App Gateway Deep Dive](313-APP_GATEWAY_DEEP_DIVE.md)
+[⬅️ Previous: 311. Hub-Spoke Backbone](311-SHARED_INFRA_NETWORKING_HUB_SPOKE_BACKBONE.md) | [🏠 Home](../README.md) | [➡️ Next: 313. App Gateway Deep Dive](313-APP_GATEWAY_DEEP_DIVE.md)
 
 ---
 
@@ -125,7 +125,7 @@ The network resources follow a strict naming convention to ensure global uniquen
 
 ---
 
-[ Previous: 311. Hub-Spoke Backbone](311-SHARED_INFRA_NETWORKING_HUB_SPOKE_BACKBONE.md) | [ Home](../README.md) | [ Next: 313. App Gateway Deep Dive](313-APP_GATEWAY_DEEP_DIVE.md)
+[⬅️ Previous: 311. Hub-Spoke Backbone](311-SHARED_INFRA_NETWORKING_HUB_SPOKE_BACKBONE.md) | [🏠 Home](../README.md) | [➡️ Next: 313. App Gateway Deep Dive](313-APP_GATEWAY_DEEP_DIVE.md)
 
 ---
 

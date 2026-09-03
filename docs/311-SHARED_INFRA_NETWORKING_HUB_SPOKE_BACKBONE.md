@@ -1,4 +1,4 @@
-[ Previous: 221. Visualizations](221-TERRAFORM_VISUALIZATIONS_AND_DEPENDENCY_GRAPHS.md) | [ Home](../README.md) | [ Next: 312. DNS Ecosystem](312-NETWORKING_AND_DNS_ECOSYSTEM.md)
+[⬅️ Previous: 221. Visualizations](221-TERRAFORM_VISUALIZATIONS_AND_DEPENDENCY_GRAPHS.md) | [🏠 Home](../README.md) | [➡️ Next: 312. DNS Ecosystem](312-NETWORKING_AND_DNS_ECOSYSTEM.md)
 
 ---
 
@@ -183,8 +183,8 @@ For public-facing traffic, the **Application Gateway WAF v2** acts as the L7 ent
 
 ---
 
-[ Previous: 221. Visualizations](221-TERRAFORM_VISUALIZATIONS_AND_DEPENDENCY_GRAPHS.md) | [ Home](../README.md) | [ Next: 312. DNS Ecosystem](312-NETWORKING_AND_DNS_ECOSYSTEM.md)
+[⬅️ Previous: 221. Visualizations](221-TERRAFORM_VISUALIZATIONS_AND_DEPENDENCY_GRAPHS.md) | [🏠 Home](../README.md) | [➡️ Next: 312. DNS Ecosystem](312-NETWORKING_AND_DNS_ECOSYSTEM.md)
 
 ---
 
-*Technical Documentation: Shared Infrastructure: Networking Backbone and Hub-Spoke Architecture | Vision 2026 Architectural Guide*
+*Technical Documentation: Shared Infrastructure: Networking Backbone and Hub-Spoke | Vision 2026 Architectural Guide*

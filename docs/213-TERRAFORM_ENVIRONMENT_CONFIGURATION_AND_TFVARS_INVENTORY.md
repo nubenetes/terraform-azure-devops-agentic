@@ -1,8 +1,10 @@
-[ Previous: 212. Variable Architecture](212-TERRAFORM_VARIABLE_ARCHITECTURE_AND_DATA_STRATEGY.md) | [ Home](../README.md) | [ Next: 221. Visualizations](221-TERRAFORM_VISUALIZATIONS_AND_DEPENDENCY_GRAPHS.md)
+[⬅️ Previous: 212. Variable Architecture](212-TERRAFORM_VARIABLE_ARCHITECTURE_AND_DATA_STRATEGY.md) | [🏠 Home](../README.md) | [➡️ Next: 214. Terraform Modernization Guide](214-TERRAFORM_MODERNIZATION_GUIDE.md)
 
 ---
 
 # 213. Environment Configuration and .tfvars Inventory
+
+---
 
 This document provides a comprehensive inventory and explanation of the Terraform environment configuration files (`.tfvars`) used across the enterprise infrastructure. It details how environment parity is achieved, the **Provisioning Sequence** based on dependencies, and how sensitive data is managed through anonymization.
 
@@ -159,7 +161,8 @@ These modules are typically provisioned **after the Shared-Infra foundation and 
 
 ---
 
-[ Previous: 212. Variable Architecture](212-TERRAFORM_VARIABLE_ARCHITECTURE_AND_DATA_STRATEGY.md) | [ Home](../README.md) | [ Next: 221. Visualizations](221-TERRAFORM_VISUALIZATIONS_AND_DEPENDENCY_GRAPHS.md)
+[⬅️ Previous: 212. Variable Architecture](212-TERRAFORM_VARIABLE_ARCHITECTURE_AND_DATA_STRATEGY.md) | [🏠 Home](../README.md) | [➡️ Next: 214. Terraform Modernization Guide](214-TERRAFORM_MODERNIZATION_GUIDE.md)
 
 ---
+
 *Technical Documentation: Environment Configuration and .tfvars Inventory | Vision 2026 Architectural Guide*

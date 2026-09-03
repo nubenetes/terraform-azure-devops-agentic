@@ -1,4 +1,4 @@
-[ Previous: 211. Module Design Patterns](211-TERRAFORM_MODULE_DESIGN_PATTERNS.md) | [ Home](../README.md) | [ Next: 213. Configuration Inventory](213-TERRAFORM_ENVIRONMENT_CONFIGURATION_AND_TFVARS_INVENTORY.md)
+[⬅️ Previous: 211. Module Design Patterns](211-TERRAFORM_MODULE_DESIGN_PATTERNS.md) | [🏠 Home](../README.md) | [➡️ Next: 213. Configuration Inventory](213-TERRAFORM_ENVIRONMENT_CONFIGURATION_AND_TFVARS_INVENTORY.md)
 
 ---
 
@@ -256,8 +256,8 @@ variable "container_runtime" {
 
 ---
 
-[ Previous: 211. Module Design Patterns](211-TERRAFORM_MODULE_DESIGN_PATTERNS.md) | [ Home](../README.md) | [ Next: 213. Configuration Inventory](213-TERRAFORM_ENVIRONMENT_CONFIGURATION_AND_TFVARS_INVENTORY.md)
+[⬅️ Previous: 211. Module Design Patterns](211-TERRAFORM_MODULE_DESIGN_PATTERNS.md) | [🏠 Home](../README.md) | [➡️ Next: 213. Configuration Inventory](213-TERRAFORM_ENVIRONMENT_CONFIGURATION_AND_TFVARS_INVENTORY.md)
 
 ---
 
-*Technical Documentation: Analysis of Terraform Variable Architecture and Data Strategy | Vision 2026 Architectural Guide*
+*Technical Documentation: Terraform Variable Architecture and Data Strategy | Vision 2026 Architectural Guide*
