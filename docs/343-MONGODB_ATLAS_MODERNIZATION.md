@@ -7,7 +7,7 @@
 
 ## 1. Overview
 
-In modern MongoDB Atlas Terraform provider releases ($>1.14$ through $1.25+$), the legacy `mongodbatlas_cluster` resource has been deprecated. This document explains the complete modernization to `mongodbatlas_advanced_cluster` implemented in [`nubenetes/terraform-azure-devops-agentic`](https://github.com/nubenetes/terraform-azure-devops-agentic).
+In modern MongoDB Atlas Terraform provider releases ($>1.14$ through $1.25+$), the legacy `mongodbatlas_cluster` resource has been deprecated. This document explains the complete modernization to `Atlas Advanced<br/>Cluster Resource` implemented in [`nubenetes/terraform-azure-devops-agentic`](https://github.com/nubenetes/terraform-azure-devops-agentic).
 
 ---
 
@@ -20,19 +20,18 @@ In modern MongoDB Atlas Terraform provider releases ($>1.14$ through $1.25+$), t
 flowchart LR
     subgraph Legacy ["Legacy mongodbatlas_cluster (Deprecated)"]
         L_Cluster["mongodbatlas_cluster"]
-        L_Spec["num_shards & regions_config"]
-        L_Auto["auto_scaling_disk_gb_enabled"]
+        L_Spec["num_shards and<br/>regions_config"]
+        L_Auto["auto_scaling_<br/>disk_gb_enabled"]
         L_Cluster --> L_Spec
         L_Cluster --> L_Auto
     end
-
-    subgraph Modern ["Modern mongodbatlas_advanced_cluster (2026 Std)"]
-        M_Cluster["mongodbatlas_advanced_cluster"]
+    subgraph Modern ["Modern Atlas Advanced<br/>Cluster Resource (2026 Std)"]
+        M_Cluster["Atlas Advanced<br/>Cluster Resource"]
         M_Specs["replication_specs"]
         M_Regions["region_configs"]
-        M_Electable["electable_specs (instance_size, node_count)"]
-        M_Adv["advanced_configuration (oplog_size_mb)"]
-        M_Backup["backup_enabled = true (Continuous Cloud Backup)"]
+        M_Electable["electable_specs<br/>(size & count)"]
+        M_Adv["advanced_config<br/>(oplog_size_mb)"]
+        M_Backup["backup_enabled = true<br/>(Continuous Backup)"]
         M_Cluster --> M_Specs
         M_Specs --> M_Regions
         M_Regions --> M_Electable
@@ -45,10 +44,10 @@ flowchart LR
 
 #### Diagram Description & Schema Modernization Breakdown
 *   **Legacy `mongodbatlas_cluster` (Left Column - Deprecated)**:
-    *   Relied on monolithic, inflexible parameters (`num_shards`, `regions_config`, `auto_scaling_disk_gb_enabled`).
+    *   Relied on monolithic, inflexible parameters (`num_shards`, `regions_config`, `auto_scaling_<br/>disk_gb_enabled`).
     *   Lacked granular multi-cloud region tiering and flexible electable node configurations.
     *   Deprecated in modern releases of the MongoDB Atlas Terraform provider ($>1.14$ through $1.25+$).
-*   **Modern `mongodbatlas_advanced_cluster` (Right Column - 2026 Standard)**:
+*   **Modern `Atlas Advanced<br/>Cluster Resource` (Right Column - 2026 Standard)**:
     *   Decomposes cluster architecture into modular nested blocks: `replication_specs`, `region_configs`, and `electable_specs`.
     *   Explicitly configures instance sizing (`M10`), node counts (`3`), and failover priorities (`7`).
     *   Enables granular `advanced_configuration` (e.g., `oplog_size_mb`) and continuous cloud backup (`backup_enabled = true`).
@@ -59,7 +58,7 @@ flowchart LR
 *   **Integrated Data Protection**: Directly binds automated continuous cloud backups and Point-in-Time Restore (PITR) policies.
 
 #### Conclusion
-Migrating from `mongodbatlas_cluster` to `mongodbatlas_advanced_cluster` transforms the persistence layer into a resilient, enterprise-grade database deployment aligned with modern cloud standards.
+Migrating from `mongodbatlas_cluster` to `Atlas Advanced<br/>Cluster Resource` transforms the persistence layer into a resilient, enterprise-grade database deployment aligned with modern cloud standards.
 
 ---
 
@@ -91,7 +90,7 @@ resource "mongodbatlas_cluster" "cluster" {
 ### Modernized Implementation (Agentic Repo):
 ```hcl
 # ✅ MODERN SEPTEMBER 2026 STANDARD
-resource "mongodbatlas_advanced_cluster" "cluster" {
+resource "Atlas Advanced<br/>Cluster Resource" "cluster" {
   project_id   = mongodbatlas_project.project.id
   name         = "${var.Enterprise_product}-${local.instance_environment}"
   cluster_type = "REPLICASET"
@@ -128,7 +127,7 @@ resource "mongodbatlas_advanced_cluster" "cluster" {
 
 ---
 
-## 4. Key Advantages of `mongodbatlas_advanced_cluster`
+## 4. Key Advantages of `Atlas Advanced<br/>Cluster Resource`
 
 1.  **Multi-Cloud & Cross-Region Replica Sets**: Enables complex multi-region and multi-cloud topology configurations within a single declarative resource.
 2.  **Dedicated Node Sizing**: Dedicated electable, read-only, and analytics nodes can each have independent instance sizes.

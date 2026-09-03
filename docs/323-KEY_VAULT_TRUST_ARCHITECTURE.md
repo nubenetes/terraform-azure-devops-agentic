@@ -30,17 +30,17 @@ The project utilizes two distinct Key Vault types to separate infrastructure sec
 ```mermaid
 graph TD
     subgraph "Global Trust plane"
-        AAD[Azure Active Directory / Entra ID]
+        AAD["Microsoft Entra ID<br/>(Tenant Authority)"]
     end
     subgraph "Infrastructure Layer"
         AGW[Application Gateway v2]
-        ID_AGW[Managed Identity: id-kv-agw]
+        ID_AGW["Managed Identity:<br/>id-kv-agw"]
         KV_INFRA[Key Vault: kv-agw-cert]
     end
     subgraph "Application Layer (Multi-Tenant)"
         BACK[App-Core Backend API]
         KV_CLIENT[Key Vault: kv-client-01]
-        USR[End User / Security Group]
+        USR["End User /<br/>Security Group"]
     end
     AAD -->|OIDC Auth| BACK
     AGW -->|Uses| ID_AGW

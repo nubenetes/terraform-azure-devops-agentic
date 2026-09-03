@@ -64,10 +64,10 @@ graph TD
         end
         subgraph Variable ["B. Application Tier (Variable per Client/Env)"]
             ASP["App Service Plans<br/>(Premium V2/V3 - P2v2)"]
-            LOGS["Log Analytics<br/>(PerGB2018 Data Ingestion)"]
+            LOGS["Log Analytics<br/>(PerGB2018 Ingestion)"]
         end
         subgraph Data ["C. Data Tier (Variable per Client)"]
-            ATLAS["MongoDB Atlas<br/>(M10 Dedicated Instances)"]
+            ATLAS["MongoDB Atlas<br/>(M10 Instances)"]
             SA["Azure Storage<br/>(Standard LRS/GRS)"]
         end
     end
@@ -218,7 +218,7 @@ graph TD
     subgraph Internal_Network ["Azure Boundary (No Egress Cost)"]
         direction TB
         APP["App Service<br/>(Back-End)"]
-        FW["Azure Firewall Premium<br/>(Data Processing: €0.016 / GB)"]
+        FW["Azure Firewall Premium<br/>(Processing: €0.016/GB)"]
     end
     subgraph External_Network ["Public Internet / Cross-Region (Egress Cost Applied)"]
         direction TB
@@ -305,7 +305,7 @@ graph TD
     classDef storage fill:#2e75b6,stroke:#fff,stroke-width:1px,color:#fff
     classDef vault fill:#7b7b7b,stroke:#fff,stroke-width:1px,color:#fff
     classDef cost fill:#e0234e,stroke:#fff,stroke-width:2px,color:#fff
-    DATA[("Azure File Share<br/>(Standard)")]
+    DATA[["Azure File Share<br/>(Standard)"]]
     RSV["<b>Recovery Vault</b><br/>Daily Snapshot"]
     RET["<b>Retention: 6 Months</b><br/>(Cumulative Data)"]
     BILL["<b>Cumulative Cost</b><br/>$ / GB stored"]

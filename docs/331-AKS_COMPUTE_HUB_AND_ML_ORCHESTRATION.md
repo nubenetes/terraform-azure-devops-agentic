@@ -48,7 +48,7 @@ graph TD
     end
     ACR[Azure Container Registry]
     KV[Azure Key Vault]
-    SA[Azure Storage: Model Weights]
+    SA[Azure Storage:<br/>Model Weights]
     USER_POOL_ML -.->|AcrPull| ACR
     USER_POOL_ML ==> |Workload Identity|KV
     USER_POOL_ML ==> |Private Link|SA

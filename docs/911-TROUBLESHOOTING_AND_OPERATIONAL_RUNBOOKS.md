@@ -69,8 +69,8 @@ graph TD
     B -- Yes --> D{App ID in Policy?}
     D -- No --> E[Add application_id to TF]
     D -- Yes --> F{User in Group?}
-    F -- No --> G[Add User to Security Group]
-    F -- Yes --> H[Verify Private Endpoint DNS]
+    F -- No --> G[Add User to<br/>Security Group]
+    F -- Yes --> H[Verify Private<br/>Endpoint DNS]
 ```
 
 </details>

@@ -15,30 +15,27 @@ This document presents the security review and hardening strategy implemented in
 ```mermaid
 flowchart TD
     subgraph Identity_Plane ["Microsoft Entra ID (Zero-Trust Identity)"]
-        FedCred["Federated Identity Credentials (OIDC)"]
-        SPN["Managed Service Principal"]
-        CSA["Custom Security Attributes"]
+        FedCred["Federated Credentials<br/>(OIDC Trust)"]
+        SPN["Managed Service<br/>Principal (MSI)"]
+        CSA["Custom Security<br/>Attributes (ABAC)"]
     end
-
     subgraph Pipeline_Plane ["Hardened Azure DevOps Pipeline (ubuntu-latest)"]
-        Runner["Pipeline Agent (Ubuntu 24.04 LTS)"]
-        MaskedEnv["Masked Environment Variables (TF_VAR_*)"]
-        Scan["Static Security Gate (Checkov / Trivy)"]
-        Approval["Manual Approval Gate (ManualValidation@0)"]
+        Runner["Pipeline Agent<br/>(Ubuntu 24.04 LTS)"]
+        MaskedEnv["Masked Env Vars<br/>(TF_VAR_*)"]
+        Scan["Static Security Gate<br/>(Checkov / Trivy)"]
+        Approval["Approval Gate<br/>(ManualValidation@0)"]
     end
-
     subgraph Azure_Plane ["Azure Landing Zone"]
-        KeyVault["Azure Key Vault (RBAC & Purge Protection)"]
-        AKS["AKS Compute (Workload Identity)"]
-        Storage["Storage Account (TLS 1.2+ & Private Link)"]
+        KeyVault["Azure Key Vault<br/>(RBAC & Purge Protect)"]
+        AKS["AKS Compute<br/>(Workload Identity)"]
+        Storage["Storage Account<br/>(TLS 1.2+ Private Link)"]
     end
-
     Runner --> Scan
     Scan --> MaskedEnv
     MaskedEnv --> Approval
     Approval --> Runner
     Runner -->|Request OIDC Token| FedCred
-    FedCred -->|Exchange for ARM Bearer Token| SPN
+    FedCred -->|Exchange for ARM Token| SPN
     SPN --> KeyVault
     SPN --> AKS
     SPN --> Storage

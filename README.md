@@ -171,40 +171,40 @@ Under strict regulatory frameworks (financial services, healthcare, European GDP
 flowchart TB
     subgraph Stacks_Model ["HashiCorp Terraform Stacks Model (Incompatible with this Architecture)"]
         direction TB
-        HCP["HCP Terraform Cloud<br/>(Proprietary SaaS Platform)"]
-        TFSTACK["tfstack.hcl<br/>(Native Declarative Graph)"]
-        TFDEPLOY["tfdeploy.hcl<br/>(SaaS Deployment Streams)"]
-        HCP_Runner["HCP Cloud Managed Runner<br/>(No Local Agent Execution)"]
+        HCP["HCP Terraform Cloud<br/>(Proprietary SaaS)"]
+        TFSTACK["tfstack.hcl<br/>(Declarative Graph)"]
+        TFDEPLOY["tfdeploy.hcl<br/>(Deployment Streams)"]
+        HCP_Runner["HCP Managed Runner<br/>(No Local Agents)"]
         HCP --> TFSTACK
         HCP --> TFDEPLOY
         TFSTACK --> HCP_Runner
         subgraph Stacks_Blockers ["Architectural Blockers"]
             direction TB
-            Block1["❌ Requires HCP Terraform SaaS<br/>(Cloud Vendor Lock-in)"]
-            Block2["❌ Eliminates Azure DevOps<br/>Native Multi-Stage CI/CD"]
-            Block3["❌ Cannot run Imperative<br/>PowerShell / Kubelogin scripts"]
-            Block4["❌ State and Secrets Streamed<br/>to 3rd-Party SaaS"]
+            Block1["❌ Requires HCP SaaS<br/>(Cloud Lock-in)"]
+            Block2["❌ Eliminates Azure<br/>DevOps Native CI/CD"]
+            Block3["❌ Cannot run Scripts<br/>(PowerShell/Kubelogin)"]
+            Block4["❌ State and Secrets<br/>Streamed to 3rd-Party"]
             Block1 --> Block2 --> Block3 --> Block4
         end
         HCP_Runner -.-> Block1
     end
     subgraph Pipeline_Model ["This Architecture: Azure DevOps Simulated Stacks (Enterprise Choice)"]
         direction TB
-        ADO["Enterprise Azure DevOps<br/>(Self-Hosted / Managed Pipelines)"]
-        Stages["Multi-Stage YAML Pipelines<br/>(Validate ➔ Plan ➔ Gate ➔ Apply)"]
-        State_Storage["Azure Storage Backend<br/>(azurerm behind Private Link)"]
-        Script_Hooks["Custom Script Tasks<br/>(PowerShell, Kubelogin, Bitbucket)"]
-        Workload_ID["Workload Identity Federation<br/>(Zero Long-Lived Secrets)"]
+        ADO["Enterprise Azure DevOps<br/>(Self-Hosted Runners)"]
+        Stages["Multi-Stage Pipelines<br/>(Plan ➔ Gate ➔ Apply)"]
+        State_Storage["Azure Storage Backend<br/>(Private Link azurerm)"]
+        Script_Hooks["Custom Script Tasks<br/>(PowerShell/Kubelogin)"]
+        Workload_ID["Workload Identity<br/>(Secretless OIDC)"]
         ADO --> Stages
         Stages --> State_Storage
         Stages --> Script_Hooks
         Stages --> Workload_ID
         subgraph Pipeline_Advantages ["Enterprise Architecture Advantages"]
             direction TB
-            Adv1["✅ 100% Azure DevOps Native<br/>Governance and Approval Gates"]
-            Adv2["✅ Zero SaaS Vendor Lock-in<br/>(Pure Terraform CLI / OpenTofu)"]
-            Adv3["✅ Perfect Interleaving of<br/>Declarative IaC and Imperative Scripts"]
-            Adv4["✅ Full Data Sovereignty<br/>(State Stored Solely in Private Azure Blob)"]
+            Adv1["✅ Azure DevOps Native<br/>Governance and Gates"]
+            Adv2["✅ Zero Vendor Lock-in<br/>(Pure Terraform CLI)"]
+            Adv3["✅ Perfect Interleaving<br/>(IaC & Custom Scripts)"]
+            Adv4["✅ Full Data Sovereignty<br/>(Private State Blobs)"]
             Adv1 --> Adv2 --> Adv3 --> Adv4
         end
         Workload_ID -.-> Adv1
@@ -277,11 +277,11 @@ flowchart TB
     end
     subgraph Spoke_AppCore ["App-Core Spoke: Application and Persistence (10.2.0.0/16)"]
         direction TB
-        AppGW["Application Gateway WAF v2<br/>(SSL Offload)"]
+        AppGW["Application Gateway<br/>WAF v2 (SSL Offload)"]
         Front_SPA["Linux Web App:<br/>Frontend SPA"]
         Back_API["Linux Web App:<br/>Backend API"]
         Blob_Storage["Azure Storage Account<br/>(Blob / EULA / TLS 1.2)"]
-        KeyVault["Azure Key Vault<br/>(RBAC & Purge Protection)"]
+        KeyVault["Azure Key Vault<br/>(RBAC & Purge Protect)"]
         AppGW -->|Private Routing| Front_SPA
         AppGW -->|API Traffic| Back_API
         Back_API -->|Private Link / Token| KeyVault
@@ -289,7 +289,7 @@ flowchart TB
     end
     subgraph MongoDB_Cloud ["External Data Tier: MongoDB Atlas Managed Cloud"]
         direction TB
-        Atlas_Cluster["MongoDB Atlas Advanced Cluster<br/>(ReplicaSet M10)"]
+        Atlas_Cluster["MongoDB Atlas<br/>Advanced Cluster<br/>(ReplicaSet M10)"]
         Atlas_Admin["Database Admin &<br/>Custom Roles"]
         Atlas_Backup["Continuous Cloud Backup<br/>& Point-in-Time Restore"]
     end
@@ -297,7 +297,7 @@ flowchart TB
         direction TB
         Entra_ID["Microsoft Entra ID<br/>(Tenant)"]
         App_Registrations["App Registrations &<br/>Service Principals"]
-        Custom_Security_Attr["Custom Security Attributes<br/>(Fine-Grained Auth)"]
+        Custom_Security_Attr["Custom Security<br/>Attributes (ABAC)"]
         CAP["Conditional Access<br/>Policies"]
         Entra_ID -.->|Identity Governance| App_Registrations
         Entra_ID -.->|Enforce MFA & Compliance| CAP
@@ -498,40 +498,33 @@ flowchart LR
     classDef app fill:#e65100,stroke:#bf360c,stroke-width:2px,color:#fff;
     classDef ops fill:#6a1b9a,stroke:#4a148c,stroke-width:2px,color:#fff;
     classDef state fill:#f8f9fa,stroke:#424242,stroke-width:1.5px,stroke-dasharray: 4 4,color:#212121;
-
     subgraph Col1 ["Tier 1: Foundations"]
         direction TB
         SI["Shared-Infra<br/>(Hub VNet, DNS,<br/>Azure Firewall)"]
         S_SI[[" sharedinfra.tfstate "]]
         SI ==> S_SI
-        
         AU["App-Users<br/>(Entra ID Groups,<br/>Directory Roles)"]
         S_AU[[" appusers.tfstate "]]
         AU ==> S_AU
     end
-
     subgraph Col2 ["Tier 2: Platforms and Core"]
         direction TB
         AKS["AKS Hub<br/>(K8s Cluster,<br/>Azure CNI)"]
         S_AKS[[" aks.tfstate "]]
         AKS ==> S_AKS
-
         AC["App-Core<br/>(App Gateway, Web Apps<br/>and Key Vault)"]
         S_AC[[" appcore.tfstate "]]
         AC ==> S_AC
     end
-
     subgraph Col3 ["Tier 3: Workloads and Day-2"]
         direction TB
         CAT["App-Catalog<br/>(Catalog App &<br/>Atlas Database)"]
         S_CAT[[" appcatalog.tfstate "]]
         CAT ==> S_CAT
-
         D2["Day2-Ops<br/>(NGINX Ingress<br/>and Monitoring)"]
         S_D2[[" day2ops.tfstate "]]
         D2 ==> S_D2
     end
-
     S_SI -.->|"Subnet IDs"| AKS
     S_SI -.->|"Private DNS & VIP"| AC
     S_AU -.->|"Group IDs & Roles"| AC
@@ -539,7 +532,6 @@ flowchart LR
     S_AKS -.->|"Kubeconfig"| D2
     S_AC -.->|"Key Vault & DB Secrets"| CAT
     S_AC -.->|"WAF Probes"| D2
-
     class SI foundation;
     class AU identity;
     class AKS compute;
@@ -592,37 +584,32 @@ flowchart LR
     classDef entra fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px;
     classDef ado fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
     classDef azure fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
-
     subgraph ADO_Pipeline ["1. CI/CD Plane: Azure DevOps"]
         direction TB
         Agent["Pipeline Runner<br/>(ubuntu-latest)"]
         OIDCToken["ADO OIDC Token<br/>(Ephemeral JWT)"]
         Agent -->|"1. Generate JWT"| OIDCToken
     end
-
     subgraph Entra ["2. Identity Plane: Microsoft Entra ID"]
         direction TB
-        FedCred["Federated Identity Credentials<br/>(OIDC Trust Binding)"]
+        FedCred["Federated Identity<br/>Credentials (OIDC Trust)"]
         SP["Service Principals &<br/>Managed Identities"]
         AppReg["App Registrations<br/>(SPA Front / API Back)"]
-        CSA["Custom Security Attributes<br/>(Fine-Grained ABAC)"]
+        CSA["Custom Security<br/>Attributes (ABAC)"]
         FedCred -->|"3. Assume Identity"| SP
         AppReg -->|"Scope Validation"| CSA
     end
-
     subgraph Azure_Resources ["3. Target Plane: Azure Landing Zone"]
         direction TB
-        AKV["Azure Key Vault<br/>(Compound Auth: App + User)"]
+        AKV["Azure Key Vault<br/>(Compound Auth)"]
         AKS_Pod["AKS Workload Pods<br/>(Azure CNI Overlay)"]
         Blob["Azure Storage Containers<br/>(Client Data Isolation)"]
     end
-
     OIDCToken -->|"2. Exchange Token"| FedCred
     SP ==>|"4. Secretless Deployment"| AKV
     AKS_Pod -.->|"Workload Identity Auth"| SP
     SP -->|"Secret Access"| AKV
     CSA -.->|"Attribute Enforcement"| Blob
-
     class FedCred,SP,AppReg,CSA entra;
     class Agent,OIDCToken ado;
     class AKS_Pod,AKV,Blob azure;
@@ -682,7 +669,6 @@ flowchart TD
     classDef mongo fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;
     classDef sec fill:#fff3e0,stroke:#f57c00,stroke-width:2px;
     classDef title fill:none,stroke:none,font-weight:bold,font-size:13px;
-
     subgraph Azure_Spoke ["Azure Spoke VNet (10.2.0.0/16)"]
         direction TB
         WebApps["Linux Web Apps<br/>(App-Core Backend API)"]
@@ -691,13 +677,12 @@ flowchart TD
         WebApps --> PE
         PE --> PE_Subnet
     end
-
     subgraph Mongo_Network ["MongoDB Atlas Managed Cloud Network"]
         direction TB
-        PLS["Azure Private Link Service<br/>(Atlas Dedicated Gateway)"]
+        PLS["Azure Private Link<br/>Dedicated Gateway"]
         subgraph Replica_Set [" "]
             direction TB
-            R_Title["mongodbatlas_advanced_cluster (Replica Set M10)"]:::title
+            R_Title["Atlas Advanced Cluster<br/>(Replica Set M10)"]:::title
             subgraph Nodes [" "]
                 direction LR
                 Primary["Primary Electable Node<br/>(Priority 7 / Electable)"]
@@ -712,17 +697,14 @@ flowchart TD
         PLS -.-> Secondary1
         PLS -.-> Secondary2
     end
-
     subgraph Atlas_Governance ["MongoDB Atlas Security and Resilience"]
         direction TB
         DB_Users["Database Users<br/>(Admin & ReadWrite)"]
         Cloud_Backup["Continuous Cloud Backup<br/>(Oplog Point-in-Time)"]
     end
-
-    PE_Subnet ==>|"Microsoft Global Backbone"| PLS
+    PE_Subnet ==>|"Global Backbone"| PLS
     DB_Users -.->|"SCRAM-SHA-256"| Primary
     Cloud_Backup -.->|"Backup Snapshots"| Secondary2
-
     class WebApps,PE,PE_Subnet azure;
     class PLS,Primary,Secondary1,Secondary2 mongo;
     class DB_Users,Cloud_Backup sec;

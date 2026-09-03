@@ -75,7 +75,7 @@ graph TD
         FW[Azure Firewall Premium<br/>IDPS + TLS Inspection]
     end
     WORKLOAD ==> |"All Egress"|UDR;
-    UDR ==> |"Next Hop: Virtual Appliance"|FW;
+    UDR ==> |"Next Hop: NVA Appliance"|FW;
     FW ==> |"Inspected Traffic"|Internet_Node((🌐 Internet));
 ```
 

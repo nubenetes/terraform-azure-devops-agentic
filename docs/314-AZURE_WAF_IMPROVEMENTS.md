@@ -47,15 +47,15 @@ In 2026, security does not reside at a single point but in orchestrated layers. 
 graph TD
     User((Global User)) -->|TLS 1.3| AFD[Azure Front Door Premium]
     subgraph Global_Edge_Security
-        AFD -->|WAF Policy AI| WAF_Global[Managed Rule Sets / Bot Protection]
+        AFD -->|WAF Policy AI| WAF_Global[Managed Rule Sets /<br/>Bot Protection]
     end
     WAF_Global -->|Private Link| AGW[Application Gateway v2]
     subgraph Regional_Hardening
-        AGW -->|WAF Policy Regional| WAF_Reg[Custom Rules / SQLi / XSS]
-        AGW -->|Zero Trust| BE[App Service / Private Endpoint]
+        AGW -->|WAF Policy Regional| WAF_Reg[Custom Rules /<br/>SQLi and XSS]
+        AGW -->|Zero Trust| BE[App Service /<br/>Private Endpoint]
     end
     subgraph Observability
-        AFD -.-> Sentinel[Microsoft Sentinel / Log Analytics]
+        AFD -.-> Sentinel[Microsoft Sentinel /<br/>Log Analytics]
         AGW -.-> Sentinel
     end
 ```

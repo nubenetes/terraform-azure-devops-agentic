@@ -76,19 +76,19 @@ graph TD
     classDef secondary fill:#7b7b7b,stroke:#fff,stroke-width:2px,color:#fff
     classDef global fill:#548235,stroke:#fff,stroke-width:2px,color:#fff
     subgraph Global_Entry ["Traffic Steering Tier"]
-        DNS["Azure DNS / Traffic Manager<br/>(Global Steering)"]
+        DNS["Azure DNS /<br/>Traffic Manager<br/>(Global Steering)"]
     end
     subgraph Region_A ["Primary: North Europe (NE)"]
         direction TB
         AGW_A["App Gateway WAF v2"]
         AKS_A["AKS Cluster (Primary)"]
-        DB_A[("MongoDB Atlas<br/>(Primary Cluster)")]
+        DB_A[["MongoDB Atlas<br/>(Primary Cluster)"]]
     end
     subgraph Region_B ["Secondary: Central US (CUS)"]
         direction TB
         AGW_B["App Gateway WAF v2"]
-        AKS_B["AKS Cluster (Warm Standby)"]
-        DB_B[("MongoDB Atlas<br/>(Geo-Replica)")]
+        AKS_B["AKS Cluster<br/>(Warm Standby)"]
+        DB_B[["MongoDB Atlas<br/>(Geo-Replica)"]]
     end
     DNS ==> AGW_A
     DNS -.->|Failover Trigger| AGW_B

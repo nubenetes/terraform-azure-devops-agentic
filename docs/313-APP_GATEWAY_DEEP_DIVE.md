@@ -59,7 +59,7 @@ graph TD
     subgraph Routing_Rules
         LH_Portal --> RR_Path[rrhs-portal PathBased]
         LH_Viewer --> RR_Viewer[rrhs-viewer PathBased]
-        LH_Redirect --> RR_Redirect[rrh-portal Basic Redirect]
+        LH_Redirect --> RR_Redirect[rrh-portal<br/>Basic Redirect]
     end
     subgraph Path_Mapping
         RR_Path -->|/core/*| BP_Back[bp-back API]
@@ -71,7 +71,7 @@ graph TD
     end
     subgraph Backends
         BP_Back --> AS_Back[App Service: API]
-        BP_V_Back --> AS_V_Back[App Service: Per-Client API]
+        BP_V_Back --> AS_V_Back[App Service:<br/>Per-Client API]
         Redirect_Viewer -.->|Jump| LH_Viewer
     end
 ```

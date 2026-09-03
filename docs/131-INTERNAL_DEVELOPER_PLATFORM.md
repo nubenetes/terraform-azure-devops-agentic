@@ -46,7 +46,7 @@ Following **Team Topologies** principles, this IDP decouples infrastructure comp
 
 ```mermaid
 graph TD
-    Dev[Application Team] -->|Defines Config| IDP[Internal Developer Platform]
+    Dev[Application Team] -->|Defines Config| IDP["Internal Developer<br/>Platform (IDP)"]
     subgraph IDP_Engine
         direction TB
         IDP --> TF[Modular Terraform]

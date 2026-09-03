@@ -83,15 +83,15 @@ graph TD
     P1 -->|Successful Apply| P2
     P2 -->|Successful Apply| P3
     subgraph States ["Isolated Terraform States"]
-        S1[("State: Shared-Infra")]
-        S2[("State: AKS")]
-        S3[("State: App-Core")]
+        S1[["State: Shared-Infra"]]
+        S2[["State: AKS"]]
+        S3[["State: App-Core"]]
     end
     P1 ==> S1
     P2 ==> S2
     P3 ==> S3
     S2 -.->|data.azurerm_subnet| S1
-    S3 -.->|data.azurerm_kubernetes_cluster| S2
+    S3 -.->|data.azurerm_k8s_cluster| S2
     class P1,P2,P3 pipeline
     class S1,S2,S3 state
 ```

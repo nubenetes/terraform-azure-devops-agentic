@@ -36,19 +36,19 @@ graph TD
     SA[Storage Account: appcore]
     subgraph Public_Assets ["Public Assets"]
         direction TB
-        CO_PUB[Container: co-appcore-env]
+        CO_PUB[Container:<br/>co-appcore-env]
         BLOB_CFG[Blob: settings.json]
     end
     subgraph Tenant_Isolation ["Tenant Isolation"]
         direction TB
-        CO_T1[Container: co-prod-clientA-env]
-        CO_T2[Container: co-prod-clientB-env]
+        CO_T1[Container:<br/>co-prod-clientA-env]
+        CO_T2[Container:<br/>co-prod-clientB-env]
         BLOB_EULA[Blob: EULA.pdf]
     end
     subgraph Legacy_Persistence ["Legacy Persistence"]
         direction TB
-        FS_T1[File Share: fs-prod-clientA-env]
-        FS_T2[File Share: fs-prod-clientB-env]
+        FS_T1[File Share:<br/>fs-prod-clientA-env]
+        FS_T2[File Share:<br/>fs-prod-clientB-env]
     end
     SA --> CO_PUB
     SA --> CO_T1

@@ -47,9 +47,9 @@ graph TD
         A_CON[ADO: Contributors]
     end
     subgraph "Resource Access (Azure)"
-        SC_ENG[Service Connection: ENG Subscription]
-        SC_PRO[Service Connection: PRO Subscription]
-        KV_SEC[Key Vault: DevOps Secrets]
+        SC_ENG[Service Connection:<br/>ENG Subscription]
+        SC_PRO[Service Connection:<br/>PRO Subscription]
+        KV_SEC[Key Vault:<br/>DevOps Secrets]
     end
     E_ADM -->|Mapped| A_ADM
     E_SRE -->|Mapped| A_MGR
@@ -139,14 +139,14 @@ The IaC cycle follows a predictable path with integrated security checkpoints.
 graph TD
     START[Commit Detected] --> BRANCH{Branch?}
     BRANCH -- "develop" --> VALIDATE[Run: terraform validate]
-    VALIDATE --> PLAN_ENG[Run: terraform plan - ENG]
+    VALIDATE --> PLAN_ENG[Run: terraform<br/>plan - ENG]
     PLAN_ENG --> APPLY_ENG[Auto-Apply to ENG]
     BRANCH -- "main" --> VALIDATE_PRO[Run: terraform validate]
-    VALIDATE_PRO --> PLAN_PRO[Run: terraform plan - PRO]
+    VALIDATE_PRO --> PLAN_PRO[Run: terraform<br/>plan - PRO]
     PLAN_PRO --> REVIEW{Review Plan Artifact}
     REVIEW -- "Rejected" --> STOP[Discard Build]
     REVIEW -- "Approved" --> GATE{Approval Gate}
-    GATE -- "SRE Approval" --> APPLY_PRO[Execute: terraform apply - PRO]
+    GATE -- "SRE Approval" --> APPLY_PRO[Execute: terraform<br/>apply - PRO]
     GATE -- "Timeout/Deny" --> STOP
 ```
 

@@ -46,7 +46,7 @@ graph TD
     end
     subgraph ENG_SPOKE [Engineering Spoke: App-Core ENG]
         direction TB
-        VNET_E[VNet: vnet-appcore-dnedev]
+        VNET_E[VNet:<br/>vnet-appcore-dnedev]
         AKS_E[AKS Cluster]
         APP_E[App Services]
     end
@@ -108,12 +108,12 @@ The project implements a complex multi-tier DNS resolution strategy to handle Cl
 ```mermaid
 graph LR
     subgraph "Public Internet"
-        P_DNS[Public DNS: enterprise.com]
+        P_DNS[Public DNS:<br/>enterprise.com]
     end
     subgraph Azure_Hub ["Azure Hub (Shared-Infra)"]
         direction TB
-        ZONE_APPS[Private Zone: apps.enterprise.com]
-        ZONE_ENG[Private Zone: eng.enterprise.com]
+        ZONE_APPS[Private Zone:<br/>apps.enterprise.com]
+        ZONE_ENG[Private Zone:<br/>eng.enterprise.com]
         RESOLVER[Private DNS Resolver]
     end
     subgraph "Spokes"

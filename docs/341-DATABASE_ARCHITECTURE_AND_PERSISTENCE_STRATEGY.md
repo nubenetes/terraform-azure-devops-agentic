@@ -94,14 +94,14 @@ graph TD
 graph TD
     subgraph Azure_Subscription ["Azure Environment (ENG/PRO)"]
         direction TB
-        App["App Service / Backend API"]
-        FW["Azure Firewall / NAT Gateway"]
+        App["App Service /<br/>Backend API"]
+        FW["Azure Firewall /<br/>NAT Gateway"]
         App -->|Outbound Egress| FW
     end
     subgraph Atlas_Cloud ["External Cloud: MongoDB Atlas"]
         direction TB
-        GW["Atlas Access List / Firewall"]
-        DB[("Replica Set M10")]
+        GW["Atlas Access List /<br/>Firewall"]
+        DB[["Replica Set M10"]]
         IAM["Local DB Users"]
         GW -->|Allow Azure IP| DB
         IAM -.->|Credential Check| DB
@@ -123,8 +123,8 @@ graph TD
 graph TD
     subgraph Azure_Subscription_Hardened ["Azure Environment (ENG/PRO)"]
         direction TB
-        App_H["App Service / Backend API"]
-        PE_A["Private Endpoint for Atlas"]
+        App_H["App Service /<br/>Backend API"]
+        PE_A["Private Endpoint<br/>for Atlas"]
         MSI_A["Managed Identity"]
         subgraph VNet_Backbone_H ["Private VNet Backbone"]
             PE_A
@@ -135,7 +135,7 @@ graph TD
     subgraph Atlas_Cloud_Sovereign ["External Cloud: MongoDB Atlas"]
         direction TB
         PL["Private Link Service"]
-        DB_H[("Replica Set M10")]
+        DB_H[["Replica Set M10"]]
         IAM_F["<b>Federated Auth</b><br/>(Entra ID Integration)"]
         PL ==> DB_H
         IAM_F -.->|Validates Identity| DB_H
@@ -143,7 +143,7 @@ graph TD
     PE_A -.->|Virtual Link| PL
     MSI_A ==> |Mapped to DB User|IAM_F
     subgraph Entra_ID ["Microsoft Entra ID"]
-        IDP["App Registration / Identity Provider"]
+        IDP["App Registration /<br/>Identity Provider"]
     end
     IDP -.->|SAML/OIDC Trust| IAM_F
 ```
@@ -160,7 +160,7 @@ The gold standard for 2026. Security is **Native Identity-based**.
 graph TD
     subgraph Azure_Subscription_Native ["Azure Environment (ENG/PRO)"]
         direction TB
-        App_N["App Service / Backend API"]
+        App_N["App Service /<br/>Backend API"]
         PE["Private Endpoint"]
         MSI["Managed Identity"]
         subgraph VNet_Backbone ["Private VNet Backbone"]
@@ -171,7 +171,7 @@ graph TD
     end
     subgraph Cosmos_Service ["Native Service: Cosmos DB"]
         direction TB
-        C_DB[("Cosmos DB Account")]
+        C_DB[["Cosmos DB Account"]]
         RBAC["Azure RBAC / Entra ID"]
         PE ==> C_DB
         MSI ==> |RBAC Assigned|RBAC

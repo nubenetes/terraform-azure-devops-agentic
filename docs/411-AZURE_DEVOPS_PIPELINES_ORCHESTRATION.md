@@ -61,7 +61,7 @@ flowchart TB
         T_PLN[terraform-plan.yml]
         T_APP[terraform-apply.yml]
         T_DES[terraform-destroy.yml]
-        T_IS[include-innosetup-steps.yml]
+        T_IS["include-innosetup-<br/>steps.yml"]
     end
     subgraph Spokes ["Orchestrated Spokes"]
         direction TB
@@ -69,13 +69,13 @@ flowchart TB
             direction LR
             P_AKS[01-provision-AKS.yml]
             P_CORE[01-provision-AppCore.yml]
-            P_INFRA[01-provision-SharedInfra.yml]
-            P_USERS[01-provision-AppUsers.yaml]
+            P_INFRA["01-provision-<br/>SharedInfra.yml"]
+            P_USERS["01-provision-<br/>AppUsers.yaml"]
         end
         subgraph App_Spokes ["Application Spokes (CI/CD)"]
             direction LR
-            P_LINK[azure-pipelines.yml - AppLink]
-            P_INT[azure-pipelines.yml - Integration]
+            P_LINK["azure-pipelines.yml<br/>(AppLink)"]
+            P_INT["azure-pipelines.yml<br/>(Integration)"]
             P_ART[publish-artifacts.yml]
         end
     end
@@ -250,12 +250,12 @@ graph TD
     subgraph Deployment_Targets [Azure Resources]
         direction LR
         subgraph ENG_Spoke [Engineering Spoke]
-            RES_ENG_S[("Shadow: rg-dnedev")]
-            RES_ENG_O[("Official: rg-nedev")]
+            RES_ENG_S[["Shadow: rg-dnedev"]]
+            RES_ENG_O[["Official: rg-nedev"]]
         end
         subgraph PRO_Spoke [Production Spoke]
-            RES_PRO_S[("Shadow: rg-dnepro")]
-            RES_PRO_O[("Official: rg-nepro")]
+            RES_PRO_S[["Shadow: rg-dnepro"]]
+            RES_PRO_O[["Official: rg-nepro"]]
         end
     end
     B_DEV --> L_PRE
@@ -368,7 +368,7 @@ parameters:
 | **App-Core** | [`01-provision-AppCore.yml`](../App-Core/01-terraform-provision-appcore-pipeline.yml) | [`App-Core/templates/`](../App-Core/templates/) | [`App-Core/scripts/`](../App-Core/scripts/) |
 | **App-Catalog** | [`01-provision-catalog3.yml`](../App-Catalog/01-terraform-provision-catalog3-pipeline.yml) | [`App-Catalog/templates/`](../App-Catalog/templates/) | [`App-Catalog/scripts/`](../App-Catalog/scripts/) |
 | **Shared-Infra** | [`01-provision-shared.yml`](../Shared-Infra/01-terraform-provision-sharedinfra-pipeline.yml) | [`Shared-Infra/templates/`](../Shared-Infra/templates/) | [`Shared-Infra/scripts/`](../Shared-Infra/scripts/) |
-| **App-Users** | [`01-provision-AppUsers.yaml`](../App-Users/01-terraform-provision-appcore-users-pipeline.yaml) | [`App-Users/templates/`](../App-Users/templates/) | [`App-Users-Config/`](../App-Users-Config/) |
+| **App-Users** | [`01-provision-<br/>AppUsers.yaml`](../App-Users/01-terraform-provision-appcore-users-pipeline.yaml) | [`App-Users/templates/`](../App-Users/templates/) | [`App-Users-Config/`](../App-Users-Config/) |
 
 ### 6.2 Configuration and Variable Management Inventory (Global Variable Groups)
 Each module maintains its own configuration set, mimicking the Azure DevOps Library (Variable Groups).

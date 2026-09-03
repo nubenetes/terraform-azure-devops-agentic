@@ -104,6 +104,12 @@ All architectural documents in the `docs/` directory & the root `README.md` MUST
         - [ ] **Flowchart Relationship Integrity**: In `graph` or `flowchart` blocks, every relationship MUST be atomic (one source, one destination). Chaining multiple destination nodes with `&` or `and` is strictly prohibited. For example, `A --> B & C` MUST be split into `A --> B` and `A --> C` on separate lines.
         - [ ] **Sequence Diagram Integrity**: `sequenceDiagram` blocks MUST follow strict syntax for actor interactions. Every interaction MUST include both a source and a destination actor (e.g., `Actor->>Actor: Message`). Implicit "self-messaging" or standalone commands (e.g., `->Message`) are strictly prohibited as they cause rendering failures in many environments.
         - [ ] **Pure Text Headers and TOC**: Verify that NO emojis or ampersands (`&`) exist in any header or TOC label. All `&` must be replaced by "and".
+        - [ ] **Mermaid Text-Clipping and Line-Length Prevention**:
+            - **Max Node Line Length**: Individual text lines inside nodes MUST NOT exceed **24 characters**. Break longer phrases into balanced multi-line labels using `<br/>`.
+            - **No Cylinder Shapes for Text**: Do NOT use cylinder shapes `[("...")]` for text or state nodes as browser font metrics cause the top curved ellipse to slice through the text. Use subroutine boxes `[["..."]]` or stadium shapes `(["..."])` instead.
+            - **Max Edge Label Length**: Edge labels `|...|` MUST NOT exceed **26 characters** per line to prevent colliding with adjacent node boundaries or subgraph borders.
+            - **Mandatory Quotes**: Always enclose labels containing parentheses, slashes, or hyphens in double quotes (e.g. `node["Label (Details)"]`).
+            - **Automated Validation**: Run `python3 scripts/validate_mermaid.py` before committing to ensure 0 text-clipping or syntax issues repository-wide.
         - [ ] **Table Fidelity**: Markdown tables MUST be preceded by a blank line and use standard alignment separators (`| :--- |`, `| :---: |`, or `| ---: |`). Syntax like `::` is strictly prohibited. Every row MUST be on its own line; collapsed rows are forbidden.
         - [ ] **Structural Integrity**: Ensure no duplicated headers, correct TOC anchors, and adherence to the hierarchical numbering standard.
         - [ ] **GitHub Anchor Integrity**: TOC anchors MUST follow GitHub's slugification logic:

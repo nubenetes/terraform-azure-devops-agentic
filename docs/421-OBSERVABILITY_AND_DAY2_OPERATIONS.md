@@ -37,7 +37,7 @@ The architecture follows a "Single Pane of Glass" philosophy, integrating native
 graph TD
     subgraph "Azure Cloud (PaaS)"
         LA[Log Analytics Workspace]
-        AM[Azure Monitor / Application Insights]
+        AM[Azure Monitor /<br/>App Insights]
         MP[Managed Prometheus]
         MG[Managed Grafana]
     end

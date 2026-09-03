@@ -40,7 +40,7 @@ graph TD
     subgraph "Azure Entra ID (Global)"
         USR[Internal/External Users]
         GRP[Security Groups]
-        CAP[Conditional Access Policies]
+        CAP["Conditional Access<br/>Policies (CAP)"]
     end
     subgraph "Resource Spoke"
         RBAC[Azure RBAC Assignments]

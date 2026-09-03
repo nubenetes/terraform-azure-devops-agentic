@@ -27,29 +27,26 @@ The infrastructure enforces a strict **Hub-and-Spoke** topology across two geogr
 ```mermaid
 flowchart TD
     subgraph Regional_Hub ["Regional Hub (Shared-Infra)"]
-        FW["Azure Firewall & Egress NAT"]
-        DNS["Private DNS Resolver & Shared Zones"]
+        FW["Azure Firewall &<br/>Egress NAT Gateway"]
+        DNS["Private DNS Resolver<br/>& Shared Zones"]
         LogW["Log Analytics Workspace"]
     end
-
     subgraph Spoke_Compute ["Compute Spoke (AKS)"]
-        AKS["AKS Managed Cluster (Azure CNI Overlay)"]
+        AKS["AKS Managed Cluster<br/>(Azure CNI Overlay)"]
         PoolSystem["System Nodepool"]
         PoolApps["User / Apps Nodepool"]
         AKS --> PoolSystem
         AKS --> PoolApps
     end
-
     subgraph Spoke_Apps ["App Core Spoke (App-Core)"]
-        WAF["Application Gateway WAF v2"]
+        WAF["Application Gateway<br/>WAF v2"]
         Apps["Linux App Services"]
-        Storage["Storage Accounts (Blob / File)"]
+        Storage["Storage Accounts<br/>(Blob / File)"]
         KV["Azure Key Vault"]
         WAF --> Apps
         Apps --> KV
         Apps --> Storage
     end
-
     Regional_Hub <==>|VNet Peering| Spoke_Compute
     Regional_Hub <==>|VNet Peering| Spoke_Apps
 ```
@@ -95,13 +92,13 @@ Terraform Stacks introduces a native HCL orchestration framework:
 flowchart TB
     subgraph Reasons ["Key Obstacles to Adopting Terraform Stacks"]
         direction TB
-        R1["1. Proprietary SaaS Requirement<br/>(HCP Terraform Cloud Only)"]
-        R2["2. Conflict with Enterprise CI/CD<br/>(Azure DevOps YAML Orchestration)"]
-        R3["3. Imperative Script Interleaving<br/>(PowerShell, Kubelogin, Bitbucket)"]
-        R4["4. Data Sovereignty and Compliance<br/>(State file streaming to 3rd-party SaaS)"]
+        R1["1. Proprietary SaaS<br/>(HCP Cloud Only)"]
+        R2["2. Conflict with CI/CD<br/>(Azure DevOps YAML)"]
+        R3["3. Script Interleaving<br/>(PowerShell/Kubelogin)"]
+        R4["4. Data Sovereignty<br/>(Private State Storage)"]
         R1 --> R2 --> R3 --> R4
     end
-    Reasons --> Verdict["Conclusion:<br/>Simulated Stacks via Azure DevOps<br/>is the Required Architectural Choice"]
+    Reasons --> Verdict["Conclusion:<br/>Simulated Stacks in ADO<br/>is Enterprise Choice"]
 ```
 
 </details>

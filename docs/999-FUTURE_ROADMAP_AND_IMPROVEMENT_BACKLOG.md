@@ -34,8 +34,8 @@ The Vision 2026 strategy aims to transition from traditional "Human-Scripted" in
 
 ```mermaid
 graph LR
-    V1[Current: YAML Orchestration] --> V2[Mid-Term: Terraform Stacks]
-    V2 --> V3[2026 Target: AI-Driven Autonomous IaC]
+    V1[Current:<br/>YAML Orchestration] --> V2[Mid-Term:<br/>Terraform Stacks]
+    V2 --> V3[2026 Target:<br/>Autonomous AI IaC]
     subgraph "Capabilities"
         V1 --> C1[Manual Gates]
         V2 --> C2[Implicit Dependencies]
