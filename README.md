@@ -501,34 +501,34 @@ flowchart LR
 
     subgraph Col1 ["Tier 1: Foundations"]
         direction TB
-        SI["Shared-Infra<br/>(Hub VNet, DNS, Firewall)"]
-        S_SI[["sharedinfra.tfstate"]]
+        SI["Shared-Infra<br/>(Hub VNet, DNS,<br/>Azure Firewall)"]
+        S_SI[[" sharedinfra.tfstate "]]
         SI ==> S_SI
         
-        AU["App-Users<br/>(Entra ID Groups, Roles)"]
-        S_AU[["appusers.tfstate"]]
+        AU["App-Users<br/>(Entra ID Groups,<br/>Directory Roles)"]
+        S_AU[[" appusers.tfstate "]]
         AU ==> S_AU
     end
 
     subgraph Col2 ["Tier 2: Platforms and Core"]
         direction TB
-        AKS["AKS Hub<br/>(K8s Cluster, Azure CNI)"]
-        S_AKS[["aks.tfstate"]]
+        AKS["AKS Hub<br/>(K8s Cluster,<br/>Azure CNI)"]
+        S_AKS[[" aks.tfstate "]]
         AKS ==> S_AKS
 
-        AC["App-Core<br/>(App Gateway, Web Apps, KV)"]
-        S_AC[["appcore.tfstate"]]
+        AC["App-Core<br/>(App Gateway, Web Apps<br/>and Key Vault)"]
+        S_AC[[" appcore.tfstate "]]
         AC ==> S_AC
     end
 
     subgraph Col3 ["Tier 3: Workloads and Day-2"]
         direction TB
-        CAT["App-Catalog<br/>(Catalog App, Atlas DB)"]
-        S_CAT[["appcatalog.tfstate"]]
+        CAT["App-Catalog<br/>(Catalog App &<br/>Atlas Database)"]
+        S_CAT[[" appcatalog.tfstate "]]
         CAT ==> S_CAT
 
-        D2["Day2-Ops<br/>(NGINX Ingress, Monitoring)"]
-        S_D2[["day2ops.tfstate"]]
+        D2["Day2-Ops<br/>(NGINX Ingress<br/>and Monitoring)"]
+        S_D2[[" day2ops.tfstate "]]
         D2 ==> S_D2
     end
 
