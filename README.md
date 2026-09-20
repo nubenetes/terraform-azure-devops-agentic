@@ -8,6 +8,7 @@
 [![Repo Footprint: 4.9 MB](https://img.shields.io/badge/Repo%20Footprint-4.9%20MB-brightgreen.svg)](https://github.com/nubenetes/terraform-azure-devops-agentic)
 [![Binary Blobs: 0 (Pure Code)](https://img.shields.io/badge/Binary%20Blobs-0%20(Pure%20Code)-success.svg)](https://github.com/nubenetes/terraform-azure-devops-agentic)
 [![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-brightgreen.svg)](https://github.com/nubenetes/terraform-azure-devops-agentic/pulls)
+[![YouTube: @nubenetes](https://img.shields.io/badge/YouTube-%40nubenetes-FF0000.svg?logo=youtube&logoColor=white)](https://www.youtube.com/@nubenetes)
 
 [![Terraform: >= 1.9.0 / 2026 Std](https://img.shields.io/badge/Terraform-%3E%3D%201.9.0%20%7C%202026%20Std-623CE4.svg?logo=terraform&logoColor=white)](https://developer.hashicorp.com/terraform)
 [![OpenTofu: Compatible](https://img.shields.io/badge/OpenTofu-Compatible-FFDA1A.svg?logo=opentofu&logoColor=black)](https://opentofu.org)
@@ -101,6 +102,9 @@
     - [14.4 Azure Kubernetes Service (AKS) and Cloud-Native Compute](#144-azure-kubernetes-service-aks-and-cloud-native-compute)
     - [14.5 MongoDB Atlas Cloud and Data Tier](#145-mongodb-atlas-cloud-and-data-tier)
     - [14.6 DevSecOps, Azure Pipelines and Static Security Governance](#146-devsecops-azure-pipelines-and-static-security-governance)
+15. [YouTube Video Walkthroughs and Podcasts](#15-youtube-video-walkthroughs-and-podcasts)
+    - [15.1 Spanish (Original Audio)](#151-spanish-original-audio)
+    - [15.2 English (Original Audio)](#152-english-original-audio)
 
 ---
 
@@ -115,6 +119,7 @@ Built upon the battle-tested foundational concepts of [`nubenetes/terraform-azur
 *   **Microsoft Entra ID (AzureAD v3.x) Realignment**: Native integration with Microsoft Graph API v1.0, deprecating ADAL/MSAL workarounds, enforcing least-privilege App Role assignments, and preparing for agentic workload identities.
 *   **MongoDB Atlas Advanced Cluster Engine**: Full migration from the deprecated `mongodbatlas_cluster` resource to `mongodbatlas_advanced_cluster` with multi-region electable replica sets, granular oplog configuration, continuous cloud backup, and Azure Private Link readiness.
 *   **Hardened DevSecOps Pipelines**: Elimination of plaintext `-var secret_...` CLI parameters in favor of masked `TF_VAR_` environment variables, implementation of Azure DevOps **Workload Identity Federation (OIDC)**, and retirement of deprecated Ubuntu 20.04 runners in favor of Ubuntu 24.04 LTS (`ubuntu-latest`).
+*   **Decoupled Multimedia Knowledge Library**: To preserve a lightweight repository footprint (< 5 MB) without binary blobs, all 26 architectural video walkthroughs and deep-dive audio podcasts are hosted externally on YouTube at [**@nubenetes**](https://www.youtube.com/@nubenetes) and fully indexed with complete technical descriptions in [**Section 15: YouTube Video Walkthroughs and Podcasts**](#15-youtube-video-walkthroughs-and-podcasts).
 
 ---
 
@@ -985,6 +990,527 @@ To acquire the necessary knowledge and master the bleeding-edge cloud engineerin
 *   **Static IaC Security Scanning**:
     *   [Checkov - Static Code Analysis for Infrastructure as Code](https://www.checkov.io/): Detecting misconfigurations and compliance violations across Terraform manifests.
     *   [Trivy - Comprehensive Container & IaC Security Scanner](https://aquasecurity.github.io/trivy/): Vulnerability scanning, secret detection, and policy compliance for Git repositories and cloud configurations.
+
+---
+
+## 15. YouTube Video Walkthroughs and Podcasts
+
+Official video walkthroughs, deep-dive podcasts, and architectural presentations covering the Vision 2026 enterprise cloud architecture are published on YouTube at [**@nubenetes**](https://www.youtube.com/@nubenetes).
+
+Because this agentic modernized repository builds directly upon the architecture of [`nubenetes/terraform-azure-devops`](https://github.com/nubenetes/terraform-azure-devops), these high-fidelity visual and audio resources serve as the definitive multimedia companion for understanding the underlying network topology, identity governance model, and orchestration engine.
+
+### 15.1 Spanish (Original Audio)
+
+<details>
+<summary><strong>Spanish Video Walkthroughs and Podcasts (14 Videos)</strong></summary>
+<br>
+
+**1. 04. Vision 2026 Azure Terraform (Español)**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=g_jy7WNAVEQ](https://www.youtube.com/watch?v=g_jy7WNAVEQ)
+- ⏱️ **Duration**: 07:02
+- 📝 **Full Description**:
+> 🛠️ Módulo 04: Automatización de Azure Terraform con Azure DevOps (Español)
+>
+> Cómo ejecutar Terraform de forma 100% automatizada en Azure DevOps sin recurrir a ClickOps ni claves estáticas.
+>
+> 📌 Aspectos Clave:
+> • Configuración de Service Connections basadas en Workload Identity Federation (OIDC).
+> • Ejecución segura de `terraform plan` y `terraform apply` con puertas de aprobación.
+> • Almacenamiento seguro del estado en Azure Blob Storage con encriptación.
+>
+> 🔗 Repositorio GitHub:
+> • https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duración: 7:02
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**2. 04. Vision 2026 Azure Terraform - Edición Extendida (Español)**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=FtoFbOXSTaM](https://www.youtube.com/watch?v=FtoFbOXSTaM)
+- ⏱️ **Duration**: 07:02
+- 📝 **Full Description**:
+> 🛠️ Módulo 04 (Edición Extendida): Azure Terraform sin ClickOps en Azure DevOps
+>
+> Guía extendida sobre cómo implementar pipelines de Terraform 100% automatizados en Azure DevOps con máxima seguridad.
+>
+> 📌 Temas Clave:
+> • Conexión federada de Azure DevOps con Azure AD mediante OIDC sin secretos.
+> • Bloqueo estricto del estado de Terraform en Azure Storage con Private Endpoints.
+> • Aprobaciones manuales y validación estática con `tflint` y `checkov`.
+>
+> 🔗 Repositorio GitHub:
+> • https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duración: 7:02
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**3. 05. Vision 2026 Cloud Arch (Español)**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=aVNXwLztvi0](https://www.youtube.com/watch?v=aVNXwLztvi0)
+- ⏱️ **Duration**: 07:09
+- 📝 **Full Description**:
+> ☁️ Módulo 05: Fundamentos de Arquitectura Cloud Vision 2026 (Español)
+>
+> Revisión técnica de los bloques fundamentales de cómputo, almacenamiento y seguridad en Azure.
+>
+> 📌 Temas de la Sesión:
+> • Jerarquía de suscripciones y grupos de administración.
+> • Patrones de alta disponibilidad zonal y geográfica.
+> • Integración nativa con pipelines de Azure DevOps.
+>
+> 🔗 Código Fuente:
+> • https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duración: 7:09
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**4. 06. Cloud Enterprise Vision 2026 (Español)**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=UbTDLGgDNQ8](https://www.youtube.com/watch?v=UbTDLGgDNQ8)
+- ⏱️ **Duration**: 07:02
+- 📝 **Full Description**:
+> ☁️ Módulo 06: Arquitectura Empresarial Cloud Vision 2026 (Español)
+>
+> Visión estratégica de la plataforma cloud empresarial: soberanía, automatización completa y gobernanza sin fricción.
+>
+> 📌 Puntos Clave:
+> • Los pilares de la arquitectura cloud de próxima generación.
+> • Reducción radical del Time-to-Market mediante Infraestructura como Código.
+> • Estrategias de cumplimiento normativo y resiliencia ante desastres.
+>
+> 🔗 Repositorio:
+> • https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duración: 7:02
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**5. 08. Vision 2026 AppCore y AppCatalog (Español)**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=X31v_z6bsN8](https://www.youtube.com/watch?v=X31v_z6bsN8)
+- ⏱️ **Duration**: 07:00
+- 📝 **Full Description**:
+> 📦 Módulo 08: AppCore y AppCatalog en Azure Terraform (Español)
+>
+> Diseño de un catálogo de aplicaciones desacoplado y gobernado para equipos de desarrollo en la nube.
+>
+> 📌 Contenido:
+> • Separación de infraestructura base (Core) vs componentes de aplicación (App).
+> • Creación de plantillas de autoservicio para desarrolladores.
+> • Automatización del ciclo de vida de recursos con Azure DevOps Pipelines.
+>
+> 🔗 Repositorio GitHub:
+> • https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duración: 7:00
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**6. 10. Identidad Zero Trust (Español)**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=XGBxsV1wh0s](https://www.youtube.com/watch?v=XGBxsV1wh0s)
+- ⏱️ **Duration**: 08:05
+- 📝 **Full Description**:
+> 🛡️ Módulo 10: Implementación de Identidad Zero Trust en Azure (Español)
+>
+> Cómo construir una arquitectura de identidad moderna basada en el principio de mínimo privilegio en Microsoft Entra ID y Azure.
+>
+> 📌 Temas Clave:
+> • Autenticación federada sin contraseñas (OIDC / Workload Identity).
+> • Asignación granular de RBAC mediante código declarativo en Terraform.
+> • Eliminación de secretos estáticos y credenciales de larga duración en CI/CD.
+>
+> 🔗 Repositorio GitHub:
+> • https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duración: 8:05
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**7. 12. Archivos tfvars y Motor Lógico (Español)**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=MuaPvneY7X0](https://www.youtube.com/watch?v=MuaPvneY7X0)
+- ⏱️ **Duration**: 08:24
+- 📝 **Full Description**:
+> ⚙️ Módulo 12: Dominando los Archivos tfvars y el Motor Lógico de Terraform
+>
+> Análisis profundo de la gestión dinámica de variables y parametrización en arquitecturas complejas de Terraform.
+>
+> 📌 Contenido:
+> • Estructuración modular de tfvars por entorno (dev, stage, prod).
+> • Validación de esquemas y tipos de variables en Terraform 1.5+.
+> • Prevención de errores de configuración y configuración reproducible.
+>
+> 🔗 Repositorio:
+> • GitHub: https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duración: 8:24
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**8. 14. MLOps Empresarial e Inferencia Segura (Español)**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=imCp2H--Ufc](https://www.youtube.com/watch?v=imCp2H--Ufc)
+- ⏱️ **Duration**: 08:13
+- 📝 **Full Description**:
+> 🤖 Módulo 14: Arquitectura MLOps Empresarial y Despliegue de Inferencia Segura
+>
+> Cómo aprovisionar plataformas de Machine Learning seguras y gobernadas en Azure mediante Terraform.
+>
+> 📌 Puntos Clave:
+> • Aprovisionamiento de Azure Machine Learning Workspaces e inferencia privada.
+> • Seguridad perimetral con Private Endpoints y deshabilitación de accesos públicos.
+> • Integración con Azure Key Vault y Storage Accounts cifrados.
+>
+> 🔗 Código Fuente:
+> • Repositorio GitHub: https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duración: 8:13
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**9. 16. Terraform Networking y DNS Corporativo (Español)**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=wy15hvlDlO0](https://www.youtube.com/watch?v=wy15hvlDlO0)
+- ⏱️ **Duration**: 08:44
+- 📝 **Full Description**:
+> 🌐 Módulo 16: Redes y DNS Corporativo con Terraform en Azure (Español)
+>
+> Explicación técnica detallada de la capa de conectividad y resolución DNS implementada para la arquitectura Vision 2026.
+>
+> 📌 Temas Tratados:
+> • Creación automatizada de redes virtuales, subredes y delegaciones.
+> • Vinculación de Zonas Privadas DNS a través de módulos reusables.
+> • Prevención de solapamiento de CIDRs y enrutamiento hacia firewalls perimetrales.
+>
+> 🔗 Repositorio del Proyecto:
+> • GitHub: https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duración: 8:44
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**10. 18. Desacoplando el Módulo DNS Top-Level Domain (Español)**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=HHDl0FgnQf4](https://www.youtube.com/watch?v=HHDl0FgnQf4)
+- ⏱️ **Duration**: 06:36
+- 📝 **Full Description**:
+> 🏛️ Módulo 18: Desacoplando el Módulo DNS Top-Level Domain (TLD) en Azure Terraform
+>
+> En esta sesión de la serie Vision 2026, exploramos el desacoplamiento arquitectónico de las zonas DNS privadas y públicas en entornos corporativos multi-suscripción de Microsoft Azure.
+>
+> 📌 Puntos Clave:
+> • Estrategias de aislamiento para zonas DNS privadas corporativas.
+> • Modularización y desacoplamiento en Terraform para prevenir bloqueos de despliegue.
+> • Automatización de registros DNS y vinculación de redes virtuales (VNet Links).
+> • Patrones de gobernanza para arquitecturas Hub-and-Spoke enterprise.
+>
+> 🔗 Código Fuente:
+> • Repositorio GitHub: https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duración: 6:36
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**11. 20. Guía de Servicios de Integración (Español)**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=XawbIOpykZ8](https://www.youtube.com/watch?v=XawbIOpykZ8)
+- ⏱️ **Duration**: 08:39
+- 📝 **Full Description**:
+> 📘 Módulo 20: Guía de Servicios de Integración en Azure Terraform (Español)
+>
+> Guía paso a paso sobre el diseño e implementación de servicios de integración corporativos en Azure mediante Infraestructura como Código (IaC).
+>
+> 📌 Contenido de la Sesión:
+> • Orquestación de servicios de integración en topologías multi-tier.
+> • Estandarización de módulos y automatización en Azure DevOps.
+> • Prácticas recomendadas de seguridad, RBAC e identidades administradas.
+>
+> 🔗 Repositorio del Proyecto:
+> • GitHub: https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duración: 8:39
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**12. Gobernanza IaC: Code-as-Docs con Azure, Jira, Confluence y Agentes de IA**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=yFXzKT0t5bg](https://www.youtube.com/watch?v=yFXzKT0t5bg)
+- ⏱️ **Duration**: 08:30
+- 📝 **Full Description**:
+> 📊 Gobernanza IaC: Code-as-Docs con Azure, Jira, Confluence y Agentes de IA
+>
+> Estrategia corporativa innovadora para integrar la gobernanza de Infraestructura como Código con herramientas de gestión empresarial (Jira, Confluence) potenciada por Agentes Autónomos de IA.
+>
+> Este video analiza una innovadora estrategia corporativa para gestionar Infraestructura como Código (IaC) en entornos Azure mediante la integración de Jira, Confluence y GitHub. La propuesta principal consiste en transformar a Confluence en la fuente de la verdad, permitiendo que modificaciones en tablas documentales disparen automáticamente despliegues de Terraform a través de GitHub Actions. El análisis destaca el papel disruptivo de la Inteligencia Artificial, específicamente GitHub Copilot y Atlassian Rovo, para democratizar la gestión técnica mediante comandos en lenguaje natural. No obstante, se advierten riesgos significativos sobre la pérdida de inmutabilidad y la seguridad si se abandonan las prácticas tradicionales de GitOps. Finalmente, el texto recomienda un modelo de flujo en cascada que preserve la gobernanza de Jira Service Management mientras se aprovecha la agilidad de la automatización moderna.
+>
+> 📌 Puntos de Innovación:
+> • Generación automática de documentación técnica (Code-as-Docs) desde módulos Terraform.
+> • Trazabilidad bidireccional entre cambios de infraestructura y tickets de Jira.
+> • Auditoría continua de cumplimiento normativo mediante agentes inteligentes.
+>
+> 🔗 Repositorio de Referencia:
+> • https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duración: 8:30
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**13. Podcast: Infraestructura Soberana y Seguridad sin Contraseñas**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=kQpkRmtZWgE](https://www.youtube.com/watch?v=kQpkRmtZWgE)
+- ⏱️ **Duration**: 30:57
+- 📝 **Full Description**:
+> 🎙️ Podcast: Terraform en Azure con Azure DevOps – Infraestructura Soberana y Seguridad sin Contraseñas
+>
+> Análisis a fondo sobre soberanía digital, seguridad sin contraseñas y gobernanza de infraestructura en la nube de Microsoft Azure.
+>
+> 📌 Temas del Podcast:
+> • ¿Qué significa construir una infraestructura cloud verdaderamente soberana?
+> • Eliminación total de Service Principals con secretos estáticos en Azure DevOps.
+> • Aislamiento criptográfico y gobernanza del ciclo de vida de llaves con Azure Key Vault.
+>
+> 🔗 Código Fuente:
+> • https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duración: 30:57
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**14. Podcast: Azure Terraform sin Contraseñas ni ClickOps**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=NMSyPk3JgOQ](https://www.youtube.com/watch?v=NMSyPk3JgOQ)
+- ⏱️ **Duration**: 21:01
+- 📝 **Full Description**:
+> 🎙️ Podcast: Terraform en Azure con Azure DevOps – Cero ClickOps y Automatización Radical
+>
+> Debate técnico sobre cómo erradicar los cambios manuales en el portal de Azure y establecer una disciplina absoluta de Infraestructura como Código.
+>
+> 📌 Puntos de Discusión:
+> • Los peligros del ClickOps en entornos corporativos regulados.
+> • Cómo diseñar una cultura de despliegue donde el código es la única fuente de verdad.
+> • Patrones de rollback y recuperación ante incidentes de infraestructura.
+>
+> 🔗 Repositorio del Proyecto:
+> • https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duración: 21:01
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+</details>
+
+### 15.2 English (Original Audio)
+
+<details>
+<summary><strong>English Video Walkthroughs and Podcasts (12 Videos)</strong></summary>
+<br>
+
+**1. 01. Vision 2026 Core Architecture Blueprint**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=2U952qD5nEI](https://www.youtube.com/watch?v=2U952qD5nEI)
+- ⏱️ **Duration**: 07:16
+- 📝 **Full Description**:
+> 🚀 Module 01: Vision 2026 Core Infrastructure Baseline & Vision
+>
+> The foundational introduction to the Cloud Enterprise Vision 2026 initiative: modernizing platform engineering through sovereign, code-driven cloud design.
+>
+> 📌 Key Principles:
+> • Zero-ClickOps: If it isn't in code, it does not exist in production.
+> • Sovereign Infrastructure: Complete control over keys, identity, and networking.
+> • Seamless developer self-service backed by robust security rails.
+>
+> 🔗 GitHub Repository:
+> • https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duration: 7:16
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**2. 02. Vision 2026 Cloud Blueprint (English)**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=P59Efi8kaBg](https://www.youtube.com/watch?v=P59Efi8kaBg)
+- ⏱️ **Duration**: 07:31
+- 📝 **Full Description**:
+> 📋 Module 02: Vision 2026 Enterprise Cloud Architecture Blueprint
+>
+> Detailed walkthrough of the reference architecture blueprint for enterprise cloud environments on Microsoft Azure.
+>
+> 📌 What We Cover:
+> • Landing Zone layout and network mesh topology.
+> • Centralized identity, logging, and key management services.
+> • Declarative IaC pipelines and self-healing cloud design.
+>
+> 🔗 Source Code & Diagrams:
+> • https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duration: 7:31
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**3. 03. Vision 2026 Cloud Blueprint Alternative Summary**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=MnbGP-SfBe8](https://www.youtube.com/watch?v=MnbGP-SfBe8)
+- ⏱️ **Duration**: 07:32
+- 📝 **Full Description**:
+> 📋 Module 03: Vision 2026 Cloud Blueprint Alternative Executive Summary
+>
+> High-level summary of the architectural decisions, trade-offs, and design patterns established in the Vision 2026 Cloud Blueprint.
+>
+> 📌 Highlights:
+> • Core architectural trade-offs: Multi-subscription vs resource group isolation.
+> • Shift-left security controls and automated policy validation.
+> • Cost optimization strategies for enterprise cloud landing zones.
+>
+> 🔗 Project Repository:
+> • https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duration: 7:32
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**4. 07. Vision 2026 AppCore and AppCatalog**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=QjxZRPTOY5k](https://www.youtube.com/watch?v=QjxZRPTOY5k)
+- ⏱️ **Duration**: 08:19
+- 📝 **Full Description**:
+> 📦 Module 07: Vision 2026 AppCore & Service Catalog Architecture
+>
+> Architectural blueprint for building reusable enterprise cloud application foundations.
+>
+> 📌 Key Learnings:
+> • Multi-tier separation between foundation infrastructure and workloads.
+> • Standardizing container environments (AKS / App Services).
+> • Enforcing baseline observability and security configurations automatically.
+>
+> 🔗 GitHub Repository:
+> • https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duration: 8:19
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**5. 09. AppUsers Identity Automation**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=m5udFEiPd7M](https://www.youtube.com/watch?v=m5udFEiPd7M)
+- ⏱️ **Duration**: 07:37
+- 📝 **Full Description**:
+> 🛡️ Module 09: AppUsers & Workload Identity Automation in Azure
+>
+> Automating enterprise identity lifecycle management and service principal permissions using Terraform.
+>
+> 📌 Highlights:
+> • Programmatic Entra ID (Azure AD) user and group management.
+> • Scoping role definitions and assignments to resource groups.
+> • Zero-Trust auditability and compliance enforcement.
+>
+> 🔗 GitHub Repository:
+> • https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duration: 7:37
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**6. 11. Demystifying tfvars Logic Engine**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=WzlZlkY3FqA](https://www.youtube.com/watch?v=WzlZlkY3FqA)
+- ⏱️ **Duration**: 07:45
+- 📝 **Full Description**:
+> ⚙️ Module 11: Demystifying the tfvars Logic Engine in Terraform
+>
+> In-depth technical review of managing state, variables, and environment manifests across multi-tenant cloud platforms.
+>
+> 📌 Key Takeaways:
+> • Decoupling environment parameters from core module logic.
+> • Dynamic variable mapping and custom validation blocks.
+> • Best practices for secure CI/CD parameter injection.
+>
+> 🔗 GitHub:
+> • Source Code: https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duration: 7:45
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**7. 13. Vision 2026 Secure MLOps Inference**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=RsCyG77uAGI](https://www.youtube.com/watch?v=RsCyG77uAGI)
+- ⏱️ **Duration**: 08:23
+- 📝 **Full Description**:
+> 🤖 Module 13: Vision 2026 Secure MLOps & Private Inference Architecture
+>
+> Engineering secure, compliant cloud infrastructure for enterprise Machine Learning and AI workloads.
+>
+> 📌 Session Highlights:
+> • Hardening Azure ML endpoints against data exfiltration.
+> • Identity-based access without long-lived API tokens.
+> • Automated provisioning of GPU/compute clusters with Terraform.
+>
+> 🔗 Source Code:
+> • GitHub: https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duration: 8:23
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**8. 15. Vision 2026 Terraform Networking and DNS**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=jp6Ia6hR0yo](https://www.youtube.com/watch?v=jp6Ia6hR0yo)
+- ⏱️ **Duration**: 08:50
+- 📝 **Full Description**:
+> 🌐 Module 15: Vision 2026 Terraform Networking & DNS Architecture
+>
+> Architecture guide covering core virtual networking, subnetting topology, and hybrid DNS resolution in Microsoft Azure.
+>
+> 📌 What You Will Learn:
+> • Enterprise Hub-and-Spoke topology with Azure Virtual WAN / VNet peering.
+> • Segmenting network security groups (NSGs) and routing tables.
+> • Centralizing DNS forwarding and private endpoints resolution.
+>
+> 🔗 Source Code:
+> • GitHub: https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duration: 8:50
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**9. 17. Enterprise Cloud IaC DNS Top Level Domain Module**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=dPTQOqUwtbI](https://www.youtube.com/watch?v=dPTQOqUwtbI)
+- ⏱️ **Duration**: 07:34
+- 📝 **Full Description**:
+> 🌐 Module 17: Enterprise Cloud IaC DNS Top-Level Domain Architecture
+>
+> Deep-dive into designing scalable, automated DNS architectures across enterprise multi-cloud and Azure hybrid footprints.
+>
+> 📌 Key Highlights:
+> • Private DNS resolver architecture and cross-subscription linking.
+> • Zero-touch DNS record management via Terraform modules.
+> • High availability and fault tolerance for mission-critical name resolution.
+>
+> 🔗 Source Code:
+> • GitHub Repository: https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duration: 7:34
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**10. 19. Integration Service Guide**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=kjih7kr9Kb8](https://www.youtube.com/watch?v=kjih7kr9Kb8)
+- ⏱️ **Duration**: 06:09
+- 📝 **Full Description**:
+> 📘 Module 19: Enterprise Integration Service Architecture Guide (English)
+>
+> Comprehensive walkthrough covering enterprise integration services deployed with Terraform on Microsoft Azure.
+>
+> 📌 Key Topics Covered:
+> • Decoupling shared integration components across subscriptions.
+> • Infrastructure as Code (IaC) governance and zero-drift pipelines.
+> • Managed Identity and Key Vault secretless integration patterns.
+>
+> 🔗 Project Source Code:
+> • GitHub Repository: https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duration: 6:09
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**11. Podcast 01: Engineering the Vision 2026 Infrastructure Baseline**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=u286hij-Y48](https://www.youtube.com/watch?v=u286hij-Y48)
+- ⏱️ **Duration**: 46:27
+- 📝 **Full Description**:
+> 🎧 Podcast: Engineering the Vision 2026 Infrastructure Baseline on Azure
+>
+> Architectural masterclass exploring the principles behind zero-clickops infrastructure baselines in Microsoft Azure.
+>
+> 📌 Key Takeaways:
+> • Establishing unbreakable security rails without impacting developer autonomy.
+> • Hub-and-Spoke networking, private endpoints, and DNS zone design.
+> • Shift-left governance, automated policy validation, and drift remediation.
+>
+> 🔗 GitHub Repository:
+> • https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duration: 46:27
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**12. Podcast 02: Vision 2026 Azure Terraform Blueprint**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=bk3ndIYdaMA](https://www.youtube.com/watch?v=bk3ndIYdaMA)
+- ⏱️ **Duration**: 53:35
+- 📝 **Full Description**:
+> 🎧 Podcast: Engineering the 2026 Azure Terraform Blueprint – Sovereign Cloud Architecture
+>
+> Comprehensive deep-dive podcast examining the production architecture of the Vision 2026 Azure Terraform Blueprint.
+>
+> 📌 Discussion Topics:
+> • Designing multi-subscription cloud foundations with sovereign security principles.
+> • Passwordless pipelines with Azure DevOps and Workload Identity Federation (OIDC).
+> • Advanced tfvars engines and dynamic state isolation across environments.
+>
+> 🔗 Source Code & Manifests:
+> • GitHub: https://github.com/nubenetes/terraform-azure-devops
+>
+> ⏱️ Duration: 53:35
+> #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+</details>
 
 ---
 
