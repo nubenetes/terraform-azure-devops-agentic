@@ -1002,7 +1002,7 @@ Because this agentic modernized repository builds directly upon the architecture
 ### 15.1 Spanish (Original Audio)
 
 <details>
-<summary><strong>Spanish Video Walkthroughs and Podcasts (17 Videos)</strong></summary>
+<summary><strong>Spanish Video Walkthroughs and Podcasts (18 Videos)</strong></summary>
 <br>
 
 **1. 04. Vision 2026 Azure Terraform (Español)**
@@ -1354,6 +1354,29 @@ Because this agentic modernized repository builds directly upon the architecture
 >
 > ⏱️ Duración: 06:19
 > #Terraform #Azure #KeyVault #ZeroTrust #AzureDevOps #DevOps #IaC #CloudSecurity #SRE #PlatformEngineering #Español
+
+**18. Short: Cómo Entra ID y el Flujo OAuth2 On-Behalf-Of Protegen la Identidad en Azure (Español)**
+- 🔗 **Link**: [https://www.youtube.com/shorts/n0WsRakBpZQ](https://www.youtube.com/shorts/n0WsRakBpZQ)
+- 🛠️ **YouTube Studio**: [https://studio.youtube.com/video/n0WsRakBpZQ/edit](https://studio.youtube.com/video/n0WsRakBpZQ/edit)
+- ⏱️ **Duration**: 01:01
+- 📝 **Full Description**:
+> 🛡️ Short: Cómo Entra ID y el Flujo OAuth2 On-Behalf-Of Protegen la Identidad en Azure!
+>
+> ¿Cómo se comunican tus microservicios en Azure sin exponer las credenciales del usuario ni propagar tokens vulnerables? Mediante el flujo On-Behalf-Of (OBO) de OAuth 2.0 en Microsoft Entra ID!
+>
+> Por qué el flujo On-Behalf-Of es vital en arquitecturas Zero-Trust:
+> • Delegación de Identidad Segura: El frontend SPA solicita un token de acceso y lo envía a la API backend.
+> • Intercambio Criptográfico OBO: La API backend intercambia ese token ante Entra ID por un nuevo token específico para llamar a servicios downstream (Microsoft Graph, Key Vault o APIs secundarias).
+> • Principio de Menor Privilegio: Ningún servicio secundario recibe el token original del usuario, acotando el radio de impacto de seguridad.
+> • Cero Secretos Estáticos: Toda la autenticación es dinámica, efímera y auditada en los registros de acceso de Entra ID.
+>
+> 🔗 Explora la Arquitectura y Código Terraform:
+> • Repositorio Principal: https://github.com/nubenetes/terraform-azure-devops
+> • Repositorio Agentic: https://github.com/nubenetes/terraform-azure-devops-agentic
+> • Manifiestos OAuth2 en App-Core: https://github.com/nubenetes/terraform-azure-devops/tree/develop/App-Core/terraform-manifests/modules/appcore_module
+>
+> ⏱️ Duración: 01:01
+> #Shorts #OAuth2 #EntraID #Azure #ZeroTrust #Microservicios #DevSecOps #API #CloudSecurity #Terraform #Español
 
 </details>
 
