@@ -1002,7 +1002,7 @@ Because this agentic modernized repository builds directly upon the architecture
 ### 15.1 Spanish (Original Audio)
 
 <details>
-<summary><strong>Spanish Video Walkthroughs and Podcasts (14 Videos)</strong></summary>
+<summary><strong>Spanish Video Walkthroughs and Podcasts (17 Videos)</strong></summary>
 <br>
 
 **1. 04. Vision 2026 Azure Terraform (Español)**
@@ -1274,12 +1274,93 @@ Because this agentic modernized repository builds directly upon the architecture
 > ⏱️ Duración: 21:01
 > #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
 
+**15. Short: La arquitectura de Terraform que desafía a HashiCorp (Español)**
+- 🔗 **Link**: [https://www.youtube.com/shorts/DfrhzjHP-5k](https://www.youtube.com/shorts/DfrhzjHP-5k)
+- ⏱️ **Duration**: 00:59
+- 📝 **Full Description**:
+> 🚀 Short: La arquitectura de Terraform que desafía a HashiCorp (Español)
+>
+> Cómo diseñar una infraestructura empresarial en Microsoft Azure 100% como código (IaC) y sin ClickOps, fundamentada en Zero-Trust, aislamiento de entornos con GitFlow y orquestación determinista.
+>
+> 🎙️ Sobre el Audio:
+> • Formato: Multi-idioma con origen y locución base original en Español 🇪🇸.
+> • Síntesis inteligente generada a partir de la documentación técnica y arquitectónica oficial del proyecto.
+>
+> 📌 Aspectos Clave de la Arquitectura:
+> • 🔐 Zero-Trust & Secretless CI/CD: Autenticación federada mediante OIDC (Workload Identity) y Managed Identities, eliminando contraseñas estáticas y secretos de larga duración.
+> • 🌐 Topología Hub-and-Spoke: Segmentación estricta de red empresarial, resolución privada de DNS e inspección L7 con Azure Application Gateway WAF v2.
+> • 💡 Aislamiento de Entornos con GitFlow: Automatización de nomenclatura (prefijo 'd' en develop para el laboratorio de IaC vs nombres limpios en main para Producción) sobre suscripciones de Azure independientes.
+> • ⚡ Cómputo Elástico y Microservicios: Despliegue modular de Azure App Services y clusters AKS preparados para cargas de producción e inferencia MLOps.
+> • 🔄 Pipelines Multi-Etapa en Azure DevOps: Ciclo de vida determinista (plan/apply) con puertas de aprobación manual, escaneo estático (Checkov, Trivy) y aislamiento de estado (tfstate).
+> • 🤖 Evolución Agentic: De la infraestructura probada en producción al nuevo patrón de arquitectura y modernización generada por agentes de Inteligencia Artificial.
+>
+> 🔗 Repositorios en GitHub:
+> • Repositorio Principal (Validado en Entornos Reales): https://github.com/nubenetes/terraform-azure-devops
+> • Repositorio Agentic (PoC y Modernización v2.0 con IA): https://github.com/nubenetes/terraform-azure-devops-agentic
+>
+> ⏱️ Duración: 00:59
+> #Shorts #Terraform #Azure #AzureDevOps #DevSecOps #CloudArchitecture #Kubernetes #AKS #ZeroTrust #PlatformEngineering #IaC #NotebookLM #AgenticAI #CloudEngineering #Español #AudioEspañol
+
+**16. Video Overview: Arquitectura Zero-Trust en Azure con OAuth2 y OIDC (Español)**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=sgjOcxaWlOI](https://www.youtube.com/watch?v=sgjOcxaWlOI)
+- 🛠️ **YouTube Studio**: [https://studio.youtube.com/video/sgjOcxaWlOI/edit](https://studio.youtube.com/video/sgjOcxaWlOI/edit)
+- ⏱️ **Duration**: 05:39
+- 📝 **Full Description**:
+> 🛡️ Video Overview: Arquitectura Zero-Trust en Azure - Identidad como Perímetro con OAuth2 y OIDC (Español)
+>
+> Análisis visual y arquitectónico sobre el modelo de gobernanza Zero-Trust en Microsoft Azure, donde la identidad sustituye a la red física como el perímetro principal de seguridad.
+>
+> 🎙️ Sobre el Audio y Presentación:
+> • Formato: Video Overview con diapositivas animadas y locución en Español 🇪🇸.
+> • Basado en la arquitectura oficial de los repositorios terraform-azure-devops y terraform-azure-devops-agentic.
+>
+> 📌 Pilares Arquitectónicos:
+> • 🔐 Identidad como Perímetro Primario: Sustitución de firewalls estáticos por validación continua de identidad mediante Microsoft Entra ID.
+> • 🔄 Flujos OAuth2 y OIDC: Autenticación federada sin secretos (Workload Identity) para pipelines de Azure DevOps y clusters AKS.
+> • 🔑 App Registrations Multi-Tenant: Patrón de pre-autorización para Single Page Applications (SPA) y APIs backend con scopes delegados y roles de aplicación.
+> • ⚡ Erradicación de ClickOps: Despliegue determinista 100 por ciento como código (IaC) con Terraform.
+>
+> 🔗 Repositorios en GitHub:
+> • Repositorio Principal: https://github.com/nubenetes/terraform-azure-devops
+> • Repositorio Agentic: https://github.com/nubenetes/terraform-azure-devops-agentic
+> • Documentación Entra ID & OAuth2: https://github.com/nubenetes/terraform-azure-devops/blob/develop/docs/321-MICROSOFT_ENTRA_ID_INTEGRATION.md
+>
+> ⏱️ Duración: 05:39
+> #Terraform #Azure #ZeroTrust #OAuth2 #OIDC #AzureDevOps #DevSecOps #CloudArchitecture #KeyVault #PlatformEngineering #Español
+
+**17. Video Overview: Azure Terraform 2026 - Eliminación de Secretos en CLI con Key Vault (Español)**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=MoXkLow-asc](https://www.youtube.com/watch?v=MoXkLow-asc)
+- 🛠️ **YouTube Studio**: [https://studio.youtube.com/video/MoXkLow-asc/edit](https://studio.youtube.com/video/MoXkLow-asc/edit)
+- ⏱️ **Duration**: 06:19
+- 📝 **Full Description**:
+> 🔐 Video Overview: Azure Terraform 2026 - Eliminación de Secretos en CLI con Key Vault y Zero Trust (Español)
+>
+> Cómo diseñar e implementar una arquitectura de infraestructura como código (IaC) en Azure donde jamás se expongan secretos en texto plano en la CLI ni en variables de entorno.
+>
+> 🎙️ Sobre el Audio y Presentación:
+> • Formato: Video Overview visual e interactivo en Español 🇪🇸.
+> • Estudio profundo sobre gobierno de identidades y ciclo de vida de claves criptográficas.
+>
+> 📌 Temas Clave Tratados:
+> • 🚫 Cero Secretos en CLI: Eliminación total de contraseñas de Service Principals en scripts de despliegue y consolas de ingeniería.
+> • 🏛️ Azure Key Vault RBAC: Gobierno de secretos y certificados con control de acceso basado en roles sin access policies obsoletas.
+> • 🤝 Managed Identities y OBO: Identidades administradas asignadas por el usuario para Application Gateway y flujo On-Behalf-Of para servicios de backend.
+> • 🤖 Automatización y Modernización: Transición desde IaC tradicional hacia la orquestación autónoma impulsada por agentes de IA.
+>
+> 🔗 Repositorios en GitHub:
+> • Repositorio Principal: https://github.com/nubenetes/terraform-azure-devops
+> • Repositorio Agentic: https://github.com/nubenetes/terraform-azure-devops-agentic
+> • Arquitectura de Confianza Key Vault: https://github.com/nubenetes/terraform-azure-devops/blob/develop/docs/323-KEY_VAULT_TRUST_ARCHITECTURE.md
+>
+> ⏱️ Duración: 06:19
+> #Terraform #Azure #KeyVault #ZeroTrust #AzureDevOps #DevOps #IaC #CloudSecurity #SRE #PlatformEngineering #Español
+
 </details>
 
 ### 15.2 English (Original Audio)
 
 <details>
-<summary><strong>English Video Walkthroughs and Podcasts (12 Videos)</strong></summary>
+<summary><strong>English Video Walkthroughs and Podcasts (22 Videos)</strong></summary>
 <br>
 
 **1. 01. Vision 2026 Core Architecture Blueprint**
@@ -1509,6 +1590,231 @@ Because this agentic modernized repository builds directly upon the architecture
 >
 > ⏱️ Duration: 53:35
 > #Terraform #Azure #DevOps #IaC #AzureDevOps #CloudArchitecture #ZeroTrust #MLOps #Automation #PlatformEngineering
+
+**13. Short: The Enterprise Blueprint for Terraform Orchestration (English)**
+- 🔗 **Link**: [https://www.youtube.com/shorts/Fzop7r1ur_c](https://www.youtube.com/shorts/Fzop7r1ur_c)
+- ⏱️ **Duration**: 00:59
+- 📝 **Full Description**:
+> 🚀 Short: The Enterprise Blueprint for Terraform Orchestration (English)
+>
+> Designing enterprise-grade Microsoft Azure infrastructure 100% as Code (IaC) without ClickOps or bloated complexity, engineered on Zero-Trust security principles and strict state boundary isolation.
+>
+> 🎙️ About the Audio:
+> • Audio synthesis generated from the official technical and architectural documentation of the project.
+> • Language: English 🇬🇧 / 🇺🇸
+>
+> 📌 Key Architecture Pillars:
+> • 🔐 Zero-Trust & Secretless CI/CD: Workload Identity Federation (OIDC) and Managed Identities in Azure DevOps—completely eliminating static credentials and long-lived secrets.
+> • 🌐 Hub-and-Spoke Backbone: Enterprise VNet segmentation, Private DNS resolution, and L7 traffic inspection via Azure Application Gateway WAF v2.
+> • 💡 GitFlow & Multi-Subscription Isolation: Automated naming convention and resource tiering (prefix 'd' on develop for IaC staging lab vs clean naming on main for Production) across isolated Azure subscriptions.
+> • ⚡ Elastic Compute & Microservices: Decoupled orchestration of Azure App Services and AKS (Azure Kubernetes Service) clusters ready for production workloads and MLOps inference.
+> • 🔄 Deterministic Pipeline Lifecycle: Multi-stage pipelines in Azure DevOps with manual approval gates, static security scans (Checkov, Trivy), and independent state management (minimizing blast radius).
+> • 🤖 The Agentic Evolution: From hand-crafted, battle-tested production IaC to AI-assisted infrastructure modernization.
+>
+> 🔗 GitHub Repositories:
+> • Primary Repository (Production-Tested & Battle-Hardened): https://github.com/nubenetes/terraform-azure-devops
+> • Agentic Repository (PoC & v2.0 Modernization with AI Agents): https://github.com/nubenetes/terraform-azure-devops-agentic
+>
+> ⏱️ Duration: 00:59
+> #Shorts #Terraform #Azure #AzureDevOps #DevSecOps #CloudArchitecture #Kubernetes #AKS #ZeroTrust #PlatformEngineering #IaC #TerraformStacks #NotebookLM #AgenticAI #CloudEngineering
+
+**14. Video Overview: Zero Secret Cloud - Secretless Azure Terraform with Workload Identity**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=EsBYtWtMTig](https://www.youtube.com/watch?v=EsBYtWtMTig)
+- 🛠️ **YouTube Studio**: [https://studio.youtube.com/video/EsBYtWtMTig/edit](https://studio.youtube.com/video/EsBYtWtMTig/edit)
+- ⏱️ **Duration**: 07:44
+- 📝 **Full Description**:
+> 🚀 Video Overview: Zero Secret Cloud - Secretless Azure Terraform with Workload Identity and OIDC
+>
+> A comprehensive architectural deep dive exploring the complete elimination of static passwords and client secrets in modern Microsoft Azure CI/CD deployments.
+>
+> 📌 Architecture Pillars Deconstructed:
+> • The End of Static Credentials: Why long-lived service principal client secrets represent a major attack surface and how to replace them entirely.
+> • Workload Identity Federation: Exchanging short-lived OIDC tokens between Azure DevOps / GitHub Actions and Microsoft Entra ID.
+> • Secretless Terraform Provisioning: Authenticating the AzureRM Terraform provider with dynamic, federated identity credentials.
+> • Production Hardening: Implementing strict branch and environment filters on federated subject identifiers.
+>
+> 🔗 GitHub Repositories:
+> • Primary Repository: https://github.com/nubenetes/terraform-azure-devops
+> • Agentic Repository: https://github.com/nubenetes/terraform-azure-devops-agentic
+> • Entra ID Integration Guide: https://github.com/nubenetes/terraform-azure-devops/blob/develop/docs/321-MICROSOFT_ENTRA_ID_INTEGRATION.md
+>
+> ⏱️ Duration: 07:44
+> #Terraform #Azure #ZeroTrust #WorkloadIdentity #OIDC #AzureDevOps #CloudSecurity #DevOps #IaC #PlatformEngineering
+
+**15. Video Overview: Azure Digital Vault - Eliminating Expired Service Principal Passwords**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=9p4_C9foLho](https://www.youtube.com/watch?v=9p4_C9foLho)
+- 🛠️ **YouTube Studio**: [https://studio.youtube.com/video/9p4_C9foLho/edit](https://studio.youtube.com/video/9p4_C9foLho/edit)
+- ⏱️ **Duration**: 07:21
+- 📝 **Full Description**:
+> 🏛️ Video Overview: Azure Digital Vault - Eliminating Expired Service Principal Passwords in Key Vault
+>
+> Stop waking up in a cold sweat at 2 AM to rotate expired service principal passwords! Discover how modern Azure Key Vault RBAC and Managed Identities establish an unbreakable trust perimeter.
+>
+> 📌 Discussion Roadmap:
+> • Eradicating Password Expiration Outages: How secretless architectures eliminate unexpected pipeline failures caused by expired credentials.
+> • Key Vault RBAC vs Access Policies: Modernizing secret management with granular Azure RBAC roles instead of legacy, error-prone access policy lists.
+> • User-Assigned Managed Identities: Allowing Azure Application Gateway and compute tiers to pull certificates directly without stored keys.
+> • Automated Key Rotation: Implementing automated cryptographic lifecycle governance with Azure Event Grid and Key Vault alerts.
+>
+> 🔗 GitHub Repositories:
+> • Primary Repository: https://github.com/nubenetes/terraform-azure-devops
+> • Agentic Repository: https://github.com/nubenetes/terraform-azure-devops-agentic
+> • Key Vault Trust Architecture: https://github.com/nubenetes/terraform-azure-devops/blob/develop/docs/323-KEY_VAULT_TRUST_ARCHITECTURE.md
+>
+> ⏱️ Duration: 07:21
+> #Azure #KeyVault #Terraform #ZeroTrust #ManagedIdentities #DevSecOps #CloudArchitecture #SRE #PlatformEngineering #AzureDevOps
+
+**16. Video Overview: Vision 2026 Cloud Security - Zero-Trust Perimeter and Least-Privilege IAM**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=4D0vReXcbjI](https://www.youtube.com/watch?v=4D0vReXcbjI)
+- 🛠️ **YouTube Studio**: [https://studio.youtube.com/video/4D0vReXcbjI/edit](https://studio.youtube.com/video/4D0vReXcbjI/edit)
+- ⏱️ **Duration**: 08:22
+- 📝 **Full Description**:
+> 🛡️ Video Overview: Vision 2026 Cloud Security - Zero-Trust Perimeter, WAF v2 and Least-Privilege IAM
+>
+> Explore the overarching security architecture of the Vision 2026 blueprint, combining deep network isolation, L7 application firewalling, and strict least-privilege identity governance.
+>
+> 📌 Core Security Modules:
+> • Hub-and-Spoke Network Isolation: Enterprise virtual network topology with dedicated subnets, NSGs, and private DNS zones.
+> • Azure Application Gateway WAF v2: Layer 7 traffic inspection, SSL termination, and OWASP Core Rule Set enforcement.
+> • Least-Privilege Role-Based Access Control: Granular security groups for AKS cluster administrators, developers, and pipeline runners.
+> • End-to-End Encryption: TLS 1.3 in transit and double encryption at rest across storage accounts and managed disks.
+>
+> 🔗 GitHub Repositories:
+> • Primary Repository: https://github.com/nubenetes/terraform-azure-devops
+> • Agentic Repository: https://github.com/nubenetes/terraform-azure-devops-agentic
+> • Security by Design Checklist: https://github.com/nubenetes/terraform-azure-devops/blob/develop/docs/324-SECURITY_BY_DESIGN_CHECKLIST.md
+>
+> ⏱️ Duration: 08:22
+> #Azure #CloudSecurity #ZeroTrust #Terraform #WAF #HubAndSpoke #DevSecOps #Kubernetes #Cybersecurity #PlatformEngineering
+
+**17. Video Overview: Azure Zero-Trust Architecture - Secretless Workload Identity for CI/CD**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=c_cVmAG51L4](https://www.youtube.com/watch?v=c_cVmAG51L4)
+- 🛠️ **YouTube Studio**: [https://studio.youtube.com/video/c_cVmAG51L4/edit](https://studio.youtube.com/video/c_cVmAG51L4/edit)
+- ⏱️ **Duration**: 08:53
+- 📝 **Full Description**:
+> ⚡ Video Overview: Azure Zero-Trust Architecture - Secretless Workload Identity for Terraform CI/CD
+>
+> Deconstructing the inner mechanics of Zero-Trust identity federation: how modern cloud workloads authenticate dynamically with Microsoft Entra ID without ever saving a secret on disk.
+>
+> 📌 Mechanics Analyzed:
+> • The OIDC Handshake: Detailed sequence of the token exchange between the CI/CD pipeline agent and the Entra ID security token service (STS).
+> • Federated Identity Credentials: How Terraform automates the creation of azuread_application_federated_identity_credential resources.
+> • Blast Radius Containment: Scoping federated identity permissions strictly to individual environments (develop vs production).
+> • Elimination of Credential Leakage: Preventing accidental commits of secrets to Git repositories and log masking failures.
+>
+> 🔗 GitHub Repositories:
+> • Primary Repository: https://github.com/nubenetes/terraform-azure-devops
+> • Agentic Repository: https://github.com/nubenetes/terraform-azure-devops-agentic
+> • Pipeline Security Guide: https://github.com/nubenetes/terraform-azure-devops/blob/develop/docs/412-AZURE_DEVOPS_PIPELINE_SECURITY_AND_GOVERNANCE.md
+>
+> ⏱️ Duration: 08:53
+> #ZeroTrust #Terraform #Azure #OIDC #WorkloadIdentity #AzureDevOps #DevSecOps #CloudArchitecture #IaC #Automation
+
+**18. Video Overview: Vision 2026 Zero-Trust Blueprint - Identity Governance and Passwordless IaC**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=nuWXqnwOM-o](https://www.youtube.com/watch?v=nuWXqnwOM-o)
+- 🛠️ **YouTube Studio**: [https://studio.youtube.com/video/nuWXqnwOM-o/edit](https://studio.youtube.com/video/nuWXqnwOM-o/edit)
+- ⏱️ **Duration**: 06:53
+- 📝 **Full Description**:
+> 🌐 Video Overview: Vision 2026 Zero-Trust Blueprint - Identity Governance and Passwordless IaC
+>
+> How the Vision 2026 enterprise architecture harmonizes identity governance, immutable Infrastructure as Code, and automated compliance into a single cohesive cloud foundation.
+>
+> 📌 Architectural Keynotes:
+> • Identity as Code: Managing Microsoft Entra ID groups, service principals, and app registrations entirely through Terraform.
+> • Multi-Tier Resource Governance: Clean separation between Shared Infrastructure (Hub, AKS) and application spoke workloads (App-Core, App-Catalog).
+> • GitFlow Automation: Safe drift detection, automated plan generation, and manual promotion gates between staging and production tiers.
+> • Agentic Modernization: Transitioning from rigid static scripts to dynamic, AI-assisted platform engineering workflows.
+>
+> 🔗 GitHub Repositories:
+> • Primary Repository: https://github.com/nubenetes/terraform-azure-devops
+> • Agentic Repository: https://github.com/nubenetes/terraform-azure-devops-agentic
+> • Architecture Blueprint 2026: https://github.com/nubenetes/terraform-azure-devops/blob/develop/docs/111-ARCHITECTURE_2026.md
+>
+> ⏱️ Duration: 06:53
+> #Terraform #Azure #ZeroTrust #IdentityGovernance #AzureDevOps #CloudEngineering #DevOps #IaC #PlatformEngineering #AgenticAI
+
+**19. Video Overview: Azure Zero-Trust Identity - Multi-Tenant OAuth2, App Registrations and OBO Flow**
+- 🔗 **Link**: [https://www.youtube.com/watch?v=P4okG34YdCQ](https://www.youtube.com/watch?v=P4okG34YdCQ)
+- 🛠️ **YouTube Studio**: [https://studio.youtube.com/video/P4okG34YdCQ/edit](https://studio.youtube.com/video/P4okG34YdCQ/edit)
+- ⏱️ **Duration**: 07:55
+- 📝 **Full Description**:
+> 🔑 Video Overview: Azure Zero-Trust Identity - Multi-Tenant OAuth2, App Registrations and OBO Flow
+>
+> An exhaustive technical session analyzing how the App-Core and App-Catalog modules configure Microsoft Entra ID App Registrations, OAuth 2.0 grant flows, and On-Behalf-Of (OBO) token exchanges with Terraform.
+>
+> 📌 Advanced OAuth2 Topics Explored:
+> • Authorization Code Flow with PKCE: Securing single-page applications (SPAs) without exposing client secrets or access tokens in browsers.
+> • On-Behalf-Of (OBO) Token Exchange: How backend APIs use delegated permissions to call Microsoft Graph and Key Vault on behalf of the signed-in user.
+> • Pre-Authorization Patterns: Using azuread_application_pre_authorized to enable seamless API access without repetitive consent prompts.
+> • Dynamic Client App Registrations: Orchestrating multi-tenant application registrations with Terraform for_each loops.
+>
+> 🔗 GitHub Repositories:
+> • Primary Repository: https://github.com/nubenetes/terraform-azure-devops
+> • Agentic Repository: https://github.com/nubenetes/terraform-azure-devops-agentic
+> • App-Core OAuth2 Manifests: https://github.com/nubenetes/terraform-azure-devops/tree/develop/App-Core/terraform-manifests/modules/appcore_module
+>
+> ⏱️ Duration: 07:55
+> #OAuth2 #AzureAD #EntraID #OBOFlow #PKCE #Terraform #Azure #DevSecOps #Microservices #CloudSecurity #API
+
+**20. Short: How Workload Identity Federation Eliminates Secrets in Azure Pipelines**
+- 🔗 **Link**: [https://www.youtube.com/shorts/SUtLIk2c2OY](https://www.youtube.com/shorts/SUtLIk2c2OY)
+- 🛠️ **YouTube Studio**: [https://studio.youtube.com/video/SUtLIk2c2OY/edit](https://studio.youtube.com/video/SUtLIk2c2OY/edit)
+- ⏱️ **Duration**: 01:11
+- 📝 **Full Description**:
+> 🚀 Short: How Workload Identity Federation Eliminates Secrets in Azure Pipelines!
+>
+> Storing long-lived passwords in CI/CD pipeline settings is a ticking time bomb. One leak or expiration can compromise your cloud or break production!
+>
+> How Workload Identity Federation solves this:
+> • Zero Static Secrets: Eliminates service principal client secrets from Azure DevOps and GitHub Actions forever.
+> • Dynamic OIDC Token Exchange: The pipeline requests an ephemeral JWT token from the identity provider.
+> • Federated Trust: Microsoft Entra ID validates the token signature and subject, granting temporary least-privilege cloud access.
+> • Auto-Expiring Credentials: Tokens expire automatically within minutes, leaving zero credentials for attackers to steal.
+>
+> 🔗 Explore the Architecture:
+> https://github.com/nubenetes/terraform-azure-devops/blob/develop/docs/321-MICROSOFT_ENTRA_ID_INTEGRATION.md
+>
+> #Shorts #Terraform #Azure #WorkloadIdentity #OIDC #AzureDevOps #CloudSecurity #DevSecOps #PlatformEngineering
+
+**21. Short: How AKS Workload Identity Connects Kubernetes Pods to Azure Without Passwords**
+- 🔗 **Link**: [https://www.youtube.com/shorts/UwTDlu9bsds](https://www.youtube.com/shorts/UwTDlu9bsds)
+- 🛠️ **YouTube Studio**: [https://studio.youtube.com/video/UwTDlu9bsds/edit](https://studio.youtube.com/video/UwTDlu9bsds/edit)
+- ⏱️ **Duration**: 01:11
+- 📝 **Full Description**:
+> ☸️ Short: How AKS Workload Identity Connects Kubernetes Pods to Azure Without Passwords!
+>
+> Still injecting Azure credentials into Kubernetes Secrets? That is an anti-pattern! Modern AKS clusters use Workload Identity to connect pods directly to Azure resources with zero passwords.
+>
+> How secretless AKS pod authentication works:
+> • Projected ServiceAccount Tokens: Kubernetes projects a signed service account token into the pod volume.
+> • OIDC Federation: The AKS cluster acts as an OIDC issuer that Microsoft Entra ID trusts.
+> • Direct Token Exchange: Azure Identity SDKs exchange the pod token for an Azure AD access token on the fly.
+> • Secretless Access: The pod accesses Azure Key Vault, Storage, or Cosmos DB without a single secret stored in etcd.
+>
+> 🔗 Check the AKS Terraform Manifests:
+> https://github.com/nubenetes/terraform-azure-devops/blob/develop/docs/331-AKS_COMPUTE_HUB_AND_ML_ORCHESTRATION.md
+>
+> #Shorts #Kubernetes #AKS #Azure #WorkloadIdentity #DevOps #CloudNative #DevSecOps #PlatformEngineering
+
+**22. Short: How OIDC Workload Identity Secures Cloud Pipelines Without Static Passwords**
+- 🔗 **Link**: [https://www.youtube.com/shorts/EpODytj3mRY](https://www.youtube.com/shorts/EpODytj3mRY)
+- 🛠️ **YouTube Studio**: [https://studio.youtube.com/video/EpODytj3mRY/edit](https://studio.youtube.com/video/EpODytj3mRY/edit)
+- ⏱️ **Duration**: 01:18
+- 📝 **Full Description**:
+> 🔐 Short: How OIDC Workload Identity Secures Cloud Pipelines Without Static Passwords!
+>
+> Why are static API keys and client secrets the number one target for attackers in 2026? Because they never expire on their own and get leaked into repos and pipeline logs!
+>
+> Why OIDC Workload Identity is the ultimate defense:
+> • Cryptographic Handshake: Azure DevOps generates a cryptographically signed OpenID Connect assertion for each job.
+> • Ephemeral Authorization: Entra ID validates the pipeline claim and issues a short-lived token valid for that specific job only.
+> • Zero Maintenance: No certificate renewal tickets, no password rotation runbooks, and no 2 AM outages.
+> • True Zero-Trust: Never trust, always verify every single pipeline stage independently.
+>
+> 🔗 Explore the Blueprint:
+> https://github.com/nubenetes/terraform-azure-devops/blob/develop/docs/412-AZURE_DEVOPS_PIPELINE_SECURITY_AND_GOVERNANCE.md
+>
+> #Shorts #OIDC #AzureDevOps #DevSecOps #CloudSecurity #Terraform #ZeroTrust #CI_CD #PlatformEngineering
 
 </details>
 
