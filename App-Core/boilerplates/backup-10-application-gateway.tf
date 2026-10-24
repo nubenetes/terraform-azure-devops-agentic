@@ -71,22 +71,6 @@ resource "azurerm_application_gateway" "appcore_agw" {
     name  = "bp-analysis-viewer-backend-client-example"
   }
   backend_address_pool {
-    fqdns = ["app-analysis-viewer-backend-client-example-${var.environment}.azurewebsites.net"]
-    name  = "bp-analysis-viewer-backend-client-example"
-  }
-  backend_address_pool {
-    fqdns = ["app-analysis-viewer-backend-client-example-${var.environment}.azurewebsites.net"]
-    name  = "bp-analysis-viewer-backend-client-example"
-  }
-  backend_address_pool {
-    fqdns = ["app-analysis-viewer-backend-client-example-${var.environment}.azurewebsites.net"]
-    name  = "bp-analysis-viewer-backend-client-example"
-  }
-  backend_address_pool {
-    fqdns = ["app-analysis-viewer-backend-client-example-${var.environment}.azurewebsites.net"]
-    name  = "bp-analysis-viewer-backend-client-example"
-  }
-  backend_address_pool {
     fqdns = ["app-analysis-viewer-backend-Enterprise-${var.environment}.azurewebsites.net"]
     name  = "bp-analysis-viewer-backend-Enterprise"
   }
@@ -97,10 +81,6 @@ resource "azurerm_application_gateway" "appcore_agw" {
   backend_address_pool {
     fqdns = ["app-analysis-viewer-backend-rajgupta-${var.environment}.azurewebsites.net"]
     name  = "bp-analysis-viewer-backend-rajgupta"
-  }
-  backend_address_pool {
-    fqdns = ["app-analysis-viewer-backend-client-example-${var.environment}.azurewebsites.net"]
-    name  = "bp-analysis-viewer-backend-client-example"
   }
   backend_address_pool {
     fqdns = ["app-analysis-viewer-frontend-${var.environment}.azurewebsites.net"]
@@ -395,12 +375,6 @@ resource "azurerm_application_gateway" "appcore_agw" {
       name                       = "rr-analysis-viewer-backend-client-example"
       paths                      = ["/pvb/client-example/*"]
     }
-    path_rule {
-      backend_address_pool_name  = "bp-analysis-viewer-backend-client-example"
-      backend_http_settings_name = "hss-analysis-viewer-backend"
-      name                       = "rr-analysis-viewer-backend-client-example"
-      paths                      = ["/pvb/client-example/*"]
-    }
   }
   url_path_map {
     default_backend_address_pool_name  = "bp-analysis-viewer-frontend"
@@ -429,30 +403,11 @@ resource "azurerm_application_gateway" "appcore_agw" {
       rewrite_rule_set_name      = "rh-default"
     }
     path_rule {
-      backend_address_pool_name  = "bp-analysis-viewer-backend-client-example"
-      backend_http_settings_name = "hss-analysis-viewer-backend"
-      name                       = "rr-analysis-viewer-backend-client-example"
-      paths                      = ["/pvb/client-example/*"]
-      rewrite_rule_set_name      = "rh-default"
-    }
-    path_rule {
       backend_address_pool_name  = "bp-analysis-viewer-backend-Enterpriseux"
       backend_http_settings_name = "hss-analysis-viewer-backend"
       name                       = "rr-analysis-viewer-backend-Enterpriseux"
       paths                      = ["/pvb/EnterpriseUX/*"]
       rewrite_rule_set_name      = "rh-default"
-    }
-    path_rule {
-      backend_address_pool_name  = "bp-analysis-viewer-backend-client-example"
-      backend_http_settings_name = "hss-analysis-viewer-backend"
-      name                       = "rr-analysis-viewer-backend-client-example"
-      paths                      = ["/pvb/client-example/*"]
-    }
-    path_rule {
-      backend_address_pool_name  = "bp-analysis-viewer-backend-client-example"
-      backend_http_settings_name = "hss-analysis-viewer-backend"
-      name                       = "rr-analysis-viewer-backend-client-example"
-      paths                      = ["/pvb/client-example/*"]
     }
   }
 

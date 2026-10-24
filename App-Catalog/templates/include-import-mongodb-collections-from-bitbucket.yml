@@ -19,8 +19,6 @@ steps:
   clean: true
 - script: git config --system -l
   displayName: git config system wide
-- bash: env
-  displayName: 'Show env'
 - bash: |
     echo "Bitbucket ref: $TOOLS_REF"
   displayName: Bitbucket ref    # https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/multi-repo-checkout
@@ -28,7 +26,7 @@ steps:
   displayName: Show folders with multi repo checkouts
 - task: Bash@3
   inputs:
-    filePath: $(Build.SourcesDirectory)/App-Catalog-azure-devops-iac/scripts/import-mongodb-collections.sh
+    filePath: $(Build.SourcesDirectory)/App-Catalog/boilerplates/import-mongodb-collections.sh
     workingDirectory: $(Build.SourcesDirectory)/enterprise_engine_database/data
     failOnStderr: false
   env:

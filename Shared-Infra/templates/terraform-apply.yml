@@ -46,7 +46,7 @@ jobs:
           inputs:
             targetType: 'inline'
             script: |
-              ipaddress=$(curl -s http://ipinfo.io/ip)
+              ipaddress=$(curl -s https://ipinfo.io/ip)
               echo "##vso[task.setvariable variable=address;isOutput=true;]$ipaddress"
               echo BuildAgentIP.address is $ipaddress        
         ######################################################
@@ -60,14 +60,14 @@ jobs:
         ######################################################
         # Terraform Install
         ######################################################
-        - task: TerraformInstaller@0
+        - task: TerraformInstaller@1
           displayName: Terraform Install
           inputs:
             terraformVersion: $(TERRAFORM_VERSION)
         ######################################################
         # Terraform Init: sharedinfra-<branch>-<env>.tfstate
         ######################################################
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Init
           inputs:
             provider: 'azurerm'
@@ -78,111 +78,53 @@ jobs:
             backendAzureRmStorageAccountName: $(STORAGE_ACCOUNT_NAME)
             backendAzureRmContainerName: $(CONTAINER_NAME)
             backendAzureRmKey: '$(INFRA_NAME)-$(GIT_BRANCH)branch-${{ parameters.environment }}.tfstate'
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
         ##############################
         # Terraform Apply
         ##############################
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform apply
           inputs:
             provider: 'azurerm'
             command: 'apply'
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
-            commandOptions: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}/${{ parameters.environment }}-$(Build.BuildId).out'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            commandOptions: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}/${{ parameters.environment }}-$(Build.BuildId).out'
             environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
         ###################################
         # Terraform Output - Show - Graph
         ###################################
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform output
           inputs:
             provider: 'azurerm'
             command: 'custom'
             customCommand: 'output'
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
             environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}        
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform output -json
           inputs:
             provider: 'azurerm'
             command: 'output' # "terraform output -json" is implicitly triggered here!
               # Terraform does not protect sensitive output values when using the -json flag
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
             environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Show (current tfstate)
           inputs:
             provider: 'azurerm'
             command: 'show' 
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
             environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
             outputTo: 'file' 
             filename: 'myFile.json'
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform graph 
           inputs:
             provider: 'azurerm'
             command: 'custom'
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
             customCommand: 'graph'
             #commandOptions: '-type=plan'
             outputTo: 'console'
-            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}        
-        #############################
-        # Europe - Terraform Output
-        #############################
-        - task: TerraformTaskV3@3
-          displayName: Terraform Output aks_nameAKSEurope
-          inputs:
-            provider: 'azurerm'
-            command: 'custom'
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
-            commandOptions: 'output -json aks_nameAKSEurope'
             environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
-            outputTo: 'file' 
-            filename: 'myFile1.json'
-        - script: echo "##vso[task.setvariable variable=aks_nameAKSEurope;isOutput=true]$(cat $(customFilePath))"
-          displayName: setup aks_nameAKSEurope var
-          name: passOutput1
-        - task: TerraformTaskV3@3
-          displayName: Terraform Output aks_resource_group_nameAKSEurope
-          inputs:
-            provider: 'azurerm'
-            command: 'custom'
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
-            commandOptions: 'output -json aks_resource_group_nameAKSEurope'
-            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
-            outputTo: 'file' 
-            filename: 'myFile2.json'
-        - script: echo "##vso[task.setvariable variable=aks_resource_group_nameAKSEurope;isOutput=true]$(cat $(customFilePath))"
-          displayName: setup aks_resource_group_nameAKSEurope var
-          name: passOutput2
-        ####################################
-        # United States - Terraform Output
-        ####################################
-        - task: TerraformTaskV3@3
-          displayName: Terraform Output aks_nameAKSUS
-          inputs:
-            provider: 'azurerm'
-            command: 'custom'
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
-            commandOptions: 'output -json aks_nameAKSUS'
-            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
-            outputTo: 'file' 
-            filename: 'myFile3.json'
-        - script: echo "##vso[task.setvariable variable=aks_nameAKSUS;isOutput=true]$(cat $(customFilePath))"
-          displayName: setup aks_nameAKSUS var
-          name: passOutput3
-        - task: TerraformTaskV3@3
-          displayName: Terraform Output aks_resource_group_nameAKSUS
-          inputs:
-            provider: 'azurerm'
-            command: 'custom'
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
-            commandOptions: 'output -json aks_resource_group_nameAKSUS'
-            environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
-            outputTo: 'file' 
-            filename: 'myFile4.json'
-        - script: echo "##vso[task.setvariable variable=aks_resource_group_nameAKSUS;isOutput=true]$(cat $(customFilePath))"
-          displayName: setup aks_resource_group_nameAKSUS var
-          name: passOutput4

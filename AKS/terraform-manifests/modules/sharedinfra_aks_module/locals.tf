@@ -11,7 +11,7 @@ locals {
   environment                   = "${local.gitbranch}${var.location_code}${var.environment}"
   resource_group_name           = "${var.rg_prefix}-${var.Enterprise_product}-${local.environment}"
   aks_cluster_name              = "aks-${local.environment}"
-  acr_name                      = local.environment # Azure Container Registry
+  acr_name                      = "cr${replace(var.Enterprise_product, "-", "")}${local.environment}" # Azure Container Registry
   aad_group_aks_admins_name     = "AAD_AKS_Admins_${local.environment}"
   aad_group_aks_developers_name = "AAD_AKS_Developers_${local.environment}"
   # testing:

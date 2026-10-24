@@ -22,14 +22,14 @@
 # - Strong consistency (or linearizable) ensures that clients always read the latest globally committed write
 
 resource "azurerm_cosmosdb_account" "db" {
-  name                      = "cosmosdb-account-${var.enterprise_product}-${local.instance_environment}"
-  location                  = azurerm_resource_group.appcore_rg.location
-  resource_group_name       = azurerm_resource_group.appcore_rg.name
-  offer_type                = "Standard"
-  kind                      = "MongoDB"
-  mongo_server_version      = "4.2" # https://learn.microsoft.com/en-us/azure/cosmos-db/mongodb/feature-support-42
-  enable_automatic_failover = true
-  tags                      = local.tags
+  name                       = "cosmosdb-account-${var.enterprise_product}-${local.instance_environment}"
+  location                   = azurerm_resource_group.appcore_rg.location
+  resource_group_name        = azurerm_resource_group.appcore_rg.name
+  offer_type                 = "Standard"
+  kind                       = "MongoDB"
+  mongo_server_version       = "7.0"
+  automatic_failover_enabled = true
+  tags                       = local.tags
 
   # https://learn.microsoft.com/en-us/azure/cosmos-db/mongodb/how-to-configure-capabilities
   capabilities {
@@ -89,16 +89,11 @@ resource "azurerm_cosmosdb_account" "db" {
   # }
 }
 
-data "azurerm_cosmosdb_account" "db" {
-  name                = azurerm_cosmosdb_account.db.name
-  resource_group_name = azurerm_cosmosdb_account.db.resource_group_name
-}
-
 resource "azurerm_cosmosdb_mongo_database" "db" {
   for_each            = toset(var.client_names)
   name                = "modb-${var.enterprise_product}-${each.value}"
-  resource_group_name = data.azurerm_cosmosdb_account.db.resource_group_name
-  account_name        = data.azurerm_cosmosdb_account.db.name
+  resource_group_name = azurerm_cosmosdb_account.db.resource_group_name
+  account_name        = azurerm_cosmosdb_account.db.name
   throughput          = 400
 }
 
@@ -209,7 +204,7 @@ resource "terraform_data" "cosmos_mongodb_instance_per_client" {
     # https://www.terraform.io/language/resources/provisioners/null_resource
     # https://learn.microsoft.com/en-us/azure/cosmos-db/mongodb/tutorial-mongotools-cosmos-db
     ############################################################################################
-    command = "chmod +x creation-time-provisioner-cosmosdb.sh;./creation-time-provisioner-cosmosdb.sh '${azurerm_cosmosdb_account.db.connection_strings[0]}' modb-${var.enterprise_product}-${each.value} ${var.environment}"
+    command = "chmod +x creation-time-provisioner-cosmosdb.sh;./creation-time-provisioner-cosmosdb.sh '${azurerm_cosmosdb_account.db.primary_mongodb_connection_string}' modb-${var.enterprise_product}-${each.value} ${var.environment}"
   }
   # depends_on = [
   #   azurerm_cosmosdb_mongo_database.db,

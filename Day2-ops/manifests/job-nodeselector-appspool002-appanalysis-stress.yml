@@ -28,7 +28,7 @@ kind: Job
 metadata:
   #name: kubernetes-job-example
   generateName: kubernetes-job-example-
-  namespace: Enterprise
+  namespace: enterprise
   labels:     
     jobgroup: jobexample
     app: appcore

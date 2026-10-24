@@ -38,20 +38,20 @@ jobs:
           inputs:
             targetType: 'inline'
             script: |
-              ipaddress=$(curl -s http://ipinfo.io/ip)
+              ipaddress=$(curl -s https://ipinfo.io/ip)
               echo "##vso[task.setvariable variable=address;isOutput=true;]$ipaddress"
               echo BuildAgentIP.address is $ipaddress
         ######################################################
         # Terraform Install
         ######################################################
-        - task: TerraformInstaller@0
+        - task: TerraformInstaller@1
           displayName: Terraform Install
           inputs:
             terraformVersion: $(TERRAFORM_VERSION)
         #######################################################
         # Terraform Init: appcore-users-<branch>-<env>.tfstate
         ######################################################
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Init
           inputs:
             provider: 'azurerm'
@@ -62,19 +62,19 @@ jobs:
             backendAzureRmStorageAccountName: $(STORAGE_ACCOUNT_NAME)
             backendAzureRmContainerName: $(CONTAINER_NAME)
             backendAzureRmKey: '$(INFRA_NAME)-$(GIT_BRANCH)branch-${{ parameters.environment }}.tfstate'
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
         ##############################
         # Terraform Apply
         ##############################
-        - script: ls -la $(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}
+        - script: ls -la $(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}
           displayName: Show file with generated plan
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform apply
           inputs:
             provider: 'azurerm'
             command: 'apply'
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
-            commandOptions: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}/${{ parameters.environment }}-$(Build.BuildId).out'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            commandOptions: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}/${{ parameters.environment }}-$(Build.BuildId).out'
             environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
         ###################################
         # Terraform Output - Show - Graph
@@ -85,32 +85,32 @@ jobs:
         # "terraform ouput -json": This is quite useful when we want to pass the outputs to other tools for automation since JSON is way easier to handle programmatically.
         # Note that Terraform does not protect sensitive output values when using the -json flag.
         ####################################################################################################################################################################
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform output
           inputs:
             provider: 'azurerm'
             command: 'custom'
             customCommand: 'output'
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
             environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform output -json
           inputs:
             provider: 'azurerm'
             command: 'output' # "terraform output -json" is implicitly triggered here!
               # Terraform does not protect sensitive output values when using the -json flag
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
             environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Show (current tfstate)
           inputs:
             provider: 'azurerm'
             command: 'show'
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
             environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
             outputTo: 'file'
             filename: 'myFile.json'
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform graph
           inputs:
             provider: 'azurerm'
@@ -118,17 +118,17 @@ jobs:
             customCommand: 'graph'
             #commandOptions: '-type=plan'
             outputTo: 'console'
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
             environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
         ###############################################################################
         # Terraform Output - list_internal_users_with_custom_security_attributes
         ###############################################################################
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Output list_internal_users_with_custom_security_attributes
           inputs:
             provider: 'azurerm'
             command: 'custom'
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
             commandOptions: 'output -json list_internal_users_with_custom_security_attributes'
             environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
             outputTo: 'file'
@@ -139,12 +139,12 @@ jobs:
         ###############################################################################
         # Terraform Output - list_external_users_with_custom_security_attributes
         ###############################################################################
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Output list_external_users_with_custom_security_attributes
           inputs:
             provider: 'azurerm'
             command: 'custom'
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
             commandOptions: 'output -json list_external_users_with_custom_security_attributes'
             environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
             outputTo: 'file'
@@ -155,12 +155,12 @@ jobs:
         ###############################################################################################
         # Terraform Output - list_manually_provisioned_internal_users_with_custom_security_attributes
         ###############################################################################################
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Output list_manually_provisioned_internal_users_with_custom_security_attributes
           inputs:
             provider: 'azurerm'
             command: 'custom'
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
             commandOptions: 'output -json list_manually_provisioned_internal_users_with_custom_security_attributes'
             environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
             outputTo: 'file'
@@ -191,7 +191,7 @@ jobs:
       inputs:
         azureSubscription: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
         scriptType: 'FilePath'
-        scriptPath: '$(System.DefaultWorkingDirectory)/scripts/01-assign-customSecurityAttributes.ps1'  # https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables
+        scriptPath: '$(System.DefaultWorkingDirectory)/App-Users/scripts/01-assign-customSecurityAttributes.ps1'  # https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables
         scriptArguments:
           -userList '$(list_of_internal_users)'
         azurePowerShellVersion: 'latestVersion' # Required. Options: latestVersion, otherVersion
@@ -219,7 +219,7 @@ jobs:
       inputs:
         azureSubscription: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
         scriptType: 'FilePath'
-        scriptPath: '$(System.DefaultWorkingDirectory)/scripts/01-assign-customSecurityAttributes.ps1'  # https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables
+        scriptPath: '$(System.DefaultWorkingDirectory)/App-Users/scripts/01-assign-customSecurityAttributes.ps1'  # https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables
         scriptArguments:
           -userList '$(list_of_external_users)'
         azurePowerShellVersion: 'latestVersion' # Required. Options: latestVersion, otherVersion
@@ -247,7 +247,7 @@ jobs:
       inputs:
         azureSubscription: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
         scriptType: 'FilePath'
-        scriptPath: '$(System.DefaultWorkingDirectory)/scripts/01-assign-customSecurityAttributes.ps1'  # https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables
+        scriptPath: '$(System.DefaultWorkingDirectory)/App-Users/scripts/01-assign-customSecurityAttributes.ps1'  # https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables
         scriptArguments:
           -userList '$(list_of_manually_provisioned_internal_users)'
         azurePowerShellVersion: 'latestVersion' # Required. Options: latestVersion, otherVersion

@@ -100,7 +100,7 @@ variable "dns_child_zone" {
 variable "dns_prefix" {
   description = "A prefix for App-Core portal dns based resources"
   type        = string
-  default     = "appcore" # Alternatives: app, appcore, core, etc
+  default     = "appc" # Alternatives: app, appc, appcore, core, etc
 }
 variable "dns_prefix_viewer" {
   description = "A prefix for app-analysis-viewer dns based resources"
@@ -235,17 +235,12 @@ variable "docker_enable_ci" {
 #################################################################################################
 variable "client_names" {
   description = "Create Azure resources with these client names"
-  #type        = list(string)
-  type = list(any)
-  default = ["client-anon",
-  "client2"]
-  # validation {
-  #   # https://spacelift.io/blog/how-to-use-terraform-variables
-  #   # https://jeffbrown.tech/terraform-variables-validation/
-  #   # Azure limits the length of key vault name, being limited to alphanumeric characters and dashes and must be between 3-24 char
-  #   condition     = alltrue([for each in var.client_names : (length("${each}") < 9) ? true:false])  # cannot be longer than 8 char with the current keyvault naming scheme in our terraform code
-  #   error_message = "Please provide a valid value for variable client_names with a maximum length of than 8 chars"
-  # }
+  type        = list(any)
+  default     = ["client1"]
+  validation {
+    condition     = alltrue([for c in var.client_names : length(c) <= 8 && can(regex("^[a-z0-9-]+$", c))])
+    error_message = "Each client name must be at most 8 characters and contain only lowercase alphanumeric characters and hyphens."
+  }
 }
 
 #################################################################################################
@@ -264,7 +259,6 @@ variable "testadmin" {
 
 ################################################################################################
 # MONGODB ATLAS
-# mongodb secrets setup as non-sensitive to see traces of mongoimport during the creation_time
 ################################################################################################
 variable "oplog_size_mb" {
   description = "(Optional) The custom oplog size of the cluster. Without a value that indicates that the cluster users the default oplog size calculated by Atlas"
@@ -278,12 +272,12 @@ variable "oplog_size_mb" {
 variable "secret_mongodb_atlas_public_key" {
   description = "Public Programmatic API key to authenticate to Atlas"
   type        = string
-  sensitive   = false
+  sensitive   = true
 }
 variable "secret_mongodb_atlas_private_key" {
   description = "Private Programmatic API key to authenticate to Atlas"
   type        = string
-  sensitive   = false
+  sensitive   = true
 }
 variable "mongodb_atlas_org_id" {
   description = "MongoDB Organization ID"
@@ -306,7 +300,7 @@ variable "mongodb_atlas_region" {
 variable "mongodb_atlas_mongodbversion" {
   description = "The Major MongoDB Version"
   type        = string
-  default     = "5.0" # Atlas supports the following MongoDB versions for M10+ clusters: 4.0, 4.2, 4.4, 5.0 or 6.0
+  default     = "7.0"
 }
 variable "mongodb_atlas_dbadmin" {
   description = "MongoDB Atlas Database Admin User Name"
@@ -317,7 +311,7 @@ variable "mongodb_atlas_dbadmin" {
 variable "secret_mongodb_atlas_dbadmin_password" {
   description = "MongoDB Atlas Database Admin Password"
   type        = string
-  sensitive   = false
+  sensitive   = true
 }
 variable "mongodb_atlas_dbuser" {
   description = "MongoDB Atlas Database User Name"
@@ -328,7 +322,7 @@ variable "mongodb_atlas_dbuser" {
 variable "secret_mongodb_atlas_dbuser_password" {
   description = "MongoDB Atlas Database User Password"
   type        = string
-  sensitive   = false
+  sensitive   = true
 }
 variable "mongodb_atlas_database_name" {
   description = "The database in the cluster to limit the database user to, the database does not have to exist yet"

@@ -29,7 +29,7 @@ jobs:
     runOnce:
       deploy:
         steps:
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Init
           inputs:
             provider: 'azurerm'
@@ -41,7 +41,7 @@ jobs:
             backendAzureRmContainerName: $(CONTAINER_NAME)
             backendAzureRmKey: '$(INFRA_NAME)-${{ parameters.environment }}.tfstate'
             workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform plan
           inputs:
             provider: 'azurerm'
@@ -57,10 +57,10 @@ jobs:
               -var secret_k8s_cluster_certificate=$(k8s-cluster-cert-appanalysis-myclient-2-${{ parameters.environment }})
               -var secret_k8s_user_client_certificate=$(k8s-user-cert-appanalysis-myclient-2-${{ parameters.environment }})
               -var secret_k8s_user_client_key=$(k8s-user-key-appanalysis-myclient-2-${{ parameters.environment }})
-              -var secret_k8s_user_token=$(k8s-user-token-appanalysis-myclient-2-${{ parameters.environment }}
+              -var secret_k8s_user_token=$(k8s-user-token-appanalysis-myclient-2-${{ parameters.environment }})
               -var secret_docker_registry_server_password='$(docker-registry-password-1)'
               -var secret_appcore_config_key=$(appanalysis-config-key-myclient-2-${{ parameters.environment }})
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform apply
           inputs:
             provider: 'azurerm'
@@ -68,14 +68,14 @@ jobs:
             workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
             commandOptions: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)/${{ parameters.environment }}-$(Build.BuildId).out'
             environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Output 
           inputs:
             provider: 'azurerm'
             command: 'output'
             workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
             environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Show (current tfstate)
           inputs:
             provider: 'azurerm'
@@ -85,7 +85,7 @@ jobs:
             outputTo: 'file'   #'console'
             filename: 'myFile.json'
 
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Output myappcore_agw
           inputs:
             provider: 'azurerm'
@@ -99,7 +99,7 @@ jobs:
           displayName: setup myappcore_agw var
           name: passOutput1
 
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Output myManagedIdentity
           inputs:
             provider: 'azurerm'
@@ -113,7 +113,7 @@ jobs:
           displayName: setup myManagedIdentity var
           name: passOutput2
 
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Output appcore_keyvault
           inputs:
             provider: 'azurerm'
@@ -127,7 +127,7 @@ jobs:
           displayName: setup appcore_keyvault var
           name: passOutput3
 
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Output myCertificateName
           inputs:
             provider: 'azurerm'
@@ -141,7 +141,7 @@ jobs:
           displayName: setup myCertificateName var
           name: passOutput4
 
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Output myResourceGroup
           inputs:
             provider: 'azurerm'
@@ -155,7 +155,7 @@ jobs:
           displayName: setup myResourceGroup var
           name: passOutput5
 
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Output myAzureSubscription
           inputs:
             provider: 'azurerm'

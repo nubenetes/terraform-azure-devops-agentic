@@ -7,12 +7,12 @@ data "azuread_user" "group_owner" {
 
 data "azuread_users" "aks_developers" {
   #user_principal_names = ["cloud-admin@example.com", "cloud-admin@example.com"]
-  user_principal_names = var.aks_developers
+  user_principal_names = distinct(var.aks_developers)
 }
 
 data "azuread_users" "aks_administrators" {
   #user_principal_names = ["cloud-admin@example.com", "cloud-admin@example.com"]
-  user_principal_names = var.aks_administrators
+  user_principal_names = distinct(var.aks_administrators)
 }
 
 data "azuread_service_principals" "aks_administrators" {

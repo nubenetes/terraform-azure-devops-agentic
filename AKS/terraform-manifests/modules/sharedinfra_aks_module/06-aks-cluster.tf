@@ -43,9 +43,6 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   # The HTTP application routing solution makes it easy to access applications that are deployed to your cluster by creating publicly accessible DNS names for application endpoints.
   # This will create a DNS zone in your subscription. HTTP application routing is designed for easily getting started with ingress controllers and as such is not recommended for production clusters.
   # https://learn.microsoft.com/en-us/azure/aks/http-application-routing
-  public_network_access_enabled = true # (Optional) Whether public network access is allowed for this Kubernetes Cluster. Defaults to true. Changing this forces a new resource to be created.
-  # When public_network_access_enabled is set to true, 0.0.0.0/32 must be added to authorized_ip_ranges in the api_server_access_profile block.
-
   #################################################################
   # nginx ingress controller + external-dns controller
   # https://learn.microsoft.com/en-us/azure/aks/web-app-routing
@@ -53,7 +50,7 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   web_app_routing {
     # https://github.com/Azure-Samples/azure-opensource-labs/tree/main/cloud-native/aks-webapp-routing
     # az aks show -n aks-dneeng -g rg-sharedinfra-aks-dneeng --query ingressProfile
-    dns_zone_id = data.azurerm_dns_zone.my_dns.id
+    dns_zone_ids = [data.azurerm_dns_zone.my_dns.id]
   }
 
   # https://learn.microsoft.com/en-us/azure/aks/cluster-autoscaler
@@ -93,7 +90,7 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     # https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
     # https://stackoverflow.com/questions/74445188/azure-kubernetes-system-and-user-pool
     only_critical_addons_enabled = true # (Optional) Enabling this option will taint default node pool with CriticalAddonsOnly=true:NoSchedule taint. Changing this forces a new resource to be created.
-    enable_auto_scaling          = true
+    auto_scaling_enabled         = true
     zones                        = [1] # The Availability Zone identifier
     type                         = "VirtualMachineScaleSets"
     max_count                    = 3
@@ -126,9 +123,7 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   } # System-assigned managed identity not supported for custom resource subnets/aks-control-plane-pods-subnet-dneeng. Please use user-assigned managed identity
 
   azure_active_directory_role_based_access_control {
-    # This requires that the Preview Feature Microsoft.ContainerService/AKS-PrometheusAddonPreview is enabled, see the documentation for more information.
-    managed                = true
-    admin_group_object_ids = [azuread_group.aks_administrators.id]
+    admin_group_object_ids = [azuread_group.aks_administrators.object_id]
     azure_rbac_enabled     = true
   }
 
@@ -148,10 +143,13 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   }
 
   # Linux Profile
-  linux_profile {
-    admin_username = "ubuntu"
-    ssh_key {
-      key_data = file(var.ssh_public_key)
+  dynamic "linux_profile" {
+    for_each = var.ssh_public_key != "" ? [1] : []
+    content {
+      admin_username = "ubuntu"
+      ssh_key {
+        key_data = fileexists(var.ssh_public_key) ? file(var.ssh_public_key) : var.ssh_public_key
+      }
     }
   }
 
@@ -199,9 +197,7 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   }
 
   # AKS Cluster Tags
-  tags = {
-    environment = local.environment
-  }
+  tags = local.tags
 
   oms_agent {
     log_analytics_workspace_id = azurerm_log_analytics_workspace.aks_cluster.id
@@ -217,7 +213,9 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   # }
 
   depends_on = [
-    azurerm_resource_provider_registration.aks_cluster,
+    azurerm_role_assignment.aks_api_server_subnet,
+    azurerm_role_assignment.aks_data_plane_nodes,
+    azurerm_role_assignment.aks_data_plane_pods,
   ]
 
 }
@@ -288,22 +286,11 @@ data "azurerm_dns_zone" "my_dns" {
 }
 
 ####################################################################################################
-# webapprouting-aks-dneeng - Nginx-ingress + external-dns controllers in AKS
-# 06-aks-cluster.tf - azurerm_kubernetes_cluster.aks_cluster.web_app_routing
-###################################################################################################
-data "azuread_service_principal" "webapprouting" {
-  display_name = "webapprouting-${local.aks_cluster_name}"
-  depends_on = [
-    azurerm_kubernetes_cluster.aks_cluster,
-  ]
-}
-
-####################################################################################################
 # RBAC - DNS Zone Contributor
 ####################################################################################################
 resource "azurerm_role_assignment" "webapprouting_dns_zone_contributor" {
   role_definition_name = "DNS Zone Contributor" # Built-in Role
-  principal_id         = data.azuread_service_principal.webapprouting.object_id
+  principal_id         = azurerm_kubernetes_cluster.aks_cluster.web_app_routing[0].web_app_routing_identity[0].object_id
   scope                = data.azurerm_dns_zone.my_dns.id # DNS Zone Scope
   depends_on = [
     azurerm_kubernetes_cluster.aks_cluster,
@@ -317,33 +304,5 @@ resource "azurerm_user_assigned_identity" "aks_cluster" {
   location            = azurerm_resource_group.rg_aks.location
   name                = "identity-${local.aks_cluster_name}"
   resource_group_name = azurerm_resource_group.rg_aks.name
+  tags                = local.tags
 }
-
-
-# resource "azurerm_role_assignment" "webapprouting" {
-#   role_definition_name = "Key Vault Reader"
-#   principal_id         = data.azuread_service_principal.webapprouting.id
-#   scope                = data.azurerm_key_vault.wildcards_Enterprise_com.id
-# }
-
-
-data "azurerm_key_vault" "wildcards_Enterprise_com" {
-  provider = azurerm.manualinfra
-  # NOTE: The vault must be in the same subscription as the provider. If the vault is in another subscription, you must create an aliased provider for that subscription.
-  name                = "kv-wildcards-Enterprise-com"
-  resource_group_name = "CertificatesResourceGroup"
-}
-
-# https://learn.microsoft.com/en-us/azure/aks/web-app-routing?tabs=without-osm#create-and-export-a-self-signed-ssl-certificate-if-you-dont-already-own-one
-# data "azurerm_key_vault" "wildcards_Enterprise_com" {
-#   name                = "kv-azuredevops-library2"
-#   resource_group_name = "rg-azuredevops-pro"
-# }
-
-
-# data "azurerm_key_vault_certificate" "wildcards_Enterprise_com" {
-#   provider     = azurerm.manualinfra
-#     # NOTE: The vault must be in the same subscription as the provider. If the vault is in another subscription, you must create an aliased provider for that subscription.
-#   name         = "cert-wildcard-Enterprise-${local.environment}"
-#   key_vault_id = data.azurerm_key_vault.wildcards_Enterprise_com.id
-# }

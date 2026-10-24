@@ -118,6 +118,9 @@ output "mongodb_project_name" {
 output "mongob_project_id" {
   value = values(mongodbatlas_project.project)[*].id
 }
+output "mongodb_project_id" {
+  value = values(mongodbatlas_project.project)[*].id
+}
 output "mongodb_ipaccesslist" {
   value = values(mongodbatlas_project_ip_access_list.ip)[*].ip_address
 }

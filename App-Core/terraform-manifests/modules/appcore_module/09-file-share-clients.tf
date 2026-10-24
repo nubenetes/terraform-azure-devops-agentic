@@ -6,10 +6,10 @@
 # For further information, refer to the section "What storage tiers are supported in Azure Files?" of documentation.
 
 resource "azurerm_storage_share" "fs_client" {
-  for_each             = toset(var.client_names) # https://blog.gruntwork.io/terraform-tips-tricks-loops-if-statements-and-gotchas-f739bbae55f9
-  name                 = "fs-${var.Enterprise_product}-${each.value}-${local.instance_environment}"
-  storage_account_name = azurerm_storage_account.appcore.name
-  quota                = 5120
+  for_each           = toset(var.client_names) # https://blog.gruntwork.io/terraform-tips-tricks-loops-if-statements-and-gotchas-f739bbae55f9
+  name               = lower("fs-${var.Enterprise_product}-${each.value}-${local.instance_environment}")
+  storage_account_id = azurerm_storage_account.appcore.id
+  quota              = 5120
   # (Required) The maximum size of the share, in gigabytes. For Standard storage accounts, this must be 1GB (or higher) and at most 5120 GB (5 TB).
   # For Premium FileStorage storage accounts, this must be greater than 100 GB and at most 102400 GB (100 TB).
   access_tier = "TransactionOptimized"

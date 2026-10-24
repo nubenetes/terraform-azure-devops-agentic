@@ -3,13 +3,13 @@
 
 
 resource "azurerm_key_vault" "App-Catalog_keyvault" {
-  for_each                  = toset(var.client_names)                                                              # https://blog.gruntwork.io/terraform-tips-tricks-loops-if-statements-and-gotchas-f739bbae55f9
-  name                      = "kv-${var.Enterprise_product}-${each.value}${local.gitbranch}${local.env_generator}" # "name" may only contain alphanumeric characters and dashes and must be between 3-24 char
-  location                  = local.location
-  resource_group_name       = azurerm_resource_group.App-Catalog_rg[each.key].name
-  tenant_id                 = data.azurerm_client_config.current.tenant_id
-  sku_name                  = "standard"
-  enable_rbac_authorization = true
+  for_each                   = toset(var.client_names)                                                                                  # https://blog.gruntwork.io/terraform-tips-tricks-loops-if-statements-and-gotchas-f739bbae55f9
+  name                       = "kv-${var.Enterprise_product}-${each.value}${local.gitbranch}${var.location_code}${local.env_generator}" # "name" may only contain alphanumeric characters and dashes and must be between 3-24 char
+  location                   = local.location
+  resource_group_name        = azurerm_resource_group.App-Catalog_rg[each.key].name
+  tenant_id                  = data.azurerm_client_config.current.tenant_id
+  sku_name                   = "standard"
+  rbac_authorization_enabled = true
   tags = merge(local.tags, {
     Client = "${each.key}"
     }
@@ -17,6 +17,14 @@ resource "azurerm_key_vault" "App-Catalog_keyvault" {
   depends_on = [
     azurerm_resource_group.App-Catalog_rg,
   ]
+}
+
+resource "azurerm_role_assignment" "terraform_sp_keyvault_certs" {
+  for_each             = toset(var.client_names)
+  description          = "Key Vault Certificates Officer: RBAC role assignment to Terraform execution Service Principal"
+  scope                = azurerm_key_vault.App-Catalog_keyvault[each.key].id
+  role_definition_name = "Key Vault Certificates Officer"
+  principal_id         = data.azurerm_client_config.current.object_id
 }
 
 
@@ -33,6 +41,7 @@ resource "azurerm_key_vault_certificate" "Enterprise_wildcard" {
   depends_on = [
     azurerm_key_vault.App-Catalog_keyvault,
     azurerm_role_assignment.appgateway_user_assigned_identity_keyvault_certs,
+    azurerm_role_assignment.terraform_sp_keyvault_certs,
   ]
 }
 

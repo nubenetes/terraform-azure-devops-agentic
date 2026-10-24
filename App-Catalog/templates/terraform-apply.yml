@@ -46,20 +46,20 @@ jobs:
           inputs:
             targetType: 'inline'
             script: |
-              ipaddress=$(curl -s http://ipinfo.io/ip)
+              ipaddress=$(curl -s https://ipinfo.io/ip)
               echo "##vso[task.setvariable variable=address;isOutput=true;]$ipaddress"
               echo BuildAgentIP.address is $ipaddress
         ######################################################
         # Terraform Install
         ######################################################
-        - task: TerraformInstaller@0
+        - task: TerraformInstaller@1
           displayName: Terraform Install
           inputs:
             terraformVersion: $(TERRAFORM_VERSION)
         #################################################
         # Terraform Init: App-Core-<branch>-<env>.tfstate
         #################################################
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Init
           inputs:
             provider: 'azurerm'
@@ -70,43 +70,43 @@ jobs:
             backendAzureRmStorageAccountName: $(STORAGE_ACCOUNT_NAME)
             backendAzureRmContainerName: $(CONTAINER_NAME)
             backendAzureRmKey: '$(INFRA_NAME)-$(GIT_BRANCH)branch-${{ parameters.environment }}.tfstate'
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
         ##############################
         # Terraform Apply
         ##############################
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform apply
           inputs:
             provider: 'azurerm'
             command: 'apply'
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
-            commandOptions: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}/${{ parameters.environment }}-$(Build.BuildId).out'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            commandOptions: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}/${{ parameters.environment }}-$(Build.BuildId).out'
             environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
         ###################################
         # Terraform Output - Show - Graph
         ###################################
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Output
           inputs:
             provider: 'azurerm'
             command: 'output'
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
             environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Show (current tfstate)
           inputs:
             provider: 'azurerm'
             command: 'show'
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
             environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
             outputTo: 'file'   #'console'
             filename: 'myFile.json'
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform graph
           inputs:
             provider: 'azurerm'
             command: 'custom'
-            workingDirectory: '$(FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
+            workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
             customCommand: 'graph'
             #commandOptions: '-type=plan'
             outputTo: 'console'

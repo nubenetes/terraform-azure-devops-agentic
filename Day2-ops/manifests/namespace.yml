@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: Enterprise
+  name: enterprise
 ---
 apiVersion: v1
 kind: Namespace

@@ -23,8 +23,10 @@ expand_finops.py
 *.tfstate.*
 crash.log
 *.tfplan
-*.tfvars
-*.tfvars.json
+*.auto.tfvars
+*.auto.tfvars.json
+!*-developbranch.tfvars
+!*-mainbranch.tfvars
 override.tf
 override.tf.json
 _override.tf

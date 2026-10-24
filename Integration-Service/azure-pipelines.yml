@@ -1,5 +1,4 @@
-trigger:
-- manual
+trigger: none
 
 pool:
   vmImage: 'windows-2022'
@@ -42,22 +41,22 @@ resources:
 # Define Variables for Environments
 variables:
   - ${{ if eq(parameters.environment, 'app-env-dev') }}:
-    - template: configuration/app-env-dev.yml
+    - template: configuration/app-envdev.yml
       parameters:
         upn: ${{ lower(parameters.upn) }}
         AETitle: ${{ lower(parameters.AETitle) }}
   - ${{ if eq(parameters.environment, 'app-env-qa') }}:
-    - template: configuration/app-env-qa.yml
+    - template: configuration/app-envqa.yml
       parameters:
         upn: ${{ lower(parameters.upn) }}
         AETitle: ${{ lower(parameters.AETitle) }}
   - ${{ if eq(parameters.environment, 'app-env-uat') }}:
-    - template: configuration/app-env-uat.yml
+    - template: configuration/app-envuat.yml
       parameters:
         upn: ${{ lower(parameters.upn) }}
         AETitle: ${{ lower(parameters.AETitle) }}
   - ${{ if eq(parameters.environment, 'app-env-pre') }}:
-    - template: configuration/app-env-pre.yml
+    - template: configuration/app-envpre.yml
       parameters:
         upn: ${{ lower(parameters.upn) }}
         AETitle: ${{ lower(parameters.AETitle) }}
@@ -67,23 +66,23 @@ variables:
         upn: ${{ lower(parameters.upn) }}
         AETitle: ${{ lower(parameters.AETitle) }}
   - ${{ if eq(parameters.environment, 'app-env-res') }}:
-    - template: configuration/app-env-res.yml
+    - template: configuration/app-envres.yml
       parameters:
         upn: ${{ lower(parameters.upn) }}
         AETitle: ${{ lower(parameters.AETitle) }}
   # Legacy environments - to be removed once terraform pipelines are up&running:
   - ${{ if eq(parameters.environment, 'dev-app') }}:
-    - template: configuration/dev-app.yml
+    - template: configuration/devapp.yml
       parameters:
         upn: ${{ lower(parameters.upn) }}
         AETitle: ${{ lower(parameters.AETitle) }}
   - ${{ if eq(parameters.environment, 'test-app') }}:
-    - template: configuration/test-app.yml
+    - template: configuration/testapp.yml
       parameters:
         upn: ${{ lower(parameters.upn) }}
         AETitle: ${{ lower(parameters.AETitle) }}
   - ${{ if eq(parameters.environment, 'core') }}:
-    - template: configuration/core.yml
+    - template: configuration/app.yml
       parameters:
         upn: ${{ lower(parameters.upn) }}
         AETitle: ${{ lower(parameters.AETitle) }}
@@ -138,14 +137,14 @@ stages:
   displayName: InnoSetup Build
   dependsOn: [Stage_1,Stage_2,Stage_3]
   jobs:
-  - job: createintegration-serviceExe
+  - job: createIntegrationServiceExe
     timeoutInMinutes: 25
     cancelTimeoutInMinutes: 0
     variables:
       storageAccount: $[ stageDependencies.Stage_1.sendMessage.outputs['ProduceVarStorageAccount.storageAccountOutput'] ]
       appRegisterTimestamp: $[ stageDependencies.Stage_2.appRegister.outputs['ProduceVarAppReg.appRegisterTimestampOutput'] ]
       spName: $[ stageDependencies.Stage_2.appRegister.outputs['ProduceVarAppReg.spNameOutput'] ]
-      integration-serviceRelease: $[ stageDependencies.Stage_3.mavenBuild.outputs['ProduceVarintegration-serviceRelease.integration-serviceReleaseOutput'] ]
+      integrationServiceRelease: $[ stageDependencies.Stage_3.mavenBuild.outputs['ProduceVarIntegrationServiceRelease.integrationServiceReleaseOutput'] ]
     steps:
       - template: templates/include-innosetup-build-steps.yml       # Template reference
 - stage: Stage_5     # End Message with URL
@@ -156,7 +155,7 @@ stages:
     timeoutInMinutes: 15
     cancelTimeoutInMinutes: 0
     variables:
-        BlobFileDownloadUrl: $[ stageDependencies.Stage_4.createintegration-serviceExe.outputs['ProduceVarBlobFileDownloadUrlOutput.BlobFileDownloadUrlOutput'] ]
+        BlobFileDownloadUrl: $[ stageDependencies.Stage_4.createIntegrationServiceExe.outputs['ProduceVarBlobFileDownloadUrlOutput.BlobFileDownloadUrlOutput'] ]
         storageAccount: $[ stageDependencies.Stage_1.sendMessage.outputs['ProduceVarStorageAccount.storageAccountOutput'] ]
     steps:
       - template: templates/include-stop-steps.yml       # Template reference

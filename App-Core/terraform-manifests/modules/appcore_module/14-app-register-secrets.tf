@@ -16,23 +16,23 @@ resource "time_rotating" "app" {
 #   }
 # }
 resource "azuread_application_password" "appcore_back_api" {
-  display_name          = "mysecret"
-  application_object_id = azuread_application.appcore_back_api.object_id
+  display_name   = "mysecret"
+  application_id = azuread_application.appcore_back_api.id
   rotate_when_changed = {
     rotation = time_rotating.app.id
   }
 }
 resource "azuread_application_password" "applink_cloud_api" {
-  display_name          = "mysecret"
-  application_object_id = azuread_application.applink_cloud_api.object_id
+  display_name   = "mysecret"
+  application_id = azuread_application.applink_cloud_api.id
   rotate_when_changed = {
     rotation = time_rotating.app.id
   }
 }
 resource "azuread_application_password" "app-analysis_viewer_back_api_myclient" {
-  for_each              = toset(var.client_names)
-  display_name          = "mysecret"
-  application_object_id = azuread_application.app-analysis_viewer_back_api_myclient[each.key].object_id
+  for_each       = toset(var.client_names)
+  display_name   = "mysecret"
+  application_id = azuread_application.app-analysis_viewer_back_api_myclient[each.key].id
   rotate_when_changed = {
     rotation = time_rotating.app.id
   }

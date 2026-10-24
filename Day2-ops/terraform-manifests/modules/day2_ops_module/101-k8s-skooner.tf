@@ -186,9 +186,12 @@ resource "kubernetes_secret_v1" "skooner" {
   }
 
   data = {
-    id     = azuread_application.skooner_login.application_id
+    id     = azuread_application.skooner_login.client_id
     secret = azuread_application_password.skooner_login.value
-    url    = "https://login.microsoftonline.com/00000000-0000-0000-0000-000000000000/v2.0"
+    url    = "https://login.microsoftonline.com/${data.azuread_client_config.current.tenant_id}/v2.0"
   }
   type = "Opaque"
+  depends_on = [
+    kubectl_manifest.skooner_namespace,
+  ]
 }

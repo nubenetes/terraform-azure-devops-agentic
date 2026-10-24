@@ -83,29 +83,11 @@ resource "azuread_user" "testadmin" {
   ]
 }
 
-data "azuread_user" "testuser1" {
-  #for_each            = (var.environment != "pro") ? toset(var.client_names):[]  # We don't want test users on Production
-  for_each            = toset(var.client_names)
-  user_principal_name = azuread_user.testuser1[each.key].user_principal_name
-  depends_on = [
-    azuread_user.testuser1,
-  ]
-}
-
-data "azuread_user" "testadmin" {
-  #for_each            = (var.environment != "pro") ? toset(var.client_names):[]  # We don't want test users on Production
-  for_each            = toset(var.client_names)
-  user_principal_name = azuread_user.testadmin[each.key].user_principal_name
-  depends_on = [
-    azuread_user.testadmin,
-  ]
-}
-
 resource "azuread_group_member" "testuser1" {
   #for_each          = (var.environment != "pro") ? toset(var.client_names):[]  # We don't want test users on Production
   for_each         = toset(var.client_names)
-  group_object_id  = azuread_group.appcore_user_role[each.key].id
-  member_object_id = data.azuread_user.testuser1[each.key].id
+  group_object_id  = azuread_group.appcore_user_role[each.key].object_id
+  member_object_id = azuread_user.testuser1[each.key].object_id
   depends_on = [
     azuread_group.appcore_user_role,
     azuread_user.testuser1,
@@ -115,8 +97,8 @@ resource "azuread_group_member" "testuser1" {
 resource "azuread_group_member" "testadmin" {
   # for_each          = (var.environment != "pro") ? toset(var.client_names):[]  # We don't want test users on Production
   for_each         = toset(var.client_names)
-  group_object_id  = azuread_group.appcore_admin_role[each.key].id
-  member_object_id = data.azuread_user.testadmin[each.key].id
+  group_object_id  = azuread_group.appcore_admin_role[each.key].object_id
+  member_object_id = azuread_user.testadmin[each.key].object_id
   depends_on = [
     azuread_group.appcore_admin_role,
     azuread_user.testadmin,

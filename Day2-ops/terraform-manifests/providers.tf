@@ -37,13 +37,9 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "~> 2.32.0"
     }
-    ansible = {
-      # https://www.ansible.com/blog/providing-terraform-with-that-ansible-magic
-      # https://www.ansible.com/blog/walking-on-clouds-with-ansible
-      # https://ansible29.rssing.com/chan-30085529/latest.php
-      # https://github.com/ansible/terraform-provider-ansible
-      source  = "ansible/ansible"
-      version = "~> 1.1.0"
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.12.0"
     }
   }
   # Terraform State Storage to Azure Storage Container
@@ -65,8 +61,9 @@ terraform {
 # 1. Terraform Provider Block for AzureRM with Default Enterprise Infrastructure Subscription
 # https://samcogan.com/deploying-to-multiple-azure-subscriptions-with-terraform/
 provider "azurerm" {
-  alias           = "manualinfra"
-  subscription_id = "00000000-0000-0000-0000-000000000000" # Enterprise Infrastructure Subscription
+  alias                           = "manualinfra"
+  subscription_id                 = "00000000-0000-0000-0000-000000000000" # Enterprise Infrastructure Subscription
+  resource_provider_registrations = "none"
   #region                     = "northeurope"
   features {
     # resource_group behavior managed via AzureRM v4 lifecycle rules
@@ -79,7 +76,7 @@ provider "azurerm" {
   alias           = "europe"
   subscription_id = var.azure_subscription_europe
   #region                     = "northeurope"
-  skip_provider_registration = true # required to run azurerm_resource_provider_registration.aks_cluster
+  resource_provider_registrations = "none"
   features {
     key_vault {
       purge_soft_delete_on_destroy = true
@@ -94,7 +91,7 @@ provider "azurerm" {
   alias           = "us"
   subscription_id = var.azure_subscription_unitedstates
   #region                     = "centralus"
-  skip_provider_registration = true # required to run azurerm_resource_provider_registration.aks_cluster
+  resource_provider_registrations = "none"
   features {
     key_vault {
       purge_soft_delete_on_destroy = true
@@ -123,17 +120,16 @@ provider "helm" {
     cluster_ca_certificate = local.deploy_Europe ? base64decode(var.secret_aks_kube_config_cluster_ca_certificate_europe) : null
     # using kubelogin to get an AAD token for the cluster.
     exec {
-      api_version = "client.authentication.k8s.io/v1beta1"
+      api_version = "client.authentication.k8s.io/v1"
       command     = "/usr/bin/kubelogin"
       args = [
         "get-token",
+        "--environment",
         "AzurePublicCloud",
         "--server-id",
-        data.azuread_service_principal.aks_aad_server.application_id, # Note: The AAD server app ID of AKS Managed AAD is always 00000000-0000-0000-0000-000000000000 in any environments.
+        data.azuread_service_principal.aks_aad_server.client_id, # Note: The AAD server app ID of AKS Managed AAD is always 00000000-0000-0000-0000-000000000000 in any environments.
         "--client-id",
         data.azuread_client_config.current.client_id,
-        #data.azuread_service_principal.azure_devops_sp.application_id,
-        #data.azurerm_client_config.current.application_id,
         "--client-secret",
         var.secret_azure_devops_sp,
         "--tenant-id",
@@ -161,17 +157,16 @@ provider "helm" {
     cluster_ca_certificate = local.deploy_United_States ? base64decode(var.secret_aks_kube_config_cluster_ca_certificate_unitedstates) : null
     # using kubelogin to get an AAD token for the cluster.
     exec {
-      api_version = "client.authentication.k8s.io/v1beta1"
+      api_version = "client.authentication.k8s.io/v1"
       command     = "/usr/bin/kubelogin"
       args = [
         "get-token",
+        "--environment",
         "AzurePublicCloud",
         "--server-id",
-        data.azuread_service_principal.aks_aad_server.application_id, # Note: The AAD server app ID of AKS Managed AAD is always 00000000-0000-0000-0000-000000000000 in any environments.
+        data.azuread_service_principal.aks_aad_server.client_id, # Note: The AAD server app ID of AKS Managed AAD is always 00000000-0000-0000-0000-000000000000 in any environments.
         "--client-id",
         data.azuread_client_config.current.client_id,
-        #data.azuread_service_principal.azure_devops_sp.application_id,
-        #data.azurerm_client_config.current.application_id,
         "--client-secret",
         var.secret_azure_devops_sp,
         "--tenant-id",
@@ -197,17 +192,16 @@ provider "kubectl" {
   load_config_file       = false
   # using kubelogin to get an AAD token for the cluster.
   exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
+    api_version = "client.authentication.k8s.io/v1"
     command     = "/usr/bin/kubelogin"
     args = [
       "get-token",
+      "--environment",
       "AzurePublicCloud",
       "--server-id",
-      data.azuread_service_principal.aks_aad_server.application_id, # Note: The AAD server app ID of AKS Managed AAD is always 00000000-0000-0000-0000-000000000000 in any environments.
+      data.azuread_service_principal.aks_aad_server.client_id, # Note: The AAD server app ID of AKS Managed AAD is always 00000000-0000-0000-0000-000000000000 in any environments.
       "--client-id",
       data.azuread_client_config.current.client_id,
-      #data.azuread_service_principal.azure_devops_sp.application_id,
-      #data.azurerm_client_config.current.application_id,
       "--client-secret",
       var.secret_azure_devops_sp,
       "--tenant-id",
@@ -225,17 +219,16 @@ provider "kubectl" {
   load_config_file       = false
   # using kubelogin to get an AAD token for the cluster.
   exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
+    api_version = "client.authentication.k8s.io/v1"
     command     = "/usr/bin/kubelogin"
     args = [
       "get-token",
+      "--environment",
       "AzurePublicCloud",
       "--server-id",
-      data.azuread_service_principal.aks_aad_server.application_id, # Note: The AAD server app ID of AKS Managed AAD is always 00000000-0000-0000-0000-000000000000 in any environments.
+      data.azuread_service_principal.aks_aad_server.client_id, # Note: The AAD server app ID of AKS Managed AAD is always 00000000-0000-0000-0000-000000000000 in any environments.
       "--client-id",
       data.azuread_client_config.current.client_id,
-      #data.azuread_service_principal.azure_devops_sp.application_id,
-      #data.azurerm_client_config.current.application_id,
       "--client-secret",
       var.secret_azure_devops_sp,
       "--tenant-id",
@@ -255,17 +248,16 @@ provider "kubernetes" {
   cluster_ca_certificate = local.deploy_Europe ? base64decode(var.secret_aks_kube_config_cluster_ca_certificate_europe) : null
   # using kubelogin to get an AAD token for the cluster.
   exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
+    api_version = "client.authentication.k8s.io/v1"
     command     = "/usr/bin/kubelogin"
     args = [
       "get-token",
+      "--environment",
       "AzurePublicCloud",
       "--server-id",
-      data.azuread_service_principal.aks_aad_server.application_id, # Note: The AAD server app ID of AKS Managed AAD is always 00000000-0000-0000-0000-000000000000 in any environments.
+      data.azuread_service_principal.aks_aad_server.client_id, # Note: The AAD server app ID of AKS Managed AAD is always 00000000-0000-0000-0000-000000000000 in any environments.
       "--client-id",
       data.azuread_client_config.current.client_id,
-      #data.azuread_service_principal.azure_devops_sp.application_id,
-      #data.azurerm_client_config.current.application_id,
       "--client-secret",
       var.secret_azure_devops_sp,
       "--tenant-id",
@@ -282,72 +274,16 @@ provider "kubernetes" {
   cluster_ca_certificate = local.deploy_United_States ? base64decode(var.secret_aks_kube_config_cluster_ca_certificate_unitedstates) : null
   # using kubelogin to get an AAD token for the cluster.
   exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
+    api_version = "client.authentication.k8s.io/v1"
     command     = "/usr/bin/kubelogin"
     args = [
       "get-token",
+      "--environment",
       "AzurePublicCloud",
       "--server-id",
-      data.azuread_service_principal.aks_aad_server.application_id, # Note: The AAD server app ID of AKS Managed AAD is always 00000000-0000-0000-0000-000000000000 in any environments.
+      data.azuread_service_principal.aks_aad_server.client_id, # Note: The AAD server app ID of AKS Managed AAD is always 00000000-0000-0000-0000-000000000000 in any environments.
       "--client-id",
       data.azuread_client_config.current.client_id,
-      #data.azuread_service_principal.azure_devops_sp.application_id,
-      #data.azurerm_client_config.current.application_id,
-      "--client-secret",
-      var.secret_azure_devops_sp,
-      "--tenant-id",
-      var.aad_tenant_id,
-      "--login",
-      "spn"
-    ]
-  }
-}
-
-provider "ansible" {
-  alias                  = "europe"
-  host                   = local.deploy_Europe ? var.secret_aks_kube_config_host_europe : null
-  cluster_ca_certificate = local.deploy_Europe ? base64decode(var.secret_aks_kube_config_cluster_ca_certificate_europe) : null
-  load_config_file       = false
-  # using kubelogin to get an AAD token for the cluster.
-  exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
-    command     = "/usr/bin/kubelogin"
-    args = [
-      "get-token",
-      "AzurePublicCloud",
-      "--server-id",
-      data.azuread_service_principal.aks_aad_server.application_id, # Note: The AAD server app ID of AKS Managed AAD is always 00000000-0000-0000-0000-000000000000 in any environments.
-      "--client-id",
-      data.azuread_client_config.current.client_id,
-      #data.azuread_service_principal.azure_devops_sp.application_id,
-      #data.azurerm_client_config.current.application_id,
-      "--client-secret",
-      var.secret_azure_devops_sp,
-      "--tenant-id",
-      var.aad_tenant_id,
-      "--login",
-      "spn"
-    ]
-  }
-}
-provider "ansible" {
-  alias                  = "us"
-  host                   = local.deploy_Europe ? var.secret_aks_kube_config_host_europe : null
-  cluster_ca_certificate = local.deploy_Europe ? base64decode(var.secret_aks_kube_config_cluster_ca_certificate_europe) : null
-  load_config_file       = false
-  # using kubelogin to get an AAD token for the cluster.
-  exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
-    command     = "/usr/bin/kubelogin"
-    args = [
-      "get-token",
-      "AzurePublicCloud",
-      "--server-id",
-      data.azuread_service_principal.aks_aad_server.application_id, # Note: The AAD server app ID of AKS Managed AAD is always 00000000-0000-0000-0000-000000000000 in any environments.
-      "--client-id",
-      data.azuread_client_config.current.client_id,
-      #data.azuread_service_principal.azure_devops_sp.application_id,
-      #data.azurerm_client_config.current.application_id,
       "--client-secret",
       var.secret_azure_devops_sp,
       "--tenant-id",

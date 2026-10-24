@@ -3,8 +3,7 @@
 # https://stackoverflow.com/questions/64800434/azure-artifact-cannot-be-uploaded-because-max-quantity-has-been-exceeded-or-the
 # https://devblogs.microsoft.com/devops/optimizing-package-storage-and-costs/
 
-trigger:
-- manual
+trigger: none
 
 pool:
   vmImage: 'windows-2022'
@@ -25,17 +24,17 @@ parameters:
 # Define Variables for Environments
 variables:
   - ${{ if eq(parameters.environment, 'app-env-dev') }}:
-    - template: configuration/app-env-dev.yml
+    - template: configuration/app-envdev.yml
   - ${{ if eq(parameters.environment, 'app-env-qa') }}:
-    - template: configuration/app-env-qa.yml
+    - template: configuration/app-envqa.yml
   - ${{ if eq(parameters.environment, 'app-env-uat') }}:
-    - template: configuration/app-env-uat.yml
+    - template: configuration/app-envuat.yml
   - ${{ if eq(parameters.environment, 'app-env-pre') }}:
-    - template: configuration/app-env-pre.yml
+    - template: configuration/app-envpre.yml
   - ${{ if eq(parameters.environment, 'app-env') }}:
     - template: configuration/app-env.yml
   - ${{ if eq(parameters.environment, 'app-env-res') }}:
-    - template: configuration/app-env-res.yml
+    - template: configuration/app-envres.yml
 
 stages:
 - stage: DownloadArtifactsFromInternet

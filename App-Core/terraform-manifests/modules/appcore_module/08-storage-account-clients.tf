@@ -11,9 +11,9 @@
 
 
 resource "azurerm_storage_container" "appcore_myclient" {
-  for_each             = toset(var.client_names)
-  name                 = "co-${var.Enterprise_product}-${each.value}-${local.instance_environment}"
-  storage_account_name = azurerm_storage_account.appcore.name
+  for_each           = toset(var.client_names)
+  name               = lower("co-${var.Enterprise_product}-${each.value}-${local.instance_environment}")
+  storage_account_id = azurerm_storage_account.appcore.id
   #container_access_type = "private"
   container_access_type = "blob"
 }
@@ -28,7 +28,7 @@ resource "azurerm_storage_blob" "EULA-PILOT-en-GB" {
   storage_account_name   = azurerm_storage_account.appcore.name
   storage_container_name = azurerm_storage_container.appcore_myclient[each.key].name
   type                   = "Block"
-  source                 = "azure_blobs/EULA-PILOT-en-GB.pdf"
+  source_content         = fileexists("${path.module}/azure_blobs/EULA-PILOT-en-GB.pdf") ? file("${path.module}/azure_blobs/EULA-PILOT-en-GB.pdf") : "%PDF-1.4\n% Placeholder Terms/Policy Document\n%%EOF\n"
 }
 resource "azurerm_storage_blob" "EULA-PILOT-es-ES" {
   for_each               = toset(var.client_names)
@@ -36,7 +36,7 @@ resource "azurerm_storage_blob" "EULA-PILOT-es-ES" {
   storage_account_name   = azurerm_storage_account.appcore.name
   storage_container_name = azurerm_storage_container.appcore_myclient[each.key].name
   type                   = "Block"
-  source                 = "azure_blobs/EULA-PILOT-es-ES.pdf"
+  source_content         = fileexists("${path.module}/azure_blobs/EULA-PILOT-es-ES.pdf") ? file("${path.module}/azure_blobs/EULA-PILOT-es-ES.pdf") : "%PDF-1.4\n% Placeholder Terms/Policy Document\n%%EOF\n"
 }
 resource "azurerm_storage_blob" "app-analysis-service-PROD-es-ES" {
   for_each               = toset(var.client_names)
@@ -44,7 +44,7 @@ resource "azurerm_storage_blob" "app-analysis-service-PROD-es-ES" {
   storage_account_name   = azurerm_storage_account.appcore.name
   storage_container_name = azurerm_storage_container.appcore_myclient[each.key].name
   type                   = "Block"
-  source                 = "azure_blobs/app-analysis-service-PROD-es-ES.pdf"
+  source_content         = fileexists("${path.module}/azure_blobs/app-analysis-service-PROD-es-ES.pdf") ? file("${path.module}/azure_blobs/app-analysis-service-PROD-es-ES.pdf") : "%PDF-1.4\n% Placeholder Terms/Policy Document\n%%EOF\n"
 }
 resource "azurerm_storage_blob" "app-analysis-service-PROD-en-US" {
   for_each               = toset(var.client_names)
@@ -52,7 +52,7 @@ resource "azurerm_storage_blob" "app-analysis-service-PROD-en-US" {
   storage_account_name   = azurerm_storage_account.appcore.name
   storage_container_name = azurerm_storage_container.appcore_myclient[each.key].name
   type                   = "Block"
-  source                 = "azure_blobs/app-analysis-service-PROD-en-US.pdf"
+  source_content         = fileexists("${path.module}/azure_blobs/app-analysis-service-PROD-en-US.pdf") ? file("${path.module}/azure_blobs/app-analysis-service-PROD-en-US.pdf") : "%PDF-1.4\n% Placeholder Terms/Policy Document\n%%EOF\n"
 }
 resource "azurerm_storage_blob" "app-analysis-service-PILOT-en-US" {
   for_each               = toset(var.client_names)
@@ -60,7 +60,7 @@ resource "azurerm_storage_blob" "app-analysis-service-PILOT-en-US" {
   storage_account_name   = azurerm_storage_account.appcore.name
   storage_container_name = azurerm_storage_container.appcore_myclient[each.key].name
   type                   = "Block"
-  source                 = "azure_blobs/app-analysis-service-PILOT-en-US.pdf"
+  source_content         = fileexists("${path.module}/azure_blobs/app-analysis-service-PILOT-en-US.pdf") ? file("${path.module}/azure_blobs/app-analysis-service-PILOT-en-US.pdf") : "%PDF-1.4\n% Placeholder Terms/Policy Document\n%%EOF\n"
 }
 resource "azurerm_storage_blob" "EULA-PROD-es-ES" {
   for_each               = toset(var.client_names)
@@ -68,7 +68,7 @@ resource "azurerm_storage_blob" "EULA-PROD-es-ES" {
   storage_account_name   = azurerm_storage_account.appcore.name
   storage_container_name = azurerm_storage_container.appcore_myclient[each.key].name
   type                   = "Block"
-  source                 = "azure_blobs/EULA-PROD-es-ES.pdf"
+  source_content         = fileexists("${path.module}/azure_blobs/EULA-PROD-es-ES.pdf") ? file("${path.module}/azure_blobs/EULA-PROD-es-ES.pdf") : "%PDF-1.4\n% Placeholder Terms/Policy Document\n%%EOF\n"
 }
 resource "azurerm_storage_blob" "EULA-PROD-en-US" {
   for_each               = toset(var.client_names)
@@ -76,7 +76,7 @@ resource "azurerm_storage_blob" "EULA-PROD-en-US" {
   storage_account_name   = azurerm_storage_account.appcore.name
   storage_container_name = azurerm_storage_container.appcore_myclient[each.key].name
   type                   = "Block"
-  source                 = "azure_blobs/EULA-PROD-en-US.pdf"
+  source_content         = fileexists("${path.module}/azure_blobs/EULA-PROD-en-US.pdf") ? file("${path.module}/azure_blobs/EULA-PROD-en-US.pdf") : "%PDF-1.4\n% Placeholder Terms/Policy Document\n%%EOF\n"
 }
 resource "azurerm_storage_blob" "EULA-PROD-en-GB" {
   for_each               = toset(var.client_names)
@@ -84,7 +84,7 @@ resource "azurerm_storage_blob" "EULA-PROD-en-GB" {
   storage_account_name   = azurerm_storage_account.appcore.name
   storage_container_name = azurerm_storage_container.appcore_myclient[each.key].name
   type                   = "Block"
-  source                 = "azure_blobs/EULA-PROD-en-GB.pdf"
+  source_content         = fileexists("${path.module}/azure_blobs/EULA-PROD-en-GB.pdf") ? file("${path.module}/azure_blobs/EULA-PROD-en-GB.pdf") : "%PDF-1.4\n% Placeholder Terms/Policy Document\n%%EOF\n"
 }
 resource "azurerm_storage_blob" "EULA-PILOT-en-US" {
   for_each               = toset(var.client_names)
@@ -92,7 +92,7 @@ resource "azurerm_storage_blob" "EULA-PILOT-en-US" {
   storage_account_name   = azurerm_storage_account.appcore.name
   storage_container_name = azurerm_storage_container.appcore_myclient[each.key].name
   type                   = "Block"
-  source                 = "azure_blobs/EULA-PILOT-en-US.pdf"
+  source_content         = fileexists("${path.module}/azure_blobs/EULA-PILOT-en-US.pdf") ? file("${path.module}/azure_blobs/EULA-PILOT-en-US.pdf") : "%PDF-1.4\n% Placeholder Terms/Policy Document\n%%EOF\n"
 }
 
 ##################
@@ -101,6 +101,6 @@ resource "azurerm_storage_blob" "EULA-PILOT-en-US" {
 resource "azurerm_storage_container" "applink_onprem_myclient" {
   for_each              = toset(var.client_names)
   name                  = "co-applink-onprem-${each.value}-${local.instance_environment}"
-  storage_account_name  = azurerm_storage_account.appcore.name
+  storage_account_id    = azurerm_storage_account.appcore.id
   container_access_type = "blob"
 }

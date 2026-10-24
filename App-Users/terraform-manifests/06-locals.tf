@@ -114,7 +114,7 @@ locals {
     ]) # flatten 3 end
     ,
     flatten([ # flatten 4 start
-      for user_key, user in local.load_yaml_manually_provisioned_internal_users : [
+      for user_key, user in local.load_yaml_internal_users : [
         for app-analysis_user_role_key, app-analysis_user_role in lookup(user, "app-analysis-user-role", []) : {
           "user-key"                  = user_key
           "first-name"                = lookup(user, "first-name", null)
@@ -155,6 +155,7 @@ locals {
       "email"    = "${user.email}"
       "upn"      = join("#", [replace("${user.email}", "@", "_"), "EXT", "@enterprise.onmicrosoft.com"])
       "center"   = "${user.center}"
+      "client"   = "${user.center}"
       "env"      = "${user.env}"
       "role"     = "${user.role}"
     }

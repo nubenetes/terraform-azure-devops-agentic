@@ -55,6 +55,8 @@ variable "gitbranch" {
 variable "ssh_public_key" {
   #default = "~/.ssh/aks-prod-sshkeys-terraform/aksprodsshkey.pub"
   description = "This variable defines the SSH Public Key for Linux k8s Worker nodes"
+  type        = string
+  default     = ""
 }
 
 #################################
@@ -62,6 +64,7 @@ variable "ssh_public_key" {
 #################################
 variable "kubernetes_version" {
   type        = string
+  default     = "1.30"
   description = "This variable defines the kubernetes version in AKS"
 }
 
@@ -94,7 +97,6 @@ variable "aks_administrators" {
   description = "List of Admins with access to AKS (cluster-admin role)"
   type        = list(string)
   default = [
-    "cloud-admin@example.com",
     "cloud-admin@example.com",
   ]
 }

@@ -225,7 +225,7 @@ Connection strings are constructed using Terraform `replace()` and stored in Key
 
 | Resource Type | Description | Key File Reference |
 | :--- | :--- | :--- |
-| `mongodbatlas_cluster` | Replica set on Azure. | [`15-mongodb.tf`](../App-Catalog/terraform-manifests/modules/appanalysis_module/15-mongodb.tf) |
+| `mongodbatlas_advanced_cluster` | Replica set on Azure. | [`15-mongodb.tf`](../App-Catalog/terraform-manifests/modules/appanalysis_module/15-mongodb.tf) |
 | `azurerm_cosmosdb_account` | Native Azure MongoDB account. | [`29-cosmosdb-mongodb.tf`](../App-Core/poc-cosmosdb-mongo/terraform-manifests/modules/appcore_module/29-cosmosdb-mongodb.tf) |
 
 ---

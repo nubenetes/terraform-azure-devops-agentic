@@ -1,4 +1,4 @@
 resource "azurerm_resource_group" "appcore_rg" {
-  name     = "rg-terraform-sandbox-<your_name>-dev"
+  name     = "rg-terraform-sandbox-enterprise-dev"
   location = "northeurope"
 }

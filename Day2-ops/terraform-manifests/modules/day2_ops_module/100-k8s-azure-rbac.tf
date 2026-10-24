@@ -13,4 +13,7 @@ resource "azurerm_role_assignment" "aks_developers_rbac_admin_prometheus" {
   # Lets you manage all resources under cluster/namespace, except update or delete resource quotas and namespaces
   scope                            = join("", [data.azurerm_kubernetes_cluster.aks.id, "/namespaces/prometheus"])
   skip_service_principal_aad_check = false
+  depends_on = [
+    kubernetes_namespace_v1.prometheus,
+  ]
 }

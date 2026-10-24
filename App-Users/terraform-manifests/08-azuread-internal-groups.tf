@@ -4,27 +4,59 @@
 
 resource "azuread_group_member" "appcore_internal_admin_user" {
   for_each = {
-    for internal_admin_user in local.yaml_internal_users : "${internal_admin_user.email}.${internal_admin_user.appcore-admin-role-key}" => internal_admin_user
+    for internal_admin_user in concat(local.yaml_internal_users, local.yaml_manually_provisioned_internal_users) : "${internal_admin_user.email}.${internal_admin_user.appcore-admin-role-key}" => internal_admin_user
     if internal_admin_user.appcore-admin-role != null
   }
   group_object_id  = data.azuread_group.appcore_admin_role_internal_users["${each.value.email}.${each.value.appcore-admin-role-key}"].id
-  member_object_id = data.azuread_user.internal["${each.value.email}"].object_id
+  member_object_id = try(azuread_user.internal[each.value.email].object_id, data.azuread_user.manually_provisioned[each.value.email].object_id)
   depends_on = [
     data.azuread_group.appcore_admin_role_internal_users,
-    data.azuread_user.internal,
+    azuread_user.internal,
+    data.azuread_user.manually_provisioned,
   ]
 }
 
 resource "azuread_group_member" "appcore_internal_user" {
   for_each = {
-    for internal_user in local.yaml_internal_users : "${internal_user.email}.${internal_user.appcore-user-role-key}" => internal_user
+    for internal_user in concat(local.yaml_internal_users, local.yaml_manually_provisioned_internal_users) : "${internal_user.email}.${internal_user.appcore-user-role-key}" => internal_user
     if internal_user.appcore-user-role != null
   }
 
   group_object_id  = data.azuread_group.appcore_user_role_internal_users["${each.value.email}.${each.value.appcore-user-role-key}"].id
-  member_object_id = data.azuread_user.internal["${each.value.email}"].object_id
+  member_object_id = try(azuread_user.internal[each.value.email].object_id, data.azuread_user.manually_provisioned[each.value.email].object_id)
   depends_on = [
     data.azuread_group.appcore_user_role_internal_users,
-    data.azuread_user.internal,
+    azuread_user.internal,
+    data.azuread_user.manually_provisioned,
   ]
 }
+
+resource "azuread_group_member" "app-analysis_internal_admin_user" {
+  for_each = {
+    for internal_admin_user in concat(local.yaml_internal_users, local.yaml_manually_provisioned_internal_users) : "${internal_admin_user.email}.${internal_admin_user.app-analysis-admin-role-key}" => internal_admin_user
+    if internal_admin_user.app-analysis-admin-role != null
+  }
+  group_object_id  = data.azuread_group.app-analysis_admin["${each.value.email}.${each.value.app-analysis-admin-role-key}"].id
+  member_object_id = try(azuread_user.internal[each.value.email].object_id, data.azuread_user.manually_provisioned[each.value.email].object_id)
+  depends_on = [
+    data.azuread_group.app-analysis_admin,
+    azuread_user.internal,
+    data.azuread_user.manually_provisioned,
+  ]
+}
+
+resource "azuread_group_member" "app-analysis_internal_user" {
+  for_each = {
+    for internal_user in concat(local.yaml_internal_users, local.yaml_manually_provisioned_internal_users) : "${internal_user.email}.${internal_user.app-analysis-user-role-key}" => internal_user
+    if internal_user.app-analysis-user-role != null
+  }
+
+  group_object_id  = data.azuread_group.app-analysis_users["${each.value.email}.${each.value.app-analysis-user-role-key}"].id
+  member_object_id = try(azuread_user.internal[each.value.email].object_id, data.azuread_user.manually_provisioned[each.value.email].object_id)
+  depends_on = [
+    data.azuread_group.app-analysis_users,
+    azuread_user.internal,
+    data.azuread_user.manually_provisioned,
+  ]
+}
+

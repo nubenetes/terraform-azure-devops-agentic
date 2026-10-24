@@ -4,7 +4,7 @@
 variable "environment" {
   description = "This variable defines the Environment"
   type        = string
-  default     = "dev"
+  default     = "eng"
 }
 
 #################################

@@ -1,18 +1,18 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: Enterprise-Enterpriseapp-analysis-63f7dac0
-  namespace: Enterprise
+  name: enterprise-enterpriseapp-analysis-63f7dac0
+  namespace: enterprise
   uid: 00000000-0000-0000-0000-000000000000
   resourceVersion: '1728125'
   generation: 1
   creationTimestamp: '2000-01-01T00:00:00Z'
   labels:
     controller-uid: 00000000-0000-0000-0000-000000000000
-    job-name: Enterprise-Enterpriseapp-analysis-63f7dac0
+    job-name: enterprise-enterpriseapp-analysis-63f7dac0
   annotations:
     batch.kubernetes.io/job-tracking: ''
-  selfLink: /apis/batch/v1/namespaces/Enterprise/jobs/Enterprise-Enterpriseapp-analysis-63f7dac0
+  selfLink: /apis/batch/v1/namespaces/enterprise/jobs/enterprise-enterpriseapp-analysis-63f7dac0
 status:
   conditions:
     - type: Complete

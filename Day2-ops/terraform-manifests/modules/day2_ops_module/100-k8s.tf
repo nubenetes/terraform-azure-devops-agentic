@@ -7,13 +7,13 @@
 resource "kubernetes_namespace_v1" "appcore_client" {
   metadata {
     annotations = {
-      name = "Enterprise"
+      name = "enterprise"
     }
     labels = {
       app         = "ml"
       environment = local.environment
     }
-    name = "Enterprise"
+    name = "enterprise"
   }
 }
 
@@ -86,7 +86,7 @@ resource "kubernetes_cluster_role_binding_v1" "cluster-view-developers" {
   }
   subject {
     kind      = "Group"
-    name      = data.azuread_group.aks_developers.id
+    name      = data.azuread_group.aks_developers.object_id
     api_group = "rbac.authorization.k8s.io"
   }
 }
@@ -150,12 +150,13 @@ resource "kubernetes_cluster_role_binding_v1" "kubeapps-developers" {
     #name      = "system:masters"
   }
   subject {
-    kind = "Group"
-    name = data.azuread_group.aks_developers.id
-    #name      = "system:masters"
-    #api_group = "rbac.authorization.k8s.io"
-    #namespace = # (Optional) Namespace defines the namespace of the ServiceAccount to bind to. This value only applies to kind ServiceAccount
+    kind      = "Group"
+    name      = data.azuread_group.aks_developers.object_id
+    api_group = "rbac.authorization.k8s.io"
   }
+  depends_on = [
+    helm_release.kubeapps,
+  ]
 }
 
 

@@ -15,3 +15,7 @@ data "azurerm_client_config" "current" {
 # AzureAD
 ##########################################
 data "azuread_client_config" "current" {}
+
+data "azuread_domains" "aad_domains" {
+  only_initial = true
+}

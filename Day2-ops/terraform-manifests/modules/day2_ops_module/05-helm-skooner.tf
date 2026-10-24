@@ -38,7 +38,7 @@ resource "helm_release" "skooner" {
   create_namespace = true # (Optional) Create the namespace if it does not yet exist. Defaults to false.
 
   values = [
-    "${file("./helm/skooner/values.yaml")}"
+    file("${path.root}/helm/skooner/values.yaml")
   ]
 
   # set {
@@ -110,10 +110,10 @@ resource "helm_release" "skooner" {
   # }
   set {
     name  = "oidc.secret.clientID"
-    value = azuread_application.skooner_login.application_id
+    value = azuread_application.skooner_login.client_id
     #type  = "auto"
   }
-  set {
+  set_sensitive {
     name  = "oidc.secret.clientSecret"
     value = azuread_application_password.skooner_login.value
     #type  = "auto"

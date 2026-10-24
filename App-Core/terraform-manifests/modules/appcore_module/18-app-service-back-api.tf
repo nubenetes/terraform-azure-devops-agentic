@@ -24,13 +24,15 @@ resource "azurerm_linux_web_app" "appcore_back_api" {
   site_config {
     ftps_state = "Disabled"
     application_stack {
-      docker_image     = var.app_docker_image_appcore_back_api
-      docker_image_tag = var.app_docker_image_tag_appcore_back_api
+      docker_image_name        = "${var.app_docker_image_appcore_back_api}:${var.app_docker_image_tag_appcore_back_api}"
+      docker_registry_url      = var.docker_registry
+      docker_registry_username = var.docker_registry_username
+      docker_registry_password = var.secret_docker_registry_server_password
     }
   }
   app_settings = {
     APP_ENVIRONMENT                 = local.appcore_dns_name # The name of corresponding key-vault-client is obtained from this: kv-<AETITLE>-<APP_ENVIRONMENT>
-    AZURE_CLIENT_ID                 = azuread_application.appcore_back_api.application_id
+    AZURE_CLIENT_ID                 = azuread_application.appcore_back_api.client_id
     AZURE_CLIENT_SECRET             = azuread_application_password.appcore_back_api.value
     AZURE_TENANT_ID                 = var.aad_tenant_id
     DOCKER_REGISTRY_SERVER_PASSWORD = var.secret_docker_registry_server_password
@@ -95,8 +97,10 @@ resource "azurerm_linux_web_app" "applink_cloud_api" {
   site_config {
     ftps_state = "Disabled"
     application_stack {
-      docker_image     = var.app_docker_image_applink_cloud_api
-      docker_image_tag = var.app_docker_image_tag_applink_cloud_api
+      docker_image_name        = "${var.app_docker_image_applink_cloud_api}:${var.app_docker_image_tag_applink_cloud_api}"
+      docker_registry_url      = var.docker_registry
+      docker_registry_username = var.docker_registry_username
+      docker_registry_password = var.secret_docker_registry_server_password
     }
   }
 
@@ -115,7 +119,7 @@ resource "azurerm_linux_web_app" "applink_cloud_api" {
   # }
   app_settings = {
     APP_ENVIRONMENT                    = local.appcore_dns_name
-    AZURE_CLIENT_ID                    = azuread_application.applink_cloud_api.application_id
+    AZURE_CLIENT_ID                    = azuread_application.applink_cloud_api.client_id
     AZURE_CLIENT_SECRET                = azuread_application_password.applink_cloud_api.value
     AZURE_DIRECTORY_ID                 = var.aad_tenant_id
     DCM_VALIDATOR_PATH                 = "/usr/bin"

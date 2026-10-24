@@ -14,8 +14,7 @@
 # https://docs.microsoft.com/en-us/azure/container-registry/container-registry-tasks-overview
 # https://docs.microsoft.com/en-us/azure/container-registry/container-registry-tasks-samples
 
-trigger:
-- manual
+trigger: none
 
 variables:
   vmImageName: 'ubuntu-latest'   # Agent VM image name
@@ -24,7 +23,7 @@ variables:
   tag: '$(Build.BuildId)'
   dockerRegistryServiceConnection: 'svccon-acr-dev'
   imageRepository: 'innosetup'
-  containerRegisty: 'containerregistryenterprise1.azurecr.io'
+  containerRegistry: 'containerregistryenterprise1.azurecr.io'
 
 stages:
 - stage: Build

@@ -47,10 +47,12 @@ resource "azurerm_linux_web_app" "App-Catalog" {
     }
   )
   site_config {
-    ftps_state = "AllAllowed"
+    ftps_state = "Disabled"
     application_stack {
-      docker_image     = var.app_docker_image
-      docker_image_tag = var.app_docker_image_tag
+      docker_image_name        = "${var.app_docker_image}:${var.app_docker_image_tag}"
+      docker_registry_url      = var.docker_registry
+      docker_registry_username = var.docker_registry_username
+      docker_registry_password = var.secret_docker_registry_server_password
     }
   }
 
@@ -82,7 +84,7 @@ resource "azurerm_linux_web_app" "App-Catalog" {
   # For other language stacks, it's better to use app settings instead, because connection strings require special formatting in the variable keys in order to access the values.
   # }
   app_settings = {
-    AZURE_CLIENT_ID                 = azuread_application.App-Catalog[each.key].application_id
+    AZURE_CLIENT_ID                 = azuread_application.App-Catalog[each.key].client_id
     AZURE_CLIENT_SECRET             = azuread_application_password.App-Catalog[each.key].value
     AZURE_TENANT_ID                 = var.aad_tenant_id
     DOCKER_REGISTRY_SERVER_PASSWORD = var.secret_docker_registry_server_password
@@ -91,8 +93,8 @@ resource "azurerm_linux_web_app" "App-Catalog" {
     DOCKER_ENABLE_CI                = var.docker_enable_ci
     K8_CLUSTER_NAME                 = var.k8s_cluster_name
     K8_RESOURCE_GROUP               = var.k8s_resource_group
-    #MONGO_URL                           = replace(mongodbatlas_advanced_cluster.cluster[each.key].connection_strings.0.standard_srv, "mongodb+srv://", "mongodb+srv://${var.mongodb_atlas_dbuser}:${var.secret_mongodb_atlas_dbuser_password}@")
-    MONGO_URL      = replace(join("/", [mongodbatlas_advanced_cluster.cluster[each.key].connection_strings.0.standard_srv, "modb-${var.Enterprise_product}-${each.value}"]), "mongodb+srv://", "mongodb+srv://${var.mongodb_atlas_dbuser}:${var.secret_mongodb_atlas_dbuser_password}@")
+    #MONGO_URL                           = replace(mongodbatlas_advanced_cluster.cluster[each.key].connection_strings[0].standard_srv, "mongodb+srv://", "mongodb+srv://${var.mongodb_atlas_dbuser}:${var.secret_mongodb_atlas_dbuser_password}@")
+    MONGO_URL      = replace(join("/", [mongodbatlas_advanced_cluster.cluster[each.key].connection_strings[0].standard_srv, "modb-${var.Enterprise_product}-${each.value}"]), "mongodb+srv://", "mongodb+srv://${var.mongodb_atlas_dbuser}:${var.secret_mongodb_atlas_dbuser_password}@")
     TENANT_ID      = var.aad_tenant_id
     WEBSITES_PORT  = 3000 # This is required for custom containers. To manually configure a custom port, use the EXPOSE instruction in the Dockerfile and the app setting, WEBSITES_PORT, with a port value to bind on the container.
     config_key     = var.secret_app_analysis_config_key
@@ -159,10 +161,12 @@ resource "azurerm_linux_web_app" "monitor_client" {
   )
 
   site_config {
-    ftps_state = "AllAllowed"
+    ftps_state = "Disabled"
     application_stack {
-      docker_image     = var.prometheus_exporter_docker_image
-      docker_image_tag = var.prometheus_exporter_docker_image_tag
+      docker_image_name        = "${var.prometheus_exporter_docker_image}:${var.prometheus_exporter_docker_image_tag}"
+      docker_registry_url      = var.docker_registry
+      docker_registry_username = var.docker_registry_username
+      docker_registry_password = var.secret_docker_registry_server_password
     }
   }
 
@@ -179,12 +183,12 @@ resource "azurerm_linux_web_app" "monitor_client" {
     DOCKER_REGISTRY_SERVER_USERNAME                = var.docker_registry_username
     DOCKER_ENABLE_CI                               = var.docker_enable_ci
     MONGO_DB_DATABASE                              = "modb-${var.Enterprise_product}-${each.value}"
-    MONGO_DB_URI                                   = replace(mongodbatlas_advanced_cluster.cluster[each.key].connection_strings.0.standard_srv, "mongodb+srv://", "mongodb+srv://${var.mongodb_atlas_dbuser}:${var.secret_mongodb_atlas_dbuser_password}@")
+    MONGO_DB_URI                                   = replace(mongodbatlas_advanced_cluster.cluster[each.key].connection_strings[0].standard_srv, "mongodb+srv://", "mongodb+srv://${var.mongodb_atlas_dbuser}:${var.secret_mongodb_atlas_dbuser_password}@")
     PUSHGATEWAY_CLIENT                             = "${each.value}"
     PUSHGATEWAY_SOLUTION                           = var.Enterprise_product
     PUSHGATEWAY_URL                                = local.push_gateway_prometheus_metrics
     SERVICE_METRICS_PLATFORM_LIST_COMPONENT1_NAME  = "omni"
-    SERVICE_METRICS_PLATFORM_LIST_COMPONENT1_VALUE = "https://${local.env_generator}${var.Enterprise_product}${each.value}.${local.dns_zone}"
+    SERVICE_METRICS_PLATFORM_LIST_COMPONENT1_VALUE = "https://${each.value}${var.dns_prefix}${local.gitbranch}${var.location_code}${local.env_generator}.${local.dns_zone}"
   }
   depends_on = [
     azurerm_service_plan.App-Catalog_service_plan,

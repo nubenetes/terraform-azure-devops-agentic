@@ -10,7 +10,7 @@
 
 - [1. Context and Origins](#1-context-and-origins)
     - [1.1 Why this course was a Strategic Choice](#11-why-this-course-was-a-strategic-choice)
-    - [1.2 The "Human-Crafted" Quality Benchmark](#12-the-human-crafted-quality-benchmark)
+    - [1.2 The "Human-Crafted" Quality Benchmark and AI-Enhanced Documentation](#12-the-human-crafted-quality-benchmark-and-ai-enhanced-documentation)
     - [1.3 Official Ecosystem Standards](#13-official-ecosystem-standards)
     - [1.4 Community and Expert Thought Leadership](#14-community-and-expert-thought-leadership)
     - [1.5 Strategic Tools and Providers](#15-strategic-tools-and-providers)

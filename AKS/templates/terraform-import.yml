@@ -59,14 +59,14 @@ jobs:
         ######################################################
         # Terraform Install
         ######################################################
-        - task: TerraformInstaller@0
+        - task: TerraformInstaller@1
           displayName: Terraform Install
           inputs:
             terraformVersion: $(TERRAFORM_VERSION)
         ######################################################
         # Terraform Init: aks-<branch>-<env>.tfstate
         ######################################################
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Init
           inputs:
             provider: 'azurerm'
@@ -96,7 +96,7 @@ jobs:
         # SOLUTION: Remove the previously registered service at Azure Portal -> Resource Explorer -> Subscriptions ->
         # <your azure subscription> -> Providers -> Microsoft.ContainerService -> managedClusters -> aks-<env>
         ##############################################################################################
-        # - task: TerraformTaskV3@3
+        # - task: TerraformTaskV4@4
         #   displayName: Terraform import DENG
         #   condition: and(eq(variables['TERRAFORM_ENV'], 'eng'),ne(variables['Build.SourceBranchName'],'main'))
         #   inputs:
@@ -112,12 +112,12 @@ jobs:
         #       -var environment=${{ parameters.environment }}
         #       -var gitbranch=$(GIT_BRANCH)
         #       -var ssh_public_key=$(sshkey.secureFilePath)
-        #       -var-file="$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)/${{ parameters.environment }}-$(GIT_BRANCH)branch.tfvars"
+        #
         #       module.europe_aks[0].azurerm_resource_provider_registration.aks_cluster /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService
         ##############################################################################################
         # Terraform import ENG - temporary workaround
         ##############################################################################################
-        # - task: TerraformTaskV3@3
+        # - task: TerraformTaskV4@4
         #   displayName: Terraform import ENG
         #   condition: and(eq(variables['TERRAFORM_ENV'], 'eng'),eq(variables['Build.SourceBranchName'],'main'))
         #   inputs:
@@ -132,12 +132,12 @@ jobs:
         #       -var environment=${{ parameters.environment }}
         #       -var gitbranch=$(GIT_BRANCH)
         #       -var ssh_public_key=$(sshkey.secureFilePath)
-        #       -var-file="$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)/${{ parameters.environment }}-$(GIT_BRANCH)branch.tfvars"
+        #
         #       module.europe_aks[0].azurerm_resource_provider_registration.aks_cluster /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService
         ############################################
         # Terraform Plan - DENG
         ############################################
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform plan DENG
           condition: and(eq(variables['TERRAFORM_ENV'], 'eng'),ne(variables['Build.SourceBranchName'],'main'))
           inputs:
@@ -155,7 +155,7 @@ jobs:
         ############################################
         # Terraform Plan - ENG
         ############################################
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform plan ENG
           condition: and(eq(variables['TERRAFORM_ENV'], 'eng'),eq(variables['Build.SourceBranchName'],'main'))
           inputs:
@@ -173,7 +173,7 @@ jobs:
         ############################################
         # Terraform Plan - PRO
         ############################################
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform plan PRO
           condition: eq(variables['TERRAFORM_ENV'], 'pro')
           inputs:
@@ -198,7 +198,7 @@ jobs:
           displayName: Publish Terraform Files Artifacts
           inputs:
             targetPath: $(Build.ArtifactStagingDirectory)
-            artifactName: $(ARTIFACTS_FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN)
+            artifactName: $(ARTIFACTS_FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN)-${{ parameters.environment }}
             artifactType: 'pipeline'
 ################################################################################################################################################################
 # Manual validation v0 - Pause a pipeline run to wait for manual interaction. Works only with YAML pipelines.

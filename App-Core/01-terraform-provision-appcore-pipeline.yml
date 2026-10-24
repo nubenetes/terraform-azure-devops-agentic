@@ -1,5 +1,4 @@
-trigger:
-- manual
+trigger: none
 
 pool:
   vmImage: 'ubuntu-latest'  #'ubuntu-22.04' #'ubuntu-latest' # MongoDB is not available for Ubuntu 22 at the moment

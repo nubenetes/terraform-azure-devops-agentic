@@ -1,5 +1,4 @@
-trigger:
-- manual
+trigger: none
 
 pool:
   vmImage: 'ubuntu-latest' #'ubuntu-20.04' #'ubuntu-latest' # MongoDB is not available for Ubuntu 22 at the moment
@@ -42,10 +41,17 @@ stages:
     - template: templates/terraform-plan.yaml
       parameters:
         environment: ${{ variables.ENVIRONMENT }}
-        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_DEV }}
+        ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+          SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_PRO }}
+        ${{ else }}:
+          SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_DEV }}
         SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
     - template: templates/terraform-apply.yaml
       parameters:
         environment: ${{ variables.ENVIRONMENT }}
-        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_DEV }}
+        ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+          SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_PRO }}
+        ${{ else }}:
+          SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_DEV }}
         SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+

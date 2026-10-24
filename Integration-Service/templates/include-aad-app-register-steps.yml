@@ -1,8 +1,6 @@
 # File: templates/include-aad-app-register-steps.yml 
 
 steps:
-- powershell: 'ls env:'
-  displayName: 'Show env'
 - task: AzureCLI@2
   displayName: 'run scripts/07-createAppRegister.ps1'
   name: ProduceVarAppReg

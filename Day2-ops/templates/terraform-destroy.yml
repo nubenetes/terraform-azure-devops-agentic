@@ -46,14 +46,14 @@ jobs:
         ######################################################
         # Terraform Install
         ######################################################
-        - task: TerraformInstaller@0
+        - task: TerraformInstaller@1
           displayName: Terraform Install
           inputs:
             terraformVersion: $(TERRAFORM_VERSION)
         ######################################################
         # Terraform Init
         ######################################################
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Init
           inputs:
             provider: 'azurerm'
@@ -67,7 +67,7 @@ jobs:
         ######################################################
         # Terraform Destroy
         ######################################################
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           condition: eq(variables['Build.SourceBranchName'],'develop')
           displayName: Terraform Destroy Develop ENG/PRO (Enterprise DevOps Subscr)
           inputs:
@@ -83,10 +83,10 @@ jobs:
               -var azure_subscription_europe="00000000-0000-0000-0000-000000000000"
               -var secret_aks_kube_config_host_europe=$(aks-deng-kube-config-host)
               -var secret_aks_kube_config_cluster_ca_certificate_europe=$(aks-deng-kube-config-cluster-ca-certificate)
-              -var secret_aks_kube_config_host_unitedstates=$(aks-deng-kube-config-host)
+              -var secret_aks_kube_config_host_unitedstates=$(aks-deng-usa-kube-config-host)
               -var secret_aks_kube_config_cluster_ca_certificate_unitedstates=$(aks-deng-kube-config-cluster-ca-certificate-usa)
               -var secret_azure_devops_sp=$(sp-day2ops-Enterprise-devops)
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           condition: and(eq(variables['TERRAFORM_ENV'], 'eng'),eq(variables['Build.SourceBranchName'],'main'))
           displayName: Terraform Destroy Main ENG (Enterprise DevTest Subscr)
           inputs:
@@ -102,10 +102,10 @@ jobs:
               -var azure_subscription_europe="00000000-0000-0000-0000-000000000000"
               -var secret_aks_kube_config_host_europe=$(aks-eng-kube-config-host)
               -var secret_aks_kube_config_cluster_ca_certificate_europe=$(aks-eng-kube-config-cluster-ca-certificate)
-              -var secret_aks_kube_config_host_unitedstates=$(aks-eng-kube-config-host)
+              -var secret_aks_kube_config_host_unitedstates=$(aks-eng-usa-kube-config-host)
               -var secret_aks_kube_config_cluster_ca_certificate_unitedstates=$(aks-eng-kube-config-cluster-ca-certificate-usa)
               -var secret_azure_devops_sp=$(sp-day2ops-Enterprise-dev)
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Destroy Main PRO (Enterprise Production Subscr)
           condition: and(eq(variables['TERRAFORM_ENV'], 'pro'),eq(variables['Build.SourceBranchName'],'main'))
           inputs:
@@ -121,6 +121,6 @@ jobs:
               -var azure_subscription_europe="00000000-0000-0000-0000-000000000000"
               -var secret_aks_kube_config_host_europe=$(aks-pro-kube-config-host)
               -var secret_aks_kube_config_cluster_ca_certificate_europe=$(aks-pro-kube-config-cluster-ca-certificate)
-              -var secret_aks_kube_config_host_unitedstates=$(aks-pro-kube-config-host)
+              -var secret_aks_kube_config_host_unitedstates=$(aks-pro-usa-kube-config-host)
               -var secret_aks_kube_config_cluster_ca_certificate_unitedstates=$(aks-pro-kube-config-cluster-ca-certificate-usa)
               -var secret_azure_devops_sp=$(sp-day2ops-Enterprise-pro)

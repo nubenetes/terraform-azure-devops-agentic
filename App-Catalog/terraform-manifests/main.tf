@@ -191,3 +191,11 @@ module "us" {
   test_user1                             = var.test_user1
   test_admin                             = var.test_admin
 }
+
+check "appcatalog_regional_deployment" {
+  assert {
+    condition     = local.deploy_Europe || local.deploy_United_States
+    error_message = "At least one regional deployment flag (deploy_Europe or deploy_United_States) must be enabled."
+  }
+}
+

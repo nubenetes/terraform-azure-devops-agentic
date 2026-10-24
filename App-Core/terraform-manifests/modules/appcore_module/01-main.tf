@@ -17,6 +17,7 @@ data "azurerm_client_config" "current" {
 # AzureAD
 ##########################################
 data "azuread_client_config" "current" {}
+data "azuread_domains" "aad_domains" {}
 
 ###########################
 # APP SERVICES
@@ -76,11 +77,11 @@ data "azurerm_key_vault_certificate" "appcore_certificate" {
 ##################################################################################################################
 ## Web App SP:
 data "azuread_service_principal" "appcore_front_spa" {
-  application_id = azuread_service_principal.appcore_front_spa.application_id
+  client_id = azuread_application.appcore_front_spa.client_id
 }
 
 data "azuread_service_principal" "appcore_back_api" {
-  application_id = azuread_service_principal.appcore_back_api.application_id
+  client_id = azuread_application.appcore_back_api.client_id
 }
 
 ##################################
@@ -153,20 +154,12 @@ data "azuread_application" "appcore_front_spa" {
 ##########################################
 # Angular Config Json Files
 # https://stackoverflow.com/questions/69219699/add-data-to-a-json-file-in-terraform
-# https://registry.terraform.io/providers/hashicorp/template/latest/docs/data-sources/file
 # https://www.terraform.io/language/functions/templatefile
 ##########################################
-data "template_file" "template_appcore_front_angular_settings" {
-  template = templatefile("template-appcore-front-angular-settings.json", {
-    clientId     = azuread_application.appcore_front_spa.application_id
-    beScope      = "${local.appr_name_appcore_back_api}"
-    applinkScope = "${local.appr_name_applink_cloud_api}"
-  })
-}
 # data "template_file" "template_app-analysis_front_angular_settings" {
 #   for_each    = toset(var.client_names)
 #   template = templatefile("template-app-analysis-front-angular-settings-${each.value}.json", {
-#     clientId  = azuread_application.app-analysis_viewer_front_spa.application_id
+#     clientId  = azuread_application.app-analysis_viewer_front_spa.client_id
 #     beScope   = "appr-${var.Enterprise_product}-${var.app-analysis-service_name}-viewer-back-${each.value}-${local.instance_environment}"
 #     applinkScope = "${local.appr_name_applink_cloud_api}"
 #   })
@@ -177,13 +170,17 @@ data "template_file" "template_appcore_front_angular_settings" {
 ##########################################
 # Storage Account Blob Container
 ##########################################
+resource "time_rotating" "sas_rotation" {
+  rotation_days = 30
+}
+
 data "azurerm_storage_account_blob_container_sas" "appcore" {
   connection_string = azurerm_storage_account.appcore.primary_connection_string
   container_name    = azurerm_storage_container.appcore.name
   https_only        = true
   #ip_address = "127.0.0.1"
-  start  = formatdate("YYYY-MM-DD", timestamp()) #"2018-03-21"
-  expiry = formatdate("YYYY-MM-DD", timestamp()) #"2018-03-21"
+  start  = formatdate("YYYY-MM-DD", time_rotating.sas_rotation.rfc3339)
+  expiry = formatdate("YYYY-MM-DD", timeadd(time_rotating.sas_rotation.rfc3339, "720h"))
   permissions {
     read   = true
     add    = true

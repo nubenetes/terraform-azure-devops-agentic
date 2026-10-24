@@ -53,7 +53,7 @@ The OIDC trust is defined in the Service Connection and consumed in [`providers.
 **Logic Source of Truth**: [`23-key-vault-clients.tf`](../App-Core/terraform-manifests/modules/appcore_module/23-key-vault-clients.tf).
 ```hcl
 resource "azurerm_key_vault_access_policy" "compound_identity" {
-  application_id = azuread_service_principal.api.application_id
+  application_id = azuread_service_principal.api.client_id
   object_id      = azuread_group.authorized_users.object_id
 }
 ```

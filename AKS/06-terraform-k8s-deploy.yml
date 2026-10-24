@@ -9,8 +9,7 @@
 # https://learnk8s.io/templating-yaml-with-code
 # https://github.com/learnk8s/templating-kubernetes/blob/master/java/README.md
 
-trigger:
-- manual
+trigger: none
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -38,8 +37,8 @@ stages:
   jobs:  
   - job: Build
     displayName: Build job
-    # pool:
-    #   vmImage: $(vmImageName)
+    pool:
+      vmImage: 'ubuntu-latest'
     steps:
     - task: PublishPipelineArtifact@1
       inputs:
@@ -51,8 +50,8 @@ stages:
   jobs:
   - deployment: Deploy
     displayName: Deploy job
-    # pool:
-    #   vmImage: 'ubuntu-latest'
+    pool:
+      vmImage: 'ubuntu-latest'
     environment: ${{ variables.ENG_ENVIRONMENT }}
     strategy:
       runOnce:
@@ -62,7 +61,7 @@ stages:
             inputs:
               artifactName: 'manifests'
               downloadPath: '$(System.ArtifactsDirectory)/manifests'
-          - task: KubernetesManifest@0
+          - task: KubernetesManifest@1
             displayName: Deploy to Kubernetes cluster
             inputs:
               kubernetesServiceConnection: 'aks-neeng'
@@ -78,9 +77,9 @@ stages:
   jobs:
   - deployment: Deploy
     displayName: Deploy job
-    # pool:
-    #   vmImage: 'ubuntu-latest'
-    environment: ${{ variables.ENG_ENVIRONMENT }}
+    pool:
+      vmImage: 'ubuntu-latest'
+    environment: ${{ variables.PRO_ENVIRONMENT }}
     strategy:
       runOnce:
         deploy:
@@ -89,7 +88,7 @@ stages:
             inputs:
               artifactName: 'manifests'
               downloadPath: '$(System.ArtifactsDirectory)/manifests'
-          - task: KubernetesManifest@0
+          - task: KubernetesManifest@1
             displayName: Deploy to Kubernetes cluster
             inputs:
               kubernetesServiceConnection: 'aks-nepro'

@@ -70,7 +70,13 @@ variable "rg_prefix" {
 variable "environment" {
   type        = string
   description = "This variable defines the Environment"
+  nullable    = false
   #default = "eng"
+
+  validation {
+    condition     = contains(["eng", "pro"], var.environment)
+    error_message = "The environment must be either 'eng' or 'pro'."
+  }
 }
 
 #################################
@@ -80,6 +86,12 @@ variable "gitbranch" {
   description = "This variable defines the git branch name on Azure DevOps Repo"
   type        = string
   default     = "develop"
+  nullable    = false
+
+  validation {
+    condition     = contains(["develop", "main"], var.gitbranch)
+    error_message = "The gitbranch must be either 'develop' or 'main'."
+  }
 }
 
 ###################
@@ -117,6 +129,20 @@ variable "dns_parent_zone" {
   type        = string
   default     = "enterprise.com" # Don't change this
 }
+variable "dns_child_zone" {
+  description = "DNS Child Zone override from environment .tfvars"
+  type        = string
+  default     = ""
+
+  validation {
+    condition = (
+      var.dns_child_zone == "" ||
+      (var.gitbranch == "develop" && var.dns_child_zone == "deng") ||
+      (var.gitbranch == "main" && contains(["eng", "apps"], var.dns_child_zone))
+    )
+    error_message = "On 'develop' branch dns_child_zone must be 'deng'; on 'main' branch it must be 'eng' or 'apps'."
+  }
+}
 variable "dns_child_zone_eng" {
   description = "DNS Child Zone"
   type        = string
@@ -153,8 +179,13 @@ variable "Enterprise_product" {
 
 variable "kubernetes_version" {
   type        = string
-  default     = "1.26.3" #"1.26.0" #"1.25.5"
+  default     = "1.30"
   description = "This variable defines the kubernetes version in AKS"
+
+  validation {
+    condition     = can(regex("^1\\.(2[8-9]|3[0-9])(\\.[0-9]+)?$", var.kubernetes_version))
+    error_message = "The kubernetes_version must be a supported Kubernetes version (1.28+)."
+  }
 }
 
 # Azure Location
@@ -173,6 +204,8 @@ variable "kubernetes_version" {
 variable "ssh_public_key" {
   #default = "~/.ssh/aks-prod-sshkeys-terraform/aksprodsshkey.pub"
   description = "This variable defines the SSH Public Key for Linux k8s Worker nodes"
+  type        = string
+  default     = ""
 }
 
 #################################
@@ -198,7 +231,6 @@ variable "aks_administrators" {
   type        = list(string)
   default = [
     "cloud-admin@example.com",
-    "cloud-admin@example.com",
   ]
 }
 
@@ -206,7 +238,6 @@ variable "aks_developers" {
   description = "List of Developers with access to AKS (admin role to development namespaces)"
   type        = list(string)
   default = [
-    "cloud-admin@example.com",
     "cloud-admin@example.com",
   ]
 }

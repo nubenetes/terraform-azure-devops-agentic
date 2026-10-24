@@ -17,7 +17,7 @@
 #   providers = {
 #     azurerm      = azurerm.manualinfra
 #   }
-#   dns_zone_name_servers                                                           = module.europe.0.dns_zone_name_servers
+#   dns_zone_name_servers                                                           = module.europe[0].dns_zone_name_servers
 #   environment                                                                     = var.environment
 #   enterprise_product                                                                  = var.enterprise_product
 #   gitbranch                                                                       = var.gitbranch

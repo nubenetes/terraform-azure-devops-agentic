@@ -26,11 +26,11 @@ output "latest_version" {
 }
 
 output "name" {
-  value = data.azurerm_kubernetes_cluster.current.name
+  value = azurerm_kubernetes_cluster.aks_cluster.name
 }
 
 output "network_profile" {
-  value = data.azurerm_kubernetes_cluster.current.network_profile
+  value = azurerm_kubernetes_cluster.aks_cluster.network_profile
 }
 
 # Azure AD Group Object Id
@@ -38,7 +38,7 @@ output "azure_ad_group_administrators_name" {
   value = azuread_group.aks_administrators.display_name
 }
 output "azure_ad_group_administrators_id" {
-  value = azuread_group.aks_administrators.id
+  value = azuread_group.aks_administrators.object_id
 }
 output "azure_ad_group_administrators_objectid" {
   value = azuread_group.aks_administrators.object_id
@@ -48,7 +48,7 @@ output "azure_ad_group_developers_name" {
   value = azuread_group.aks_developers.display_name
 }
 output "azure_ad_group_developers_id" {
-  value = azuread_group.aks_developers.id
+  value = azuread_group.aks_developers.object_id
 }
 output "azure_ad_group_developers_objectid" {
   value = azuread_group.aks_developers.object_id

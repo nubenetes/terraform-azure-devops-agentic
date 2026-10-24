@@ -1,5 +1,4 @@
-trigger:
-- manual
+trigger: none
 
 pool:
   vmImage: 'windows-2022'
@@ -34,7 +33,7 @@ variables:
   # Placeholders found in templates/application-properties.j2
   # Download URLs of Public Artifacts
   WINSW_DOWNLOAD_URL: 'https://github.com/winsw/winsw/releases/download/v2.12.0/WinSW-x64.exe'
-  JRE_DOWNLOAD_URL: 'https://github.com/adoptium/temurin11-binaries/releases/download/jdk-127.0.0.1%2B1/OpenJDK11U-jre_x64_windows_hotspot_11.0.14.1_1.zip'
+  JRE_DOWNLOAD_URL: 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.7%2B7/OpenJDK17U-jre_x64_windows_hotspot_17.0.7_7.zip'
   MAVEN_DOWNLOAD_URL: "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.6.3/apache-maven-3.6.3-bin.zip"
   # Conditions
   enableConditionOptionalStages: 'false' # true/false  - do we enable all the optional stages ?

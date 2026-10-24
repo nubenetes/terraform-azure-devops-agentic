@@ -71,11 +71,11 @@
   email: cloud-admin@example.com
   center: &center001 client-anon # defines anchor label &center001
   appcore-admin-role: &role001
-    - client-anon
+    - dnedev
   appcore-user-role: &role002
     - dneuat
   app-analysis-admin-role: &role003
-    - client-anon
+    - dnedev
   app-analysis-user-role: &role004
     - dneuat
 # -

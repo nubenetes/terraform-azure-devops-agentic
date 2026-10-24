@@ -69,6 +69,10 @@ variable "environment" {
   description = "This variable defines the Environment"
   type        = string
   default     = "dev"
+  validation {
+    condition     = contains(["dev", "qa", "uat", "pre", "pro", "dem", "res"], var.environment)
+    error_message = "Environment must be one of: dev, qa, uat, pre, pro, dem, res."
+  }
 }
 
 #################################
@@ -78,6 +82,10 @@ variable "gitbranch" {
   description = "This variable defines the git branch name on Azure DevOps Repo"
   type        = string
   default     = "develop"
+  validation {
+    condition     = contains(["develop", "main"], var.gitbranch)
+    error_message = "gitbranch must be either 'develop' or 'main'."
+  }
 }
 
 ###################
@@ -277,29 +285,20 @@ variable "docker_enable_ci" {
 variable "client_names_europe" {
   description = "Create Azure resources with these client names"
   type        = list(any)
-  default = ["client-anon",
-  "client2"]
-  # validation {
-  #    # https://spacelift.io/blog/how-to-use-terraform-variables
-  #    # https://jeffbrown.tech/terraform-variables-validation/
-  #    # Azure limits the length of key vault name, being limited to alphanumeric characters and dashes and must be between 3-24 char
-  #    condition     = alltrue([for each in var.client_names : (length("${each}") < 9) ? true:false])  # cannot be longer than 8 char with the current keyvault naming scheme in our terraform code
-  #    error_message = "Please provide a valid value for variable client_names with a maximum length of than 8 chars"
-  # }
-
+  default     = ["client1"]
+  validation {
+    condition     = alltrue([for c in var.client_names_europe : length(c) <= 12 && can(regex("^[a-z0-9-]+$", lower(c)))])
+    error_message = "Each client name must be at most 12 characters and contain only alphanumeric characters and hyphens."
+  }
 }
 variable "client_names_unitedstates" {
   description = "Create Azure resources with these client names"
   type        = list(any)
-  default     = ["client3"]
-  # validation {
-  #    # https://spacelift.io/blog/how-to-use-terraform-variables
-  #    # https://jeffbrown.tech/terraform-variables-validation/
-  #    # Azure limits the length of key vault name, being limited to alphanumeric characters and dashes and must be between 3-24 char
-  #    condition     = alltrue([for each in var.client_names : (length("${each}") < 9) ? true:false])  # cannot be longer than 8 char with the current keyvault naming scheme in our terraform code
-  #    error_message = "Please provide a valid value for variable client_names with a maximum length of than 8 chars"
-  # }
-
+  default     = ["client1"]
+  validation {
+    condition     = alltrue([for c in var.client_names_unitedstates : length(c) <= 12 && can(regex("^[a-z0-9-]+$", lower(c)))])
+    error_message = "Each client name must be at most 12 characters and contain only alphanumeric characters and hyphens."
+  }
 }
 
 
@@ -319,7 +318,6 @@ variable "testadmin" {
 
 ################################################################################################
 # MONGODB ATLAS
-# mongodb secrets setup as non-sensitive to see traces of mongoimport during the creation_time
 ################################################################################################
 variable "oplog_size_mb" {
   description = "(Optional) The custom oplog size of the cluster. Without a value that indicates that the cluster users the default oplog size calculated by Atlas"
@@ -333,12 +331,12 @@ variable "oplog_size_mb" {
 variable "secret_mongodb_atlas_public_key" {
   description = "Public Programmatic API key to authenticate to Atlas"
   type        = string
-  sensitive   = false
+  sensitive   = true
 }
 variable "secret_mongodb_atlas_private_key" {
   description = "Private Programmatic API key to authenticate to Atlas"
   type        = string
-  sensitive   = false
+  sensitive   = true
 }
 variable "mongodb_atlas_org_id" {
   description = "MongoDB Organization ID"
@@ -367,7 +365,7 @@ variable "mongodb_atlas_unitedstates_region" {
 variable "mongodb_atlas_mongodbversion" {
   description = "The Major MongoDB Version"
   type        = string
-  default     = "6.0" # Atlas supports the following MongoDB versions for M10+ clusters: 4.0, 4.2, 4.4, 5.0 or 6.0
+  default     = "7.0"
 }
 variable "mongodb_atlas_dbadmin" {
   description = "MongoDB Atlas Database Admin User Name"
@@ -378,7 +376,7 @@ variable "mongodb_atlas_dbadmin" {
 variable "secret_mongodb_atlas_dbadmin_password" {
   description = "MongoDB Atlas Database Admin Password"
   type        = string
-  sensitive   = false
+  sensitive   = true
 }
 variable "mongodb_atlas_dbuser" {
   description = "MongoDB Atlas Database User Name"
@@ -389,7 +387,7 @@ variable "mongodb_atlas_dbuser" {
 variable "secret_mongodb_atlas_dbuser_password" {
   description = "MongoDB Atlas Database User Password"
   type        = string
-  sensitive   = false
+  sensitive   = true
 }
 variable "mongodb_atlas_database_name" {
   description = "The database in the cluster to limit the database user to, the database does not have to exist yet"
@@ -846,7 +844,7 @@ variable "backup_policy_retention_weekly" {
 variable "backup_policy_retention_monthly" {
   description = "Azure Backup Policy Retention Monthly"
   type        = number
-  default     = 0
+  default     = 6
 }
 
 # variable "backup_policy_retention_yearly" {

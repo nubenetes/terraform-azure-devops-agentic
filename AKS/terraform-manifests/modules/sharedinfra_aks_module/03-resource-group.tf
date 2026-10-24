@@ -2,9 +2,7 @@
 resource "azurerm_resource_group" "rg_aks" {
   name     = local.resource_group_name
   location = var.location
-  tags = {
-    environment = local.environment
-  }
+  tags     = local.tags
 }
 
 

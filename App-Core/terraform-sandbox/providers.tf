@@ -15,15 +15,16 @@ terraform {
     }
     # mongodbatlas = {
     #   source      = "mongodb/mongodbatlas"
-    #   version     = "~> 1.8.1"
+    #   version     = "~> 1.25.0"
     # }
     # kubernetes = {
     #   source  = "hashicorp/kubernetes"
-    #   version = "~> 2.18.1"
+    #   version = "~> 2.32.0"
     # }
   }
 }
 
 provider "azurerm" {
+  resource_provider_registrations = "none"
   features {}
 }

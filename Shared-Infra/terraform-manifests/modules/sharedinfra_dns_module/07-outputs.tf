@@ -31,7 +31,7 @@ output "dns_zone_name_servers" {
 }
 
 output "dns_zone_id" {
-  value = data.azurerm_dns_zone.my_dns.id
+  value = azurerm_dns_zone.my_dns.id
 }
 
 ####################################

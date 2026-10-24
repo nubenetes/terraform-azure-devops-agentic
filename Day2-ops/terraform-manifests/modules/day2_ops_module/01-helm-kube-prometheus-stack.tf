@@ -23,7 +23,7 @@ resource "helm_release" "kube_prometheus_stack" {
   create_namespace = true # (Optional) Create the namespace if it does not yet exist. Defaults to false.
 
   values = [
-    "${file("./helm/kube-prometheus-stack/values.yaml")}"
+    file("${path.root}/helm/kube-prometheus-stack/values.yaml")
   ]
 
   # set {
@@ -72,10 +72,10 @@ resource "helm_release" "kube_prometheus_stack" {
   }
   set {
     name  = "grafana.grafana\\.ini.auth\\.azuread.client_id"
-    value = azuread_application.grafana_login.application_id
+    value = azuread_application.grafana_login.client_id
     type  = "string"
   }
-  set {
+  set_sensitive {
     name  = "grafana.grafana\\.ini.auth\\.azuread.client_secret"
     value = azuread_application_password.grafana_login.value
     type  = "string"

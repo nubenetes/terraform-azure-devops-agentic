@@ -38,8 +38,8 @@ variables:
   serviceConnection: "svccon-App-Link-dev"  # Example: 'Enterprise Example-Dev-Subscription' with RG 'dev-appcResourceGroup' (App-Core DevTest environment)
   resourceGroup: "rg-appcore-nepre"  # 'dev-appcResourceGroup' , 'test-appcResourceGroup' , 'coreResourceGroup' , etc
   rgLocation: 'northeurope'
-  appName: "appr-App-Link-onprem-${{ lower(parameters.AETitle) }}-nepre"  # Application Name in AAD - Based on AETitle and Environment
-  storageContainerName: "co-App-Link-onprem-${{ lower(parameters.AETitle) }}-nepre"
+  appName: "appr-app-link-onprem-${{ lower(parameters.AETitle) }}-nepre"  # Application Name in AAD - Based on AETitle and Environment
+  storageContainerName: "co-app-link-onprem-${{ lower(parameters.AETitle) }}-nepre"
   blobName: "blob_applink_${{ lower(parameters.AETitle) }}_nepre"
   storageAccountTags: "env=nepre"
   upnName: ${{ lower(parameters.upn) }}    # lower() -> change to lowercase (capital letters can arise errors when creating azure resources)

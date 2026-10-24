@@ -77,9 +77,9 @@ resource "time_rotating" "app" {
 }
 
 resource "azuread_application_password" "App-Catalog" {
-  for_each              = toset(var.client_names) # https://blog.gruntwork.io/terraform-tips-tricks-loops-if-statements-and-gotchas-f739bbae55f9
-  display_name          = "mysecret"
-  application_object_id = azuread_application.App-Catalog[each.key].object_id
+  for_each       = toset(var.client_names) # https://blog.gruntwork.io/terraform-tips-tricks-loops-if-statements-and-gotchas-f739bbae55f9
+  display_name   = "mysecret"
+  application_id = azuread_application.App-Catalog[each.key].id
   rotate_when_changed = {
     rotation = time_rotating.app.id
   }

@@ -116,7 +116,7 @@ resource "azurerm_key_vault_access_policy" "compound_identity_appcore_back_api_a
   object_id      = azuread_group.appcore_admin_role[each.key].object_id
   
   # The Application Context (Enables Compound Identity)
-  application_id = azuread_service_principal.appcore_back_api.application_id
+  application_id = azuread_service_principal.appcore_back_api.client_id
   
   secret_permissions = ["Get", "List"]
 }

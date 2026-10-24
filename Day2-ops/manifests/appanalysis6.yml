@@ -3,7 +3,7 @@ kind: Job
 metadata:
   generateName:  app-analysis-
   #name: app-analysis #Enterprise-Enterpriseapp-analysis-63f7dac2
-  namespace: Enterprise
+  namespace: enterprise
   labels:
     jobgroup: app-analysis
     app: appcore

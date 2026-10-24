@@ -29,7 +29,6 @@ module "europe_day2_ops" {
     kubectl             = kubectl.europe
     kubernetes          = kubernetes.europe
     azurerm.manualinfra = azurerm.manualinfra
-    ansible             = ansible.europe
   }
   location_code = var.location_code_europe
   environment   = var.environment
@@ -45,7 +44,6 @@ module "us_day2_ops" {
     kubectl             = kubectl.us
     kubernetes          = kubernetes.us
     azurerm.manualinfra = azurerm.manualinfra
-    ansible             = ansible.us
   }
   location_code = var.location_code_unitedstates
   environment   = var.environment

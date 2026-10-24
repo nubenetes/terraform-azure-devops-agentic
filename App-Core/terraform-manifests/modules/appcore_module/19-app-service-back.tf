@@ -24,8 +24,10 @@ resource "azurerm_linux_web_app" "app-analysis_pdf_renderer" {
   site_config {
     ftps_state = "Disabled"
     application_stack {
-      docker_image     = var.app_docker_image_pdf_renderer
-      docker_image_tag = var.app_docker_image_tag_pdf_renderer
+      docker_image_name        = "${var.app_docker_image_pdf_renderer}:${var.app_docker_image_tag_pdf_renderer}"
+      docker_registry_url      = var.docker_registry
+      docker_registry_username = var.docker_registry_username
+      docker_registry_password = var.secret_docker_registry_server_password
     }
   }
 

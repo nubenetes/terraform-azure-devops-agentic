@@ -5,7 +5,7 @@
 ##################################################################################################################################
 
 resource "azurerm_dns_ns_record" "my_env_subdomain_on_parent_domain" {
-  name                = local.environment
+  name                = local.dns_child_zone
   zone_name           = "enterprise.com"
   resource_group_name = "infrastructureresourcegroup"
   ttl                 = 300 # 5 min

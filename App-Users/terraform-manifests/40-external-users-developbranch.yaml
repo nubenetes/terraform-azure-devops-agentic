@@ -3,8 +3,8 @@
 ########################################
 ---
 - email: cloud-admin@example.com
-  center: &center001 client-anon  # defines anchor label &center001
-  env: &env001 client-anon
+  center: &center001 client-anon # defines anchor label &center001
+  env: &env001 dnedev
   role: admin
 - email: cloud-admin@example.com
   center: *center001

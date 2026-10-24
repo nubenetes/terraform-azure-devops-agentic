@@ -32,7 +32,5 @@ resource "azurerm_dns_ns_record" "my_env_subdomain_on_parent_domain" {
   resource_group_name = "infrastructureresourcegroup"
   ttl                 = 300 # 5 min
   records             = var.dns_zone_name_servers
-  tags = {
-    Environment = "${local.gitbranch}${var.environment}"
-  }
+  tags                = local.tags
 }

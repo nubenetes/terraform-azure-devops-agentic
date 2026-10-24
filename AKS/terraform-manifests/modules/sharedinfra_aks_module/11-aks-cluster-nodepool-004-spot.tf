@@ -6,12 +6,17 @@
 # https://github.com/hashicorp/terraform-provider-azurerm/blob/main/examples/kubernetes/spot-node-pool/main.tf
 resource "azurerm_kubernetes_cluster_node_pool" "spot" {
   name                  = "spot"
-  enable_auto_scaling   = true
+  auto_scaling_enabled  = true
   kubernetes_cluster_id = azurerm_kubernetes_cluster.aks_cluster.id
   vm_size               = "Standard_DS2_v2"
   max_count             = 10
   min_count             = 0
   node_count            = 0 #1
+  mode                  = "User"
+  orchestrator_version  = var.kubernetes_version
+  os_type               = "Linux"
+  os_disk_size_gb       = 64
+  zones                 = [1]
   priority              = "Spot"
   eviction_policy       = "Delete"
   spot_max_price        = 0.5                                    # note: this is the "maximum" price
@@ -31,4 +36,9 @@ resource "azurerm_kubernetes_cluster_node_pool" "spot" {
   node_taints = [
     "kubernetes.azure.com/scalesetpriority=spot:NoSchedule"
   ]
+  tags = merge(local.tags, {
+    "nodepool-type" = "spot"
+    "environment"   = local.environment
+    "nodepoolos"    = "linux"
+  })
 }
