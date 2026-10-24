@@ -7,8 +7,8 @@
 # *.tfvars are NOT committed in git when terraform is triggered manually from a laptop (containing sensitive data/credentials)
 # Since this is triggered by Azure DevOps, we want to include *.tfvars to separate environments. Credentials are not saved here but in Azure KeyVault.
 
-dns_child_zone       = "deng"
-deploy_Europe        = false
-deploy_United_States = false
+dns_child_zone        = "deng"
+deploy_Europe         = false
+deploy_United_States  = false
 #acr_name_europe       = "DenterpriseappcrEurope"  # ACR deployed with terraform is currently disabled
 #acr_name_unitedstates = "DenterpriseappcrUnitedStates"  # ACR deployed with terraform is currently disabled

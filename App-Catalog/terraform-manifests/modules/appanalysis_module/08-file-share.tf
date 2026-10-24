@@ -14,7 +14,6 @@ resource "azurerm_recovery_services_vault" "vault_appanalysis" {
   location            = local.location
   resource_group_name = azurerm_resource_group.App-Catalog_rg[each.key].name
   sku                 = "Standard"
-  soft_delete_enabled = false
   tags = merge(local.tags, {
     Client = "${each.key}"
   })

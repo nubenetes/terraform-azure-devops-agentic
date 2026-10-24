@@ -23,7 +23,7 @@
 parameters:
 - name: 'environment'
   type: string
-  default: 'eng'
+  default: 'pro'
 - name: 'SERVICE_CONNECTION_NAME_TFSTATE'
   type: string
   default: 'svccon-appcore-dev'
@@ -54,7 +54,7 @@ jobs:
       backendAzureRmResourceGroupName: $(RESOURCE_GROUP_NAME_TERRAFORM_STATE)
       backendAzureRmStorageAccountName: $(STORAGE_ACCOUNT_NAME)
       backendAzureRmContainerName: $(CONTAINER_NAME)
-      backendAzureRmKey: '$(INFRA_NAME)-$(GIT_BRANCH)-branch-${{ parameters.environment }}.tfstate'
+      backendAzureRmKey: '$(INFRA_NAME)-$(GIT_BRANCH)branch-${{ parameters.environment }}.tfstate'
       workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES)'
   - task: TerraformTaskV4@4
     displayName: Terraform Output

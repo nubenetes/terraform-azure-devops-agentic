@@ -181,7 +181,7 @@ provider "kubernetes" {
   alias = "europe"
   #host                     = var.cluster_endpoint
   host                   = local.deploy_Europe ? var.secret_aks_kube_config_host_europe : null
-  cluster_ca_certificate = local.deploy_Europe ? base64decode(var.secret_aks_kube_config_cluster_ca_certificate_europe) : null
+  cluster_ca_certificate = local.deploy_Europe && var.secret_aks_kube_config_cluster_ca_certificate_europe != "value" ? base64decode(var.secret_aks_kube_config_cluster_ca_certificate_europe) : null
   # using kubelogin to get an AAD token for the cluster.
   exec {
     api_version = "client.authentication.k8s.io/v1"
@@ -216,7 +216,7 @@ provider "kubernetes" {
 provider "kubernetes" {
   alias                  = "us"
   host                   = local.deploy_United_States ? var.secret_aks_kube_config_host_unitedstates : null
-  cluster_ca_certificate = local.deploy_United_States ? base64decode(var.secret_aks_kube_config_cluster_ca_certificate_unitedstates) : null
+  cluster_ca_certificate = local.deploy_United_States && var.secret_aks_kube_config_cluster_ca_certificate_unitedstates != "value" ? base64decode(var.secret_aks_kube_config_cluster_ca_certificate_unitedstates) : null
   # using kubelogin to get an AAD token for the cluster.
   exec {
     api_version = "client.authentication.k8s.io/v1"

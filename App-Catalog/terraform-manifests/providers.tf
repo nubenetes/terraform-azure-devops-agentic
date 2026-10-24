@@ -127,15 +127,15 @@ provider "azuread" {
 provider "kubernetes" {
   alias                  = "europe"
   host                   = local.deploy_Europe ? var.secret_aks_kube_config_host_europe : null
-  client_certificate     = local.deploy_Europe ? base64decode(var.secret_aks_kube_config_client_certificate_europe) : null
-  client_key             = local.deploy_Europe ? base64decode(var.secret_aks_kube_config_client_key_europe) : null
-  cluster_ca_certificate = local.deploy_Europe ? base64decode(var.secret_aks_kube_config_cluster_ca_certificate_europe) : null
+  client_certificate     = local.deploy_Europe && var.secret_aks_kube_config_client_certificate_europe != "value" ? base64decode(var.secret_aks_kube_config_client_certificate_europe) : null
+  client_key             = local.deploy_Europe && var.secret_aks_kube_config_client_key_europe != "value" ? base64decode(var.secret_aks_kube_config_client_key_europe) : null
+  cluster_ca_certificate = local.deploy_Europe && var.secret_aks_kube_config_cluster_ca_certificate_europe != "value" ? base64decode(var.secret_aks_kube_config_cluster_ca_certificate_europe) : null
 }
 
 provider "kubernetes" {
   alias                  = "us"
   host                   = local.deploy_United_States ? var.secret_aks_kube_config_host_unitedstates : null
-  client_certificate     = local.deploy_United_States ? base64decode(var.secret_aks_kube_config_client_certificate_unitedstates) : null
-  client_key             = local.deploy_United_States ? base64decode(var.secret_aks_kube_config_client_key_unitedstates) : null
-  cluster_ca_certificate = local.deploy_United_States ? base64decode(var.secret_aks_kube_config_cluster_ca_certificate_unitedstates) : null
+  client_certificate     = local.deploy_United_States && var.secret_aks_kube_config_client_certificate_unitedstates != "value" ? base64decode(var.secret_aks_kube_config_client_certificate_unitedstates) : null
+  client_key             = local.deploy_United_States && var.secret_aks_kube_config_client_key_unitedstates != "value" ? base64decode(var.secret_aks_kube_config_client_key_unitedstates) : null
+  cluster_ca_certificate = local.deploy_United_States && var.secret_aks_kube_config_cluster_ca_certificate_unitedstates != "value" ? base64decode(var.secret_aks_kube_config_cluster_ca_certificate_unitedstates) : null
 }

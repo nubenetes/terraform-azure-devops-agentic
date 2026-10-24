@@ -122,7 +122,7 @@ jobs:
         #       -var environment=${{ parameters.environment }}
         #       -var gitbranch=$(GIT_BRANCH)
         #       -var ssh_public_key=$(sshkey.secureFilePath)
-        #
+        #       -var-file="$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)/${{ parameters.environment }}-$(GIT_BRANCH)branch.tfvars"
         #       -var secret_aks_kube_config_host_europe=$(aks-deng-kube-config-host)
         #       -var secret_aks_kube_admin_config_client_certificate_europe=$(aks-deng-kube-config-client-certificate)
         #       -var secret_aks_kube_admin_config_client_key_europe=$(aks-deng-kube-config-client-key)
@@ -150,7 +150,7 @@ jobs:
         #       -var environment=${{ parameters.environment }}
         #       -var gitbranch=$(GIT_BRANCH)
         #       -var ssh_public_key=$(sshkey.secureFilePath)
-        #
+        #       -var-file="$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)/${{ parameters.environment }}-$(GIT_BRANCH)branch.tfvars"
         #       -var secret_aks_kube_config_host_europe=$(aks-eng-kube-config-host)
         #       -var secret_aks_kube_admin_config_client_certificate_europe=$(aks-eng-kube-config-client-certificate)
         #       -var secret_aks_kube_admin_config_client_key_europe=$(aks-eng-kube-config-client-key)

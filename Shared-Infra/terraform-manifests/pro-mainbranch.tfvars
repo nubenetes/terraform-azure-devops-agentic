@@ -7,11 +7,11 @@
 # *.tfvars are NOT committed in git when terraform is triggered manually from a laptop (containing sensitive data/credentials)
 # Since this is triggered by Azure DevOps, we want to include *.tfvars to separate environments. Credentials are not saved here but in Azure KeyVault.
 
-dns_child_zone                  = "apps"
-azure_subscription_unitedstates = "00000000-0000-0000-0000-000000000004" # Enterprise Production Subscription
-azure_subscription_europe       = "00000000-0000-0000-0000-000000000004" # Enterprise Production Subscription
-deploy_Europe                   = false                                  # AKS is deployed
-deploy_United_States            = false
+dns_child_zone                   = "apps"
+azure_subscription_unitedstates  = "00000000-0000-0000-0000-000000000004"   # Enterprise Production Subscription
+azure_subscription_europe        = "00000000-0000-0000-0000-000000000004"   # Enterprise Production Subscription
+deploy_Europe                    = false # AKS is deployed
+deploy_United_States             = false
 #storage_account_replication_type = "GRS"
 # acr_name_europe                  = "enterpriseappcrEurope"   # ACR deployed with terraform is currently disabled
 # acr_name_unitedstates            = "enterpriseappcrUnitedStates"  # ACR deployed with terraform is currently disabled
@@ -20,10 +20,10 @@ deploy_United_States            = false
 # AKS Users
 ########################################
 # List of Admins with access to AKS (cluster-admin role)
-aks_administrators = [
-  "admin.user1@enterprise.com",
-  "admin.user2@enterprise.com",
-]
+aks_administrators  = [
+    "admin.user1@enterprise.com",
+    "admin.user2@enterprise.com",
+  ]
 
 # List of Developers with access to AKS (admin role to development namespaces)
-aks_developers = []
+aks_developers      = []

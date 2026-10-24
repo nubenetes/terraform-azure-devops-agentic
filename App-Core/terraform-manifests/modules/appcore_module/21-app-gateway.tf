@@ -62,7 +62,7 @@ resource "azurerm_application_gateway" "appcore_agw" {
   name                = "agw-${var.Enterprise_product}-${local.instance_environment}"
   resource_group_name = azurerm_resource_group.appcore_rg.name
   location            = local.location
-  enable_http2        = true
+  http2_enabled       = true
   tags                = local.tags
   sku { # TLS termination with Key Vault certificates is limited to the v2 SKUs.
     # https://azure.microsoft.com/en-us/pricing/details/application-gateway/

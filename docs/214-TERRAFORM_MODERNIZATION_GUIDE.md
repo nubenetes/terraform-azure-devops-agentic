@@ -87,11 +87,16 @@ In AzureRM v4.0, automatic registration of all Azure Resource Providers is disab
 | :--- | :--- | :--- | :--- |
 | `provider "azurerm"` | `skip_provider_registration = true` | `resource_provider_registrations = "none"` | All Root Modules |
 | `azurerm_kubernetes_cluster` | `enable_auto_scaling = true` | `auto_scaling_enabled = true` | `AKS` |
+| `azurerm_kubernetes_cluster` (`api_server_access_profile`) | `vnet_integration_enabled = true` | `virtual_network_integration_enabled = true` | `AKS` |
 | `azurerm_kubernetes_cluster_node_pool` | `enable_auto_scaling = true` | `auto_scaling_enabled = true` | `AKS` |
+| `azurerm_application_gateway` | `enable_http2 = true` | `http2_enabled = true` | `App-Core`, `App-Catalog` |
 | `azurerm_storage_account` | `enable_https_traffic_only = true` | `https_traffic_only_enabled = true` and `min_tls_version = "TLS1_2"` | `App-Core`, `App-Catalog`, `Shared-Infra` |
+| `azurerm_storage_container` | `storage_account_name` and `.resource_manager_id` | `storage_account_id` and `.id` | `App-Core`, `App-Catalog` |
 | `azurerm_key_vault` | `enable_rbac_authorization = true` | `rbac_authorization_enabled = true` | `App-Core`, `App-Catalog`, `Shared-Infra` |
+| `azurerm_log_analytics_workspace` | `local_authentication_disabled = true` | `local_authentication_enabled = false` | `App-Core`, `App-Catalog` |
+| `azurerm_recovery_services_vault` | `soft_delete_enabled = false` | Attribute removed (soft delete enforced by default in v4.0) | `App-Catalog`, `App-Core` |
 | `azurerm_private_dns_zone_virtual_network_link` | `private_dns_zone_id` (or DNS zone link) | `dns_zone_ids = [...]` (on `private_dns_zone_group`) | `App-Core`, `Shared-Infra` |
-| `azurerm_backup_protected_file_share` | `source_storage_account_id` | `storage_account_id` | `App-Core` |
+| `azurerm_backup_protected_file_share` | `source_storage_account_id` | `storage_account_id` | `App-Core`, `App-Catalog` |
 | `azurerm_linux_web_app` | `docker_image` + `docker_image_tag` | `application_stack { docker_image_name = "${image}:${tag}" }` | `App-Core`, `App-Catalog` |
 | `azurerm_cosmosdb_account` | `enable_automatic_failover = true` | `automatic_failover_enabled = true` | `App-Core` (Cosmos DB PoC) |
 | `azurerm_security_center_contact` | Implicit singleton | Explicit `name = "default"` required in v4.0 | `Shared-Infra` |

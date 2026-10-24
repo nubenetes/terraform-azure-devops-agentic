@@ -238,8 +238,8 @@ variable "client_names" {
   type        = list(any)
   default     = ["client1"]
   validation {
-    condition     = alltrue([for c in var.client_names : length(c) <= 8 && can(regex("^[a-z0-9-]+$", c))])
-    error_message = "Each client name must be at most 8 characters and contain only lowercase alphanumeric characters and hyphens."
+    condition     = alltrue([for c in var.client_names : length(c) <= 12 && can(regex("^[a-z0-9-]+$", lower(c)))])
+    error_message = "Each client name must be at most 12 characters and contain only alphanumeric characters and hyphens."
   }
 }
 

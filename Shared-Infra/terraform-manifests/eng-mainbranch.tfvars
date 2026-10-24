@@ -8,24 +8,24 @@
 # Since this is triggered by Azure DevOps, we want to include *.tfvars to separate environments. Credentials are not saved here but in Azure KeyVault.
 
 dns_child_zone                  = "eng"
-azure_subscription_unitedstates = "00000000-0000-0000-0000-000000000002" # Enterprise DevTest Subscription
-azure_subscription_europe       = "00000000-0000-0000-0000-000000000002" # Enterprise DevTest Subscription
-deploy_Europe                   = true                                   # AKS is deployed
+azure_subscription_unitedstates = "00000000-0000-0000-0000-000000000002"   # Enterprise DevTest Subscription
+azure_subscription_europe       = "00000000-0000-0000-0000-000000000002"   # Enterprise DevTest Subscription
+deploy_Europe                   = true # AKS is deployed
 deploy_United_States            = false
 
 ########################################
 # AKS Users
 ########################################
 # List of Admins with access to AKS (cluster-admin role)
-aks_administrators = [
-  "admin.user1@enterprise.com",
-  "admin.user2@enterprise.com",
-]
+aks_administrators  = [
+    "admin.user1@enterprise.com",
+    "admin.user2@enterprise.com",
+  ]
 
 # List of Developers with access to AKS (admin role on development namespaces)
-aks_developers = [
-  "dev.user1@enterprise.com",
-  "dev.user2@enterprise.com",
-  "admin.user3@enterprise.com",
-  "dev.user3@enterprise.com",
-]
+aks_developers      = [
+    "dev.user1@enterprise.com", 
+    "dev.user2@enterprise.com",
+    "admin.user3@enterprise.com",
+    "dev.user3@enterprise.com",
+  ]

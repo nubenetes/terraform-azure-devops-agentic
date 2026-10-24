@@ -844,7 +844,7 @@ variable "backup_policy_retention_weekly" {
 variable "backup_policy_retention_monthly" {
   description = "Azure Backup Policy Retention Monthly"
   type        = number
-  default     = 6
+  default     = 0
 }
 
 # variable "backup_policy_retention_yearly" {

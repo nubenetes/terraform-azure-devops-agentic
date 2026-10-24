@@ -112,7 +112,7 @@ jobs:
         #       -var environment=${{ parameters.environment }}
         #       -var gitbranch=$(GIT_BRANCH)
         #       -var ssh_public_key=$(sshkey.secureFilePath)
-        #
+        #       -var-file="$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)/${{ parameters.environment }}-$(GIT_BRANCH)branch.tfvars"
         #       module.europe_aks[0].azurerm_resource_provider_registration.aks_cluster /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService
         ##############################################################################################
         # Terraform import ENG - temporary workaround
@@ -132,7 +132,7 @@ jobs:
         #       -var environment=${{ parameters.environment }}
         #       -var gitbranch=$(GIT_BRANCH)
         #       -var ssh_public_key=$(sshkey.secureFilePath)
-        #
+        #       -var-file="$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)/${{ parameters.environment }}-$(GIT_BRANCH)branch.tfvars"
         #       module.europe_aks[0].azurerm_resource_provider_registration.aks_cluster /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService
         ############################################
         # Terraform Plan - DENG

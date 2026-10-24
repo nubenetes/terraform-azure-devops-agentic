@@ -138,7 +138,7 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     #authorized_ip_ranges      = ["0.0.0.0/32"] # When public_network_access_enabled is set to true, 0.0.0.0/32 must be added to authorized_ip_ranges in the api_server_access_profile block.
     subnet_id = azurerm_subnet.aks_api_server.id # (Optional) The ID of the Subnet where the API server endpoint is delegated to.
     # apiServerAccessProfile.subnetId should be empty when using default vnet with apiserverVnetIntegration
-    vnet_integration_enabled = true # This requires that the Preview Feature Microsoft.ContainerService/EnableAPIServerVnetIntegrationPreview is enabled and the Resource Provider is re-registered, see the documentation for more information.
+    virtual_network_integration_enabled = true # This requires that the Preview Feature Microsoft.ContainerService/EnableAPIServerVnetIntegrationPreview is enabled and the Resource Provider is re-registered, see the documentation for more information.
     # This requires that the Preview Feature Microsoft.ContainerService/EnableAPIServerVnetIntegrationPreview is enabled and the Resource Provider is re-registered, see the documentation for more information.
   }
 

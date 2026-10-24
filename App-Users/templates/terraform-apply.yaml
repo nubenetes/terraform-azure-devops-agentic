@@ -128,8 +128,9 @@ jobs:
           inputs:
             provider: 'azurerm'
             command: 'custom'
+            customCommand: 'output'
             workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
-            commandOptions: 'output -json list_internal_users_with_custom_security_attributes'
+            commandOptions: '-json list_internal_users_with_custom_security_attributes'
             environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
             outputTo: 'file'
             filename: 'myFile1.json'
@@ -144,8 +145,9 @@ jobs:
           inputs:
             provider: 'azurerm'
             command: 'custom'
+            customCommand: 'output'
             workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
-            commandOptions: 'output -json list_external_users_with_custom_security_attributes'
+            commandOptions: '-json list_external_users_with_custom_security_attributes'
             environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
             outputTo: 'file'
             filename: 'myFile2.json'
@@ -160,8 +162,9 @@ jobs:
           inputs:
             provider: 'azurerm'
             command: 'custom'
+            customCommand: 'output'
             workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE)-${{ parameters.environment }}'
-            commandOptions: 'output -json list_manually_provisioned_internal_users_with_custom_security_attributes'
+            commandOptions: '-json list_manually_provisioned_internal_users_with_custom_security_attributes'
             environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
             outputTo: 'file'
             filename: 'myFile3.json'

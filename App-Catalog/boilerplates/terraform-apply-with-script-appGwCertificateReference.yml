@@ -93,8 +93,9 @@ jobs:
           inputs:
             provider: 'azurerm'
             command: 'custom'
+            customCommand: 'output'
             workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
-            commandOptions: 'output -json myappanalysis3_agw'
+            commandOptions: '-json myappanalysis3_agw'
             environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
             outputTo: 'file'   #'console'
             filename: 'myFile2.json'
@@ -107,8 +108,9 @@ jobs:
           inputs:
             provider: 'azurerm'
             command: 'custom'
+            customCommand: 'output'
             workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
-            commandOptions: 'output -json myManagedIdentity'
+            commandOptions: '-json myManagedIdentity'
             environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
             outputTo: 'file'   #'console'
             filename: 'myFile3.json'
@@ -121,8 +123,9 @@ jobs:
           inputs:
             provider: 'azurerm'
             command: 'custom'
+            customCommand: 'output'
             workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
-            commandOptions: 'output -json appanalysis3_keyvault'
+            commandOptions: '-json appanalysis3_keyvault'
             environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
             outputTo: 'file'   #'console'
             filename: 'myFile4.json'
@@ -135,8 +138,9 @@ jobs:
           inputs:
             provider: 'azurerm'
             command: 'custom'
+            customCommand: 'output'
             workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
-            commandOptions: 'output -json myCertificateName'
+            commandOptions: '-json myCertificateName'
             environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
             outputTo: 'file'   #'console'
             filename: 'myFile5.json'
@@ -149,8 +153,9 @@ jobs:
           inputs:
             provider: 'azurerm'
             command: 'custom'
+            customCommand: 'output'
             workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
-            commandOptions: 'output -json myResourceGroup'
+            commandOptions: '-json myResourceGroup'
             environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
             outputTo: 'file'   #'console'
             filename: 'myFile6.json'
@@ -163,8 +168,9 @@ jobs:
           inputs:
             provider: 'azurerm'
             command: 'custom'
+            customCommand: 'output'
             workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
-            commandOptions: 'output -json myAzureSubscription'
+            commandOptions: '-json myAzureSubscription'
             environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
             outputTo: 'file'   #'console'
             filename: 'myFile7.json'
