@@ -124,8 +124,8 @@ metadata:
   namespace: skooner
   annotations:
     #kubernetes.azure.com/tls-cert-keyvault-uri: "https://kv-azuredevops-library2.vault.azure.net/certificates/skooner-deng/bafdb264ae7a47f2bb6f7f3d9125279b"
-    #kubernetes.azure.com/tls-cert-keyvault-uri: "https://kv-wildcards-Enterprise-com.vault.azure.net/certificates/cert-wildcard-Enterprise-${local.dns_child_zone}/${data.azurerm_key_vault_certificate.wildcards_Enterprise_com.version}"
-    kubernetes.azure.com/tls-secret-keyvault-uri: "https://kv-wildcards-Enterprise-com.vault.azure.net/secrets/${local.secret_name_in_akv_with_wildcard_cert}/${data.azurerm_key_vault_secret.wildcards_Enterprise_com["${local.secret_name_in_akv_with_wildcard_cert}"].version}"
+    #kubernetes.azure.com/tls-cert-keyvault-uri: "https://kv-wildcards-enterprise.vault.azure.net/certificates/cert-wildcard-Enterprise-${local.dns_child_zone}/${data.azurerm_key_vault_certificate.wildcards_Enterprise_com.version}"
+    kubernetes.azure.com/tls-secret-keyvault-uri: "https://kv-wildcards-enterprise.vault.azure.net/secrets/${local.secret_name_in_akv_with_wildcard_cert}/${data.azurerm_key_vault_secret.wildcards_Enterprise_com["${local.secret_name_in_akv_with_wildcard_cert}"].version}"
     #kubernetes.azure.com/tls-secret-name:
 spec:
   ingressClassName: webapprouting.kubernetes.azure.com

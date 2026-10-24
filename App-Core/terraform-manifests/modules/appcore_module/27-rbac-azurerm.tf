@@ -211,7 +211,7 @@ resource "azurerm_role_assignment" "aad_developers_group_keyvault_appgateway" {
 resource "azurerm_role_assignment" "aad_developers_group_storage_blob_data_reader" {
   role_definition_name = var.aad_developers_group_storage_blob_assigned_role # Built-in Role
   principal_id         = var.aad_developers_group
-  scope                = azurerm_storage_container.appcore.resource_manager_id
+  scope                = azurerm_storage_container.appcore.id
 }
 
 ####################################################################################################
@@ -220,7 +220,7 @@ resource "azurerm_role_assignment" "aad_developers_group_storage_blob_data_reade
 resource "azurerm_role_assignment" "appcore_front_storage_blob_data_reader" {
   role_definition_name = "Storage Blob Data Reader" # Built-in role: Allows for read access to Azure Storage blob containers and data.
   principal_id         = azuread_service_principal.appcore_front_spa.object_id
-  scope                = azurerm_storage_container.appcore.resource_manager_id
+  scope                = azurerm_storage_container.appcore.id
 }
 
 ####################################################################################################
@@ -229,7 +229,7 @@ resource "azurerm_role_assignment" "appcore_front_storage_blob_data_reader" {
 resource "azurerm_role_assignment" "applink_cloud_storage_blob_data_reader" {
   role_definition_name = "Storage Blob Data Reader" # Built-in role: Allows for read access to Azure Storage blob containers and data.
   principal_id         = azuread_service_principal.applink_cloud_api.object_id
-  scope                = azurerm_storage_container.appcore.resource_manager_id
+  scope                = azurerm_storage_container.appcore.id
 }
 
 

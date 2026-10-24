@@ -100,7 +100,7 @@ resource "azurerm_storage_blob" "EULA-PILOT-en-US" {
 ##################
 resource "azurerm_storage_container" "applink_onprem_myclient" {
   for_each              = toset(var.client_names)
-  name                  = "co-applink-onprem-${each.value}-${local.instance_environment}"
+  name                  = lower("co-applink-onprem-${each.value}-${local.instance_environment}")
   storage_account_id    = azurerm_storage_account.appcore.id
   container_access_type = "blob"
 }

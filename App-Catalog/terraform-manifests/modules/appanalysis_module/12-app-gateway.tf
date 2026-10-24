@@ -21,7 +21,7 @@ resource "azurerm_application_gateway" "App-Catalog_agw" {
   name                = "agw-${var.Enterprise_product}-${each.value}-${local.instance_environment}"
   resource_group_name = azurerm_resource_group.App-Catalog_rg[each.key].name
   location            = local.location
-  enable_http2        = true
+  http2_enabled       = true
   tags = merge(local.tags, {
     Client = "${each.key}"
     }

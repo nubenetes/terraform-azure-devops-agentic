@@ -24,8 +24,8 @@ resource "azurerm_log_analytics_workspace" "appcore_back" {
   name                            = "log-law-${var.Enterprise_product}-back-${local.instance_environment}"
   resource_group_name             = azurerm_resource_group.appcore_rg.name
   location                        = azurerm_resource_group.appcore_rg.location
-  allow_resource_only_permissions = true #(Optional) Specifies if the log Analytics Workspace allow users accessing to data associated with resources they have permission to view, without permission to workspace. Defaults to true.
-  local_authentication_disabled   = true #(Optional) Specifies if the log Analytics workspace should enforce authentication using Azure AD. Defaults to false.
+  allow_resource_only_permissions = true  #(Optional) Specifies if the log Analytics Workspace allow users accessing to data associated with resources they have permission to view, without permission to workspace. Defaults to true.
+  local_authentication_enabled    = false #(Optional) Specifies if the log Analytics workspace should allow local authentication. Defaults to true; set to false to enforce Azure AD authentication.
   sku                             = "PerGB2018"
   retention_in_days               = 30
   #daily_quota_gb                      = 10 #(Optional) The workspace daily quota for ingestion in GB. Defaults to -1 (unlimited) if omitted.
@@ -40,8 +40,8 @@ resource "azurerm_log_analytics_workspace" "applink_cloud" {
   name                            = "log-law-applink-cloud-${local.instance_environment}"
   resource_group_name             = azurerm_resource_group.appcore_rg.name
   location                        = azurerm_resource_group.appcore_rg.location
-  allow_resource_only_permissions = true #(Optional) Specifies if the log Analytics Workspace allow users accessing to data associated with resources they have permission to view, without permission to workspace. Defaults to true.
-  local_authentication_disabled   = true #(Optional) Specifies if the log Analytics workspace should enforce authentication using Azure AD. Defaults to false.
+  allow_resource_only_permissions = true  #(Optional) Specifies if the log Analytics Workspace allow users accessing to data associated with resources they have permission to view, without permission to workspace. Defaults to true.
+  local_authentication_enabled    = false #(Optional) Specifies if the log Analytics workspace should allow local authentication. Defaults to true; set to false to enforce Azure AD authentication.
   sku                             = "PerGB2018"
   retention_in_days               = 30
   #daily_quota_gb                      = 10 #(Optional) The workspace daily quota for ingestion in GB. Defaults to -1 (unlimited) if omitted.
@@ -57,8 +57,8 @@ resource "azurerm_log_analytics_workspace" "applink_onprem_myclient" {
   name                            = "log-law-applink-onprem-${each.value}-${local.instance_environment}"
   resource_group_name             = azurerm_resource_group.appcore_rg.name
   location                        = azurerm_resource_group.appcore_rg.location
-  allow_resource_only_permissions = true #(Optional) Specifies if the log Analytics Workspace allow users accessing to data associated with resources they have permission to view, without permission to workspace. Defaults to true.
-  local_authentication_disabled   = true #(Optional) Specifies if the log Analytics workspace should enforce authentication using Azure AD. Defaults to false.
+  allow_resource_only_permissions = true  #(Optional) Specifies if the log Analytics Workspace allow users accessing to data associated with resources they have permission to view, without permission to workspace. Defaults to true.
+  local_authentication_enabled    = false #(Optional) Specifies if the log Analytics workspace should allow local authentication. Defaults to true; set to false to enforce Azure AD authentication.
   sku                             = "PerGB2018"
   retention_in_days               = 30
   #daily_quota_gb                      = 10 #(Optional) The workspace daily quota for ingestion in GB. Defaults to -1 (unlimited) if omitted.

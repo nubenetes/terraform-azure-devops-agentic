@@ -111,12 +111,12 @@ resource "azurerm_role_assignment" "appcore_admin_group_storage_blob_data_reader
   for_each             = toset(var.client_names)
   role_definition_name = "Storage Blob Data Reader" # Built-in role: Allows for read access to Azure Storage blob containers and data.
   principal_id         = azuread_group.appcore_admin_role[each.key].object_id
-  scope                = azurerm_storage_container.appcore_myclient[each.key].resource_manager_id
+  scope                = azurerm_storage_container.appcore_myclient[each.key].id
 }
 resource "azurerm_role_assignment" "appcore_user_group_storage_blob_data_reader" {
   for_each             = toset(var.client_names)
   role_definition_name = "Storage Blob Data Reader" # Built-in role: Allows for read access to Azure Storage blob containers and data.
   principal_id         = azuread_group.appcore_user_role[each.key].object_id
-  scope                = azurerm_storage_container.appcore_myclient[each.key].resource_manager_id
+  scope                = azurerm_storage_container.appcore_myclient[each.key].id
 }
 

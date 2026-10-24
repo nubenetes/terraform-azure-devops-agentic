@@ -14,6 +14,11 @@ variable "azure_subscription_europe" {
   type        = string
   default     = "00000000-0000-0000-0000-000000000000" # Enterprise DevOps Subscription
 }
+variable "azure_subscription" {
+  description = "Legacy/alias azure subscription ID variable"
+  type        = string
+  default     = "00000000-0000-0000-0000-000000000000" # Enterprise DevOps Subscription
+}
 
 
 #################################

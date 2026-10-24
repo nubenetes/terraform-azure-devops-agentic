@@ -60,20 +60,20 @@ jobs:
       backendAzureRmStorageAccountName: $(STORAGE_ACCOUNT_NAME)
       backendAzureRmContainerName: $(CONTAINER_NAME)
       backendAzureRmKey: '$(INFRA_NAME)-$(GIT_BRANCH)branch-${{ parameters.environment }}.tfstate'
-      workingDirectory: '$(System.DefaultWorkingDirectory)/terraform-manifests'
+      workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES)'
   - task: TerraformTaskV4@4
     displayName: Terraform Output 
     inputs:
       provider: 'azurerm'
       command: 'output'
-      workingDirectory: '$(System.DefaultWorkingDirectory)/terraform-manifests'
+      workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES)'
       environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME_TFSTATE }}
   - task: TerraformTaskV4@4
     displayName: Terraform Show (current tfstate)
     inputs:
       provider: 'azurerm'
       command: 'show' 
-      workingDirectory: '$(System.DefaultWorkingDirectory)/terraform-manifests'
+      workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES)'
       environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME_TFSTATE }}
       outputTo: 'console' 
   - task: TerraformTaskV4@4  
@@ -82,7 +82,7 @@ jobs:
       provider: 'azurerm'
       command: 'custom'
       customCommand: 'state'
-      workingDirectory: '$(System.DefaultWorkingDirectory)/terraform-manifests'
+      workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES)'
       commandOptions: list
       environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME_TFSTATE }}        
   - task: TerraformTaskV4@4  
@@ -91,7 +91,7 @@ jobs:
       provider: 'azurerm'
       command: 'custom'
       customCommand: 'state'
-      workingDirectory: '$(System.DefaultWorkingDirectory)/terraform-manifests'
+      workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES)'
       commandOptions: rm ${{ PARAMETERS.RESOURCE_ADDRESS }}
       environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME_TFSTATE }}
       outputTo: 'console'

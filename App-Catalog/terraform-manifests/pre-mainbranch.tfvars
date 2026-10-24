@@ -10,19 +10,21 @@
 #client_names_europe        = ["client1", "client2", "client3", "client4","client5"]
 #client_names_unitedstates  = ["client1", "client2", "client3"]
 
-dns_child_zone                  = "eng"                                  # This env is setup on eng.Enterprise.com dns_child_zone
-azure_subscription_unitedstates = "00000000-0000-0000-0000-000000000002" # Enterprise DevTest Subscription
-azure_subscription_europe       = "00000000-0000-0000-0000-000000000002" # Enterprise DevTest Subscription
-deploy_Europe                   = true
-deploy_United_States            = false
+dns_child_zone                    = "eng"  # This env is setup on eng.Enterprise.com dns_child_zone
+azure_subscription_unitedstates   = "00000000-0000-0000-0000-000000000002"   # Enterprise DevTest Subscription
+azure_subscription_europe         = "00000000-0000-0000-0000-000000000002"   # Enterprise DevTest Subscription
+deploy_Europe                     = true
+deploy_United_States              = false
 
 # Enterprise Monitor Client (Prometheus exporter):
-prometheus_exporter_docker_image     = "Enterprisecatalogcr.azurecr.io/monitor-client"
-prometheus_exporter_docker_image_tag = "1.0.1"
+prometheus_exporter_docker_image            = "Enterprisecatalogcr.azurecr.io/monitor-client"
+prometheus_exporter_docker_image_tag        = "1.0.1"
+
+azure_subscription = "00000000-0000-0000-0000-000000000002"   # Enterprise DevTest Subscription
 
 # Enterprise appanalysis aka omni-catalog:
-app_docker_image     = "Enterprisecatalogcr.azurecr.io/omni" # OMNI aka appanalysis or OMNI-Catalog
-app_docker_image_tag = "3.0.2"
+app_docker_image                            = "Enterprisecatalogcr.azurecr.io/omni" # OMNI aka appanalysis or OMNI-Catalog
+app_docker_image_tag                        = "3.0.2"
 
 # AKS Computation:
 # docker_enable_ci                            = true
@@ -33,4 +35,4 @@ app_docker_image_tag = "3.0.2"
 #oplog_size_mb                              = 990
 
 # Prometheus Push Gateway (used by Monitor Client)
-prometheus_push_gateway = "pushgateway-devtest.Enterprise.com"
+prometheus_push_gateway                    = "pushgateway-devtest.Enterprise.com"

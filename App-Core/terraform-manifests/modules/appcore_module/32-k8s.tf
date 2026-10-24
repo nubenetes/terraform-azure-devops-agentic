@@ -64,7 +64,7 @@ resource "kubernetes_secret_v1" "sa_client" {
   for_each = toset(var.client_names)
   metadata {
     name      = azurerm_storage_account.appcore.name
-    namespace = "${local.k8s_namespace_name}-${each.value}"
+    namespace = lower("${local.k8s_namespace_name}-${each.value}")
   }
 
   data = {
@@ -81,8 +81,8 @@ resource "kubernetes_secret_v1" "sa_client" {
 resource "kubernetes_persistent_volume_claim_v1" "my_client" {
   for_each = toset(var.client_names)
   metadata {
-    name      = each.value
-    namespace = "${local.k8s_namespace_name}-${each.value}"
+    name      = lower(each.value)
+    namespace = lower("${local.k8s_namespace_name}-${each.value}")
     # Set this annotation to NOT let Kubernetes automatically create
     # a persistent volume for this volume claim.
     # annotations = {
@@ -134,7 +134,7 @@ resource "kubernetes_persistent_volume_claim_v1" "my_client" {
 resource "kubernetes_persistent_volume_v1" "my_client" {
   for_each = toset(var.client_names)
   metadata {
-    name = "${var.Enterprise_product_k8s_prefix}-${each.value}-${local.instance_environment}"
+    name = lower("${var.Enterprise_product_k8s_prefix}-${each.value}-${local.instance_environment}")
   }
   spec {
     capacity = {
@@ -148,7 +148,7 @@ resource "kubernetes_persistent_volume_v1" "my_client" {
         read_only        = "false"
         secret_name      = azurerm_storage_account.appcore.name
         secret_namespace = kubernetes_secret_v1.sa_client[each.value].metadata[0].namespace
-        share_name       = "fs-${var.Enterprise_product}-${each.value}-${local.instance_environment}"
+        share_name       = lower("fs-${var.Enterprise_product}-${each.value}-${local.instance_environment}")
       }
     }
   }
@@ -177,7 +177,7 @@ resource "kubernetes_role_binding_v1" "appcore_client" {
   for_each = (local.sharedinfra_environment != "pro") ? toset(var.client_names) : []
   metadata {
     name      = "developers-${local.gitbranch}admin"
-    namespace = "${local.k8s_namespace_name}-${each.value}"
+    namespace = lower("${local.k8s_namespace_name}-${each.value}")
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -192,7 +192,7 @@ resource "kubernetes_role_binding_v1" "appcore_client" {
   # }
   subject {
     kind      = "Group"
-    namespace = "${local.k8s_namespace_name}-${each.value}"
+    namespace = lower("${local.k8s_namespace_name}-${each.value}")
     #name      = "system:masters"
     name = data.azuread_group.aks_developers.object_id
     #api_group = "rbac.authorization.k8s.io"
@@ -206,7 +206,7 @@ resource "kubernetes_role_v1" "appcore_client" {
   for_each = (local.sharedinfra_environment != "pro") ? toset(var.client_names) : []
   metadata {
     name      = "developers-${local.gitbranch}admin"
-    namespace = "${local.k8s_namespace_name}-${each.value}"
+    namespace = lower("${local.k8s_namespace_name}-${each.value}")
     labels = {
       test = "MyDevelopersAdminRole"
     }

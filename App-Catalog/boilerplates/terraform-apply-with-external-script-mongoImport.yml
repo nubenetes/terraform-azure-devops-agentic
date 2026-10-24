@@ -90,8 +90,9 @@ jobs:
           inputs:
             provider: 'azurerm'
             command: 'custom'
+            customCommand: 'output'
             workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
-            commandOptions: 'output -json mongodb_connection_strings'
+            commandOptions: '-json mongodb_connection_strings'
             environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
             outputTo: 'file'   #'console'
             filename: 'myFile2.json'
@@ -103,8 +104,9 @@ jobs:
           inputs:
             provider: 'azurerm'
             command: 'custom'
+            customCommand: 'output'
             workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
-            commandOptions: 'output -json mongodb_atlas_database_name'
+            commandOptions: '-json mongodb_atlas_database_name'
             environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
             outputTo: 'file'   #'console'
             filename: 'myFile3.json'
@@ -116,8 +118,9 @@ jobs:
           inputs:
             provider: 'azurerm'
             command: 'custom'
+            customCommand: 'output'
             workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
-            commandOptions: 'output -json secret_mongodb_atlas_dbadmin_password'
+            commandOptions: '-json secret_mongodb_atlas_dbadmin_password'
             environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
             outputTo: 'file'   #'console'
             filename: 'myFile4.json'
@@ -129,8 +132,9 @@ jobs:
           inputs:
             provider: 'azurerm'
             command: 'custom'
+            customCommand: 'output'
             workingDirectory: '$(FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE)'
-            commandOptions: 'output -json mongodb_atlas_dbadmin'
+            commandOptions: '-json mongodb_atlas_dbadmin'
             environmentServiceNameAzureRM: $(SERVICE_CONNECTION_NAME)
             outputTo: 'file'   #'console'
             filename: 'myFile5.json'

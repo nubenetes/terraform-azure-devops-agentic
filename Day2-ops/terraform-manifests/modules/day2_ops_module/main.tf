@@ -62,12 +62,12 @@ resource "azuread_service_principal" "msgraph" {
 
 
 ##################################################################
-# kv-wildcards-Enterprise-com in Enterprise Infrastructure Subscription
+# kv-wildcards-enterprise in Enterprise Infrastructure Subscription
 ##################################################################
 data "azurerm_key_vault" "wildcards_Enterprise_com" {
   provider = azurerm.manualinfra
   # NOTE: The vault must be in the same subscription as the provider. If the vault is in another subscription, you must create an aliased provider for that subscription.
-  name                = "kv-wildcards-Enterprise-com"
+  name                = "kv-wildcards-enterprise"
   resource_group_name = "CertificatesResourceGroup"
 }
 
