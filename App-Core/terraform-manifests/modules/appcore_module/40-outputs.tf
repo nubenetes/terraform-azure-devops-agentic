@@ -84,7 +84,7 @@ output "id_linux_webapp_appcore_front_spa" {
   value = data.azurerm_linux_web_app.appcore_front_spa.id
 }
 output "application_id_appcore_front_spa" {
-  value = data.azuread_application.appcore_front_spa.application_id
+  value = data.azuread_application.appcore_front_spa.client_id
 }
 output "id_linux_webapp_appcore_back_api" {
   value = data.azurerm_linux_web_app.appcore_back_api.id
@@ -159,7 +159,7 @@ output "mongodb_project_id" {
   value = mongodbatlas_project.project.id
 }
 output "mongodb_ipaccesslist" {
-  value = mongodbatlas_project_ip_access_list.ip.ip_address
+  value = mongodbatlas_project_ip_access_list.ip.cidr_block
 }
 output "mongodbatlas_cluster_name" {
   value = mongodbatlas_advanced_cluster.cluster.name

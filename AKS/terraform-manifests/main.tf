@@ -37,7 +37,7 @@ module "europe_aks" {
   aks_developers                                     = var.aks_developers
   service_principals_with_aad_aks_cluster_admin_role = var.service_principals_with_aad_aks_cluster_admin_role
   dns_parent_zone                                    = var.dns_parent_zone
-  dns_child_zone                                     = (var.environment != "pro") ? "${var.dns_child_zone_eng}" : "${var.dns_child_zone_pro}"
+  dns_child_zone                                     = (var.environment != "pro") ? var.dns_child_zone_eng : var.dns_child_zone_pro
 }
 
 
@@ -67,5 +67,12 @@ module "us_aks" {
   aks_developers                                     = var.aks_developers
   service_principals_with_aad_aks_cluster_admin_role = var.service_principals_with_aad_aks_cluster_admin_role
   dns_parent_zone                                    = var.dns_parent_zone
-  dns_child_zone                                     = (var.environment != "pro") ? "${var.dns_child_zone_eng}" : "${var.dns_child_zone_pro}"
+  dns_child_zone                                     = (var.environment != "pro") ? var.dns_child_zone_eng : var.dns_child_zone_pro
+}
+
+check "aks_cluster_Regional_deployment" {
+  assert {
+    condition     = local.deploy_Europe || local.deploy_United_States
+    error_message = "At least one regional AKS deployment flag (deploy_Europe or deploy_United_States) must be enabled."
+  }
 }

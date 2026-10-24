@@ -53,11 +53,11 @@ graph LR
 
 ## 2. Architectural Evolution: Pipeline-to-Stack Migration
 
-Currently, the repository uses **Azure DevOps YAML** to orchestrate dependencies between root modules (e.g., Shared-Infra -> AKS). This is a "Pipeline-Centric" model.
+Currently, the repository implements **Simulated Stacks in Azure DevOps**—using multi-stage Azure DevOps YAML pipelines, partitioned state files (`azurerm` backend), and typed `data` sources to orchestrate dependencies across decoupled root modules (`Shared-Infra` $\rightarrow$ `App-Users` $\rightarrow$ `AKS` $\rightarrow$ `App-Core` $\rightarrow$ `App-Catalog` $\rightarrow$ `Day2-ops`).
 
-### 2.1 Low-Level Improvement: Terraform Stacks (GA)
-*   **Goal**: Replace brittle `data` sources and manual pipeline triggers with native HCL `stack` and `component` blocks.
-*   **Justification**: This moves dependency logic from an external orchestrator (ADO) into the code itself, enabling **Unified Plans** across multiple environments and subscriptions.
+### 2.1 Dual-Track Orchestration: Simulated Stacks vs. HCP Terraform Stacks (GA)
+*   **Current Enterprise Standard (Simulated Stacks in Azure DevOps)**: As analyzed in [113. Agentic Architecture Blueprint](./113-ARCHITECTURE_2026_AGENTIC.md), native HashiCorp Terraform Stacks (`.tfstack.hcl` / `.tfdeploy.hcl`) requires the proprietary HCP Terraform SaaS execution engine, cannot execute on open-source Terraform CLI or OpenTofu runners, cannot interleave imperative operational scripts (Azure PowerShell for Entra ID Custom Security Attributes, `kubelogin`, or Bitbucket schema syncs), and streams state metadata outside private Azure storage perimeters. Therefore, **Simulated Stacks in Azure DevOps** remains the primary sovereign enterprise choice.
+*   **Future Optional Track (HCP Terraform Stacks)**: For organizations adopting commercial HCP Terraform Enterprise or when HashiCorp opens `.tfstack.hcl` execution to local CLI runners with lifecycle hooks, replacing `data` source lookups and pipeline triggers with native `component` blocks will enable **Unified Speculative Plans** across multiple environments and subscriptions.
 
 ---
 
@@ -123,10 +123,11 @@ The transition from "Dashboards" to "Insights".
     *   **External Reference**: [Atlas Azure Private Link Architecture](https://www.mongodb.com/docs/atlas/security-private-endpoint/).
 
 ### 7.3 Terraform Stacks Migration: State-Aware Orchestration
-*   **High-Level**: Move from a "Repo-per-Layer" or "Pipeline-per-Layer" model to a single unified HCL definition. This allows Terraform to understand the entire environment as one atomic unit.
+*   **High-Level**: Reconcile sovereign pipeline-based orchestration (**Simulated Stacks in Azure DevOps**) with declarative multi-component graphs (**HCP Terraform Stacks**).
 *   **Low-Level Technical Detail**:
-    *   **Implementation**: Transition from separate root modules to a unified `main.tfstack.hcl`. This enables **Unified Plans**, where a change in [311. Shared-Infra](./311-SHARED_INFRA_NETWORKING_HUB_SPOKE_BACKBONE.md) accurately predicts the impact on the App-Core layer.
-    *   **Context**: Addresses the complexity mentioned in [111. Architecture Strategy](./111-ARCHITECTURE_2026.md).
+    *   **Simulated Stacks Baseline**: This repository currently implements **Simulated Stacks** via partitioned root modules (`Shared-Infra`, `App-Users`, `AKS`, `App-Core`, `App-Catalog`, `Day2-ops`), private `azurerm` Blob state isolation, `ManualValidation@0` ITIL approval gates, and imperative script hooks (PowerShell/kubelogin), avoiding HCP SaaS lock-in and preserving data sovereignty (see [113. Agentic Architecture Blueprint](./113-ARCHITECTURE_2026_AGENTIC.md)).
+    *   **Future HCP Stacks Option**: For tenants licensed on HCP Terraform Enterprise where third-party SaaS state hosting and declarative-only execution are acceptable, transitioning separate root modules into a unified `main.tfstack.hcl` and `deployments.tfdeploy.hcl` enables **Unified Plans**, where a change in [311. Shared-Infra](./311-SHARED_INFRA_NETWORKING_HUB_SPOKE_BACKBONE.md) automatically computes downstream impacts on `App-Core`.
+    *   **Context**: Harmonizes the architectural trade-offs documented in [111. Architecture Strategy](./111-ARCHITECTURE_2026.md) and [113. Agentic Architecture Blueprint](./113-ARCHITECTURE_2026_AGENTIC.md).
     *   **External Reference**: [Terraform Stacks Overview](https://developer.hashicorp.com/terraform/language/stacks).
 
 ### 7.4 Resource Cleanup: Automated Hygiene and FinOps

@@ -37,9 +37,9 @@ output "external_users" {
   value = local.yaml_external_users
 }
 output "list_of_external_users_redirect_url" {
-  value = jsondecode(jsonencode(tomap(merge(
-    { for external_user in local.yaml_external_users : azuread_invitation.appcore_external_user["${external_user.email}"].user_email_address => azuread_invitation.appcore_external_user["${external_user.email}"].redirect_url }
-  ))))
+  value = {
+    for email, inv in azuread_invitation.external : inv.user_email_address => inv.redirect_url
+  }
   sensitive = true
 }
 output "list_external_users_with_custom_security_attributes" {
@@ -58,9 +58,9 @@ output "list_internal_users_with_custom_security_attributes" {
   value = local.list_internal_users_with_custom_security_attributes
 }
 output "list_of_internal_users_credentials" {
-  value = jsondecode(jsonencode(tomap(merge(
-    { for internal_user in local.yaml_internal_users_without_roles : azuread_user.internal["${internal_user.email}"].user_principal_name => azuread_user.internal["${internal_user.email}"].password }
-  ))))
+  value = {
+    for internal_user in local.yaml_internal_users_without_roles : azuread_user.internal["${internal_user.email}"].user_principal_name => azuread_user.internal["${internal_user.email}"].password
+  }
   sensitive = true
 }
 

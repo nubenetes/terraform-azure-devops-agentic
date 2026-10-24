@@ -7,8 +7,6 @@ steps:
   clean: true
 - script: git config --system -l 
   displayName: git config system wide   
-- bash: env
-  displayName: 'Show env' 
 - bash: |    
     echo "Bitbucket ref: $TOOLS_REF"    
   displayName: Bitbucket ref    # https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/multi-repo-checkout

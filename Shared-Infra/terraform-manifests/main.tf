@@ -29,7 +29,7 @@ module "dns" {
   aad_tenant_id      = var.aad_tenant_id
   subnet_cidr        = var.subnet_cidr
   dns_parent_zone    = var.dns_parent_zone
-  dns_child_zone     = (var.environment != "pro") ? "${var.dns_child_zone_eng}" : "${var.dns_child_zone_pro}"
+  dns_child_zone     = (var.environment != "pro") ? var.dns_child_zone_eng : var.dns_child_zone_pro
   dns_prefix         = var.dns_prefix
   Enterprise_product = "${var.Enterprise_product}-dns"
 }
@@ -42,8 +42,8 @@ module "dns_top_level_domain" {
   Enterprise_product    = var.Enterprise_product
   gitbranch             = var.gitbranch
   dns_parent_zone       = var.dns_parent_zone
-  dns_child_zone        = (var.environment != "pro") ? "${var.dns_child_zone_eng}" : "${var.dns_child_zone_pro}"
-  dns_zone_name_servers = module.dns.0.dns_zone_name_servers
+  dns_child_zone        = (var.environment != "pro") ? var.dns_child_zone_eng : var.dns_child_zone_pro
+  dns_zone_name_servers = module.dns[0].dns_zone_name_servers
   environment           = var.environment # 'eng' or 'pro'
   depends_on = [
     module.dns,
@@ -59,4 +59,11 @@ module "sharedinfra_microsoft_defender_cloud" {
   Enterprise_product = "sharedinfra-mdc"
   gitbranch          = var.gitbranch
   environment        = var.environment # 'eng' or 'pro'
+}
+
+check "dns_zone_delegation_health" {
+  assert {
+    condition     = length(module.dns[0].dns_zone_name_servers) >= 2
+    error_message = "DNS child zone must have at least 2 authoritative name servers delegated."
+  }
 }

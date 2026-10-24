@@ -52,13 +52,6 @@ resource "azuread_application" "kubeapps_login" {
       type = "Role" # Application
     }
   }
-  required_resource_access {
-    resource_app_id = "00000000-0000-0000-0000-000000000000" # Azure Kubernetes Service AAD Server
-    resource_access {
-      id   = "00000000-0000-0000-0000-000000000000" # user.read
-      type = "Scope"                                # Delegated
-    }
-  }
   ################
   # SPA settings:
   ################
@@ -98,8 +91,8 @@ resource "time_rotating" "kubeapps" {
 # Secrets
 ##############
 resource "azuread_application_password" "kubeapps_login" {
-  display_name          = "kubeapps-auth-proxy-secret"
-  application_object_id = azuread_application.kubeapps_login.object_id
+  display_name   = "kubeapps-auth-proxy-secret"
+  application_id = azuread_application.kubeapps_login.id
   rotate_when_changed = {
     rotation = time_rotating.kubeapps.id
   }

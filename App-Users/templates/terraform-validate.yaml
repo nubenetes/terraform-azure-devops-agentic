@@ -27,8 +27,6 @@ jobs:
   - checkout: App-Core-Users-YAML
     clean: true
     condition: eq(variables['Build.SourceBranchName'],'main')
-  - bash: env
-    displayName: 'Show env'
   - script: git config --system -l
     displayName: git config system wide
   - script: ls -la $(Build.SourcesDirectory)
@@ -75,11 +73,11 @@ jobs:
       targetPath: $(FOLDER_WITH_TERRAFORM_FILES)
       artifactName: $(ARTIFACTS_FOLDER_WITH_TERRAFORM_FILES)
       artifactType: 'pipeline'
-  - task: TerraformInstaller@0
+  - task: TerraformInstaller@1
     displayName: Terraform Install
     inputs:
       terraformVersion: $(TERRAFORM_VERSION)
-  - task: TerraformTaskV3@3
+  - task: TerraformTaskV4@4
     displayName: Terraform Init
     inputs:
       provider: 'azurerm'
@@ -88,11 +86,12 @@ jobs:
       backendAzureRmResourceGroupName: $(RESOURCE_GROUP_NAME_TERRAFORM_STATE)
       backendAzureRmStorageAccountName: $(STORAGE_ACCOUNT_NAME)
       backendAzureRmContainerName: $(CONTAINER_NAME)
-      backendAzureRmKey: '$(INFRA_NAME)-$(GIT_BRANCH)branch-base.tfstate'
+      backendAzureRmKey: '$(INFRA_NAME)-$(GIT_BRANCH)branch-$(ENVIRONMENT).tfstate'
       workingDirectory: $(FOLDER_WITH_TERRAFORM_FILES)
-  - task: TerraformTaskV3@3
+  - task: TerraformTaskV4@4
     displayName: Terraform Validate
     inputs:
       provider: 'azurerm'
       command: 'validate'
       workingDirectory: $(FOLDER_WITH_TERRAFORM_FILES)
+

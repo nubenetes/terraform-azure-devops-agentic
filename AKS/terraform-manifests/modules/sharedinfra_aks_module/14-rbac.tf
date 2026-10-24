@@ -42,6 +42,13 @@ resource "azurerm_role_assignment" "aks_data_plane_nodes" {
   skip_service_principal_aad_check = true
 }
 
+resource "azurerm_role_assignment" "aks_data_plane_pods" {
+  principal_id                     = azurerm_user_assigned_identity.aks_cluster.principal_id
+  role_definition_name             = "Network Contributor"
+  scope                            = azurerm_subnet.aks_pods_data_plane.id
+  skip_service_principal_aad_check = true
+}
+
 
 ###################################################################################################################################
 # Create Azure AD Group in Active Directory for AKS Admins

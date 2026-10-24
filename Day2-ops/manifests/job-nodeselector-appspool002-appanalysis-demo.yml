@@ -28,7 +28,7 @@ kind: Job
 metadata:
   #name: kubernetes-job-example
   generateName: kubernetes-job-example-
-  namespace: Enterprise
+  namespace: enterprise
   labels:     
     jobgroup: jobexample
     app: appcore
@@ -77,6 +77,7 @@ spec:
           #requests:
             #cpu: "4" #"4" #"1" #"4"
             #memory: "30Gi" #160Mi #6000Mi #16000Mi                
+      restartPolicy: Never
       
 # for i in {1..5}; do kubectl create -f job.yml; done  
       

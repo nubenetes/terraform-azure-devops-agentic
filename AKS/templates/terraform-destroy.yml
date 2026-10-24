@@ -32,14 +32,14 @@ jobs:
         ######################################################
         # Terraform Install
         ######################################################
-        - task: TerraformInstaller@0
+        - task: TerraformInstaller@1
           displayName: Terraform Install
           inputs:
             terraformVersion: $(TERRAFORM_VERSION)
         ######################################################
         # Terraform Init
         ######################################################
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Init
           inputs:
             provider: 'azurerm'
@@ -53,7 +53,7 @@ jobs:
         ######################################################
         # Terraform Destroy
         ######################################################
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           condition: eq(variables['Build.SourceBranchName'],'develop')
           displayName: Terraform Destroy Develop ENG/PRO (Enterprise DevOps Subscr)
           inputs:
@@ -67,7 +67,7 @@ jobs:
               -var ssh_public_key=$(sshkey.secureFilePath)
               -var azure_subscription_unitedstates="00000000-0000-0000-0000-000000000000"
               -var azure_subscription_europe="00000000-0000-0000-0000-000000000000"
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           condition: and(eq(variables['TERRAFORM_ENV'], 'eng'),eq(variables['Build.SourceBranchName'],'main'))
           displayName: Terraform Destroy Main ENG (Enterprise DevTest Subscr)
           inputs:
@@ -81,7 +81,7 @@ jobs:
               -var ssh_public_key=$(sshkey.secureFilePath)
               -var azure_subscription_unitedstates="00000000-0000-0000-0000-000000000000"
               -var azure_subscription_europe="00000000-0000-0000-0000-000000000000"
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Destroy Main PRO (Enterprise Production Subscr)
           condition: and(eq(variables['TERRAFORM_ENV'], 'pro'),eq(variables['Build.SourceBranchName'],'main'))
           inputs:

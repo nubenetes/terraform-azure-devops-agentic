@@ -223,7 +223,7 @@ variable "docker_enable_ci" {
 variable "client_names" {
   description = "Create Azure resources with these client names"
   type        = list(string)
-  default     = ["client-anon"]
+  default     = ["client1"]
   validation {
     # https://spacelift.io/blog/how-to-use-terraform-variables
     # https://jeffbrown.tech/terraform-variables-validation/
@@ -261,7 +261,7 @@ variable "client_names_with_enabled_app_gateways" {
 
 #####################################################################################################
 # MONGODB ATLAS
-# mongodb secrets setup as non-sensitive to see traces of mongoimport during the creation_time
+# mongodb secrets setup as sensitive
 #####################################################################################################
 variable "oplog_size_mb" {
   description = "(Optional) The custom oplog size of the cluster. Without a value that indicates that the cluster users the default oplog size calculated by Atlas"
@@ -275,12 +275,12 @@ variable "oplog_size_mb" {
 variable "secret_mongodb_atlas_public_key" {
   description = "Public Programmatic API key to authenticate to Atlas"
   type        = string
-  sensitive   = false
+  sensitive   = true
 }
 variable "secret_mongodb_atlas_private_key" {
   description = "Private Programmatic API key to authenticate to Atlas"
   type        = string
-  sensitive   = false
+  sensitive   = true
 }
 variable "mongodb_atlas_org_id" {
   description = "MongoDB Organization ID"
@@ -303,7 +303,7 @@ variable "mongodb_atlas_region" {
 variable "mongodb_atlas_mongodbversion" {
   description = "The Major MongoDB Version"
   type        = string
-  default     = "5.0" # Atlas supports the following MongoDB versions for M10+ clusters: 4.0, 4.2, 4.4, or 5.0
+  default     = "7.0"
 }
 variable "mongodb_atlas_dbadmin" {
   description = "MongoDB Atlas Database Admin User Name"
@@ -314,7 +314,7 @@ variable "mongodb_atlas_dbadmin" {
 variable "secret_mongodb_atlas_dbadmin_password" {
   description = "MongoDB Atlas Database Admin Password"
   type        = string
-  sensitive   = false
+  sensitive   = true
 }
 variable "mongodb_atlas_dbuser" {
   description = "MongoDB Atlas Database User Name"
@@ -325,7 +325,7 @@ variable "mongodb_atlas_dbuser" {
 variable "secret_mongodb_atlas_dbuser_password" {
   description = "MongoDB Atlas Database User Password"
   type        = string
-  sensitive   = false
+  sensitive   = true
 }
 variable "mongodb_atlas_database_name" {
   description = "The database in the cluster to limit the database user to, the database does not have to exist yet"

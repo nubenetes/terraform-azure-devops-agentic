@@ -45,8 +45,9 @@ terraform {
 # 1. Terraform Provider Block for AzureRM with Default Enterprise Infrastructure Subscription
 # https://samcogan.com/deploying-to-multiple-azure-subscriptions-with-terraform/
 provider "azurerm" {
-  alias           = "manualinfra"
-  subscription_id = "00000000-0000-0000-0000-000000000000" # Enterprise Infrastructure Subscription
+  alias                           = "manualinfra"
+  subscription_id                 = "00000000-0000-0000-0000-000000000000" # Enterprise Infrastructure Subscription
+  resource_provider_registrations = "none"
   #region                     = "northeurope"
   features {
     # resource_group behavior managed via AzureRM v4 lifecycle rules
@@ -59,7 +60,7 @@ provider "azurerm" {
   alias           = "europe"
   subscription_id = var.azure_subscription_europe
   #region                     = "northeurope"
-  skip_provider_registration = true # required to run azurerm_resource_provider_registration.aks_cluster
+  resource_provider_registrations = "none"
   features {
     key_vault {
       purge_soft_delete_on_destroy = true
@@ -74,7 +75,7 @@ provider "azurerm" {
   alias           = "us"
   subscription_id = var.azure_subscription_unitedstates
   #region                     = "centralus"
-  skip_provider_registration = true # required to run azurerm_resource_provider_registration.aks_cluster
+  resource_provider_registrations = "none"
   features {
     key_vault {
       purge_soft_delete_on_destroy = true

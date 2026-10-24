@@ -2,14 +2,14 @@
 # https://github.com/hashicorp/terraform-provider-azurerm/blob/main/examples/app-service-certificate/stored-in-keyvault/main.tf
 
 resource "azurerm_key_vault" "appcore_keyvault_myclient" {
-  for_each                  = toset(var.client_names) # https://blog.gruntwork.io/terraform-tips-tricks-loops-if-statements-and-gotchas-f739bbae55f9
-  name                      = "kv-${each.value}-${local.appcore_dns_name}"
-  location                  = local.location
-  resource_group_name       = azurerm_resource_group.appcore_rg.name
-  tenant_id                 = data.azurerm_client_config.current.tenant_id
-  sku_name                  = "standard"
-  tags                      = local.tags
-  enable_rbac_authorization = false
+  for_each                   = toset(var.client_names) # https://blog.gruntwork.io/terraform-tips-tricks-loops-if-statements-and-gotchas-f739bbae55f9
+  name                       = trimsuffix(substr(lower("kv-${each.value}-${local.appcore_dns_name}"), 0, 24), "-")
+  location                   = local.location
+  resource_group_name        = azurerm_resource_group.appcore_rg.name
+  tenant_id                  = data.azurerm_client_config.current.tenant_id
+  sku_name                   = "standard"
+  tags                       = local.tags
+  rbac_authorization_enabled = false
   #enabled_for_template_deployment = true
   depends_on = [
     azurerm_resource_group.appcore_rg,
@@ -214,7 +214,7 @@ resource "azurerm_key_vault_access_policy" "compound_identity_appcore_back_api_a
   key_vault_id   = azurerm_key_vault.appcore_keyvault_myclient[each.key].id
   tenant_id      = azuread_service_principal.appcore_back_api.application_tenant_id
   object_id      = azuread_group.appcore_user_role[each.key].object_id # Security Principal Group (object_id)
-  application_id = azuread_service_principal.appcore_back_api.application_id
+  application_id = azuread_service_principal.appcore_back_api.client_id
   # Application ID of the client making request on behalf of a principal
   key_permissions         = var.vault_access_policy_compound_identity_appcore_back_api_app_role_viewer_key_permissions
   secret_permissions      = var.vault_access_policy_compound_identity_appcore_back_api_app_role_viewer_secret_permissions
@@ -234,7 +234,7 @@ resource "azurerm_key_vault_access_policy" "compound_identity_appcore_back_api_a
   key_vault_id   = azurerm_key_vault.appcore_keyvault_myclient[each.key].id
   tenant_id      = azuread_service_principal.appcore_back_api.application_tenant_id
   object_id      = azuread_group.appcore_admin_role[each.key].object_id # Security Principal Group (object_id)
-  application_id = azuread_service_principal.appcore_back_api.application_id
+  application_id = azuread_service_principal.appcore_back_api.client_id
   # Application ID of the client making request on behalf of a principal
   key_permissions         = var.vault_access_policy_compound_identity_appcore_back_api_app_role_admin_key_permissions
   secret_permissions      = var.vault_access_policy_compound_identity_appcore_back_api_app_role_admin_secret_permissions
@@ -259,7 +259,7 @@ resource "azurerm_key_vault_secret" "database_myclient" {
   key_vault_id = azurerm_key_vault.appcore_keyvault_myclient[each.key].id
   name         = "${each.value}-db" # Deployed Database Name in mongodb cluster is "modb-${var.Enterprise_product}-${each.value}"
   #value        = mongodbatlas_advanced_cluster.cluster.connection_strings[0].standard_srv
-  value        = replace(join("/", [mongodbatlas_advanced_cluster.cluster.connection_strings.0.standard_srv, "modb-${var.Enterprise_product}-${each.value}"]), "mongodb+srv://", "mongodb+srv://${var.mongodb_atlas_dbuser}:${var.secret_mongodb_atlas_dbuser_password}@")
+  value        = replace(join("/", [mongodbatlas_advanced_cluster.cluster.connection_strings[0].standard_srv, "modb-${var.Enterprise_product}-${each.value}"]), "mongodb+srv://", "mongodb+srv://${var.mongodb_atlas_dbuser}:${var.secret_mongodb_atlas_dbuser_password}@")
   content_type = "ConnectionString"
   depends_on = [
     azurerm_key_vault.appcore_keyvault_myclient,
@@ -281,7 +281,7 @@ resource "azurerm_key_vault_secret" "database_legacy_myclient" {
   key_vault_id = azurerm_key_vault.appcore_keyvault_myclient[each.key].id
   name         = "${each.value}-applink-db" # Deployed Database Name in mongodb cluster is "modb-${var.Enterprise_product}-${each.value}"
   #value        = mongodbatlas_advanced_cluster.cluster.connection_strings[0].standard_srv
-  value        = replace(join("/", [mongodbatlas_advanced_cluster.cluster.connection_strings.0.standard_srv, "modb-${var.Enterprise_product}-${each.value}"]), "mongodb+srv://", "mongodb+srv://${var.mongodb_atlas_dbuser}:${var.secret_mongodb_atlas_dbuser_password}@")
+  value        = replace(join("/", [mongodbatlas_advanced_cluster.cluster.connection_strings[0].standard_srv, "modb-${var.Enterprise_product}-${each.value}"]), "mongodb+srv://", "mongodb+srv://${var.mongodb_atlas_dbuser}:${var.secret_mongodb_atlas_dbuser_password}@")
   content_type = "ConnectionString"
   depends_on = [
     azurerm_key_vault.appcore_keyvault_myclient,

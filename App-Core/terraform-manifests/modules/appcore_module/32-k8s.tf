@@ -14,7 +14,7 @@ resource "kubernetes_namespace_v1" "appcore_client" {
       app         = "ml"
       environment = var.environment
     }
-    name = "${local.k8s_namespace_name}-${each.value}"
+    name = lower("${local.k8s_namespace_name}-${each.value}")
   }
 }
 
@@ -96,7 +96,7 @@ resource "kubernetes_persistent_volume_claim_v1" "my_client" {
         storage = "1Gi"
       }
     }
-    volume_name = kubernetes_persistent_volume_v1.my_client[each.key].metadata.0.name
+    volume_name = kubernetes_persistent_volume_v1.my_client[each.key].metadata[0].name
     #volume_name = "${each.value}"
     storage_class_name = "azurefile-csi"
   }
@@ -147,7 +147,7 @@ resource "kubernetes_persistent_volume_v1" "my_client" {
       azure_file {
         read_only        = "false"
         secret_name      = azurerm_storage_account.appcore.name
-        secret_namespace = "Enterprise"
+        secret_namespace = kubernetes_secret_v1.sa_client[each.value].metadata[0].namespace
         share_name       = "fs-${var.Enterprise_product}-${each.value}-${local.instance_environment}"
       }
     }
@@ -194,7 +194,7 @@ resource "kubernetes_role_binding_v1" "appcore_client" {
     kind      = "Group"
     namespace = "${local.k8s_namespace_name}-${each.value}"
     #name      = "system:masters"
-    name = data.azuread_group.aks_developers.id
+    name = data.azuread_group.aks_developers.object_id
     #api_group = "rbac.authorization.k8s.io"
   }
   depends_on = [

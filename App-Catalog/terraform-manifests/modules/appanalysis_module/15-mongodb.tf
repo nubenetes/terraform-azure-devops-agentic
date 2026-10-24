@@ -34,10 +34,11 @@ resource "mongodbatlas_project_ip_access_list" "ip" {
 ##############################
 
 resource "mongodbatlas_advanced_cluster" "cluster" {
-  for_each     = toset(var.client_names)
-  name         = "${var.Enterprise_product}-${each.value}-${var.environment}"
-  project_id   = mongodbatlas_project.project[each.key].id
-  cluster_type = "REPLICASET"
+  for_each               = toset(var.client_names)
+  name                   = "${var.Enterprise_product}-${each.value}-${var.environment}"
+  project_id             = mongodbatlas_project.project[each.key].id
+  cluster_type           = "REPLICASET"
+  mongo_db_major_version = var.mongodb_atlas_mongodbversion
 
   replication_specs {
     region_configs {
@@ -55,7 +56,8 @@ resource "mongodbatlas_advanced_cluster" "cluster" {
     oplog_size_mb = var.oplog_size_mb
   }
 
-  backup_enabled = true
+  backup_enabled         = true
+  retain_backups_enabled = true
 
   tags {
     key   = "Client"

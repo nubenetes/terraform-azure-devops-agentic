@@ -35,10 +35,12 @@ resource "azurerm_linux_web_app" "app-analysis_viewer_back_api_myclient" {
   https_only          = true
   tags                = local.tags
   site_config {
-    ftps_state = "AllAllowed"
+    ftps_state = "Disabled"
     application_stack {
-      docker_image     = var.app_docker_image_analysis_viewer_backend
-      docker_image_tag = var.app_docker_image_tag_analysis_viewer_backend
+      docker_image_name        = "${var.app_docker_image_analysis_viewer_backend}:${var.app_docker_image_tag_analysis_viewer_backend}"
+      docker_registry_url      = var.docker_registry
+      docker_registry_username = var.docker_registry_username
+      docker_registry_password = var.secret_docker_registry_server_password
     }
   }
 
@@ -58,9 +60,9 @@ resource "azurerm_linux_web_app" "app-analysis_viewer_back_api_myclient" {
   app_settings = {
     AE_TITLE        = "${each.value}"
     APP_ENVIRONMENT = local.appcore_dns_name
-    #AZURE_CLIENT_ID                     = (var.environment != "pro") ? azuread_application.app-analysis_viewer_back_api_myclient[each.key].application_id:"00000000-0000-0000-0000-000000000000"
+    #AZURE_CLIENT_ID                     = (var.environment != "pro") ? azuread_application.app-analysis_viewer_back_api_myclient[each.key].client_id:"00000000-0000-0000-0000-000000000000"
     #AZURE_CLIENT_SECRET                 = (var.environment != "pro") ? azuread_application_password.app-analysis_viewer_back_api_myclient[each.key].value:"00000~ANONYMIZED_SECRET_00000"
-    AZURE_CLIENT_ID                 = ((var.environment != "pro") && (var.environment != "res") && (var.environment != "dem")) ? data.azuread_application.app-analysis_viewer_back_api_legacy_dev.application_id : data.azuread_application.app-analysis_viewer_back_api_legacy_pro.application_id
+    AZURE_CLIENT_ID                 = ((var.environment != "pro") && (var.environment != "res") && (var.environment != "dem")) ? data.azuread_application.app-analysis_viewer_back_api_legacy_dev.client_id : data.azuread_application.app-analysis_viewer_back_api_legacy_pro.client_id
     AZURE_CLIENT_SECRET             = ((var.environment != "pro") && (var.environment != "res") && (var.environment != "dem")) ? "00000~ANONYMIZED_SECRET_00000" : "00000~ANONYMIZED_SECRET_00000"
     AZURE_TENANT_ID                 = var.aad_tenant_id
     DOCKER_REGISTRY_SERVER_PASSWORD = var.secret_docker_registry_server_password
@@ -69,7 +71,7 @@ resource "azurerm_linux_web_app" "app-analysis_viewer_back_api_myclient" {
     DOCKER_ENABLE_CI                = var.docker_enable_ci
     applink_URL                     = "https://${local.appcore_fqdn}/applinkcloud"
     PDF_URL                         = "https://${local.appcore_fqdn}/report/pdf"
-    MONGO_URL                       = replace(join("/", [mongodbatlas_advanced_cluster.cluster.connection_strings.0.standard_srv, "modb-${var.Enterprise_product}-${each.value}"]), "mongodb+srv://", "mongodb+srv://${var.mongodb_atlas_dbuser}:${var.secret_mongodb_atlas_dbuser_password}@") # Dec 21st 2022: still required by THIS app service (instead of pulling secret from KV)
+    MONGO_URL                       = replace(join("/", [mongodbatlas_advanced_cluster.cluster.connection_strings[0].standard_srv, "modb-${var.Enterprise_product}-${each.value}"]), "mongodb+srv://", "mongodb+srv://${var.mongodb_atlas_dbuser}:${var.secret_mongodb_atlas_dbuser_password}@") # Dec 21st 2022: still required by THIS app service (instead of pulling secret from KV)
     Enterprise_BASE_PATH            = "/home/workspace/compose_omni/Enterprise"
     Enterprise_record_PATH          = "/records"
     STORAGE_ACCESS_KEY              = azurerm_storage_account.appcore.primary_access_key

@@ -70,7 +70,13 @@ variable "rg_prefix" {
 variable "environment" {
   type        = string
   description = "This variable defines the Environment"
+  nullable    = false
   #default = "eng"
+
+  validation {
+    condition     = contains(["eng", "pro"], var.environment)
+    error_message = "The environment must be either 'eng' or 'pro'."
+  }
 }
 
 #################################
@@ -80,6 +86,12 @@ variable "gitbranch" {
   description = "This variable defines the git branch name on Azure DevOps Repo"
   type        = string
   default     = "develop"
+  nullable    = false
+
+  validation {
+    condition     = contains(["develop", "main"], var.gitbranch)
+    error_message = "The gitbranch must be either 'develop' or 'main'."
+  }
 }
 
 ###################
@@ -154,6 +166,8 @@ variable "Enterprise_product" {
 variable "ssh_public_key" {
   #default = "~/.ssh/aks-prod-sshkeys-terraform/aksprodsshkey.pub"
   description = "This variable defines the SSH Public Key for Linux k8s Worker nodes"
+  type        = string
+  default     = ""
 }
 
 variable "secret_aks_kube_config_host_europe" {
@@ -174,7 +188,7 @@ variable "secret_aks_kube_config_host_unitedstates" {
   description = "aks_kube_config_host"
   type        = string
   sensitive   = true
-  default     = "rg-sharedinfra-aks-neeng-16e7a689.hcp.northeurope.azmk8s.io:443"
+  default     = "rg-sharedinfra-aks-cuseng-16e7a689.hcp.centralus.azmk8s.io:443"
 }
 
 variable "secret_aks_kube_config_cluster_ca_certificate_unitedstates" {

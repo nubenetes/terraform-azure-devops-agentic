@@ -5,6 +5,65 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0-agentic] - 2026-10-24
+
+### Added
+- **Environment `.tfvars` Configuration Matrix Restoration (50 `.tfvars` Files)**:
+  - Restored all 36 environment `.tfvars` files (`*-developbranch.tfvars` and `*-mainbranch.tfvars`) from the origin repository across `Shared-Infra/terraform-manifests/` (4), `AKS/terraform-manifests/` (4), `Day2-ops/terraform-manifests/` (4), `App-Catalog/terraform-manifests/` (10), and `App-Core/terraform-manifests/` (14).
+  - Generated 14 matching `*-developbranch.tfvars` and `*-mainbranch.tfvars` files in `App-Core/poc-cosmosdb-mongo/terraform-manifests/` adapted to the Cosmos DB PoC variable schema.
+  - Updated root `.gitignore` and nested `.gitignore` files (`Day2-ops`, `App-Users`, `App-Users-Config`, `Integration-Service`) so deterministic environment `.tfvars` matrices are tracked by Git while local `*.auto.tfvars` remain ignored.
+  - Declared `variable "dns_child_zone"` with branch-aware validation in `Shared-Infra/terraform-manifests/variables.tf` and `AKS/terraform-manifests/variables.tf` to eliminate undeclared-variable warnings when loading `-var-file`.
+- **Declarative Terraform 1.9+ / 1.15+ / 1.16+ Capabilities (`check`, `removed`, Cross-Variable `validation`)**:
+  - Added continuous health `check` blocks across `Shared-Infra/terraform-manifests/main.tf` (`dns_zone_delegation_health`), `AKS/terraform-manifests/main.tf` (`aks_cluster_regional_deployment`), `App-Users/terraform-manifests/07-azuread-internal-users.tf` (`entra_verified_domains`), `App-Catalog/terraform-manifests/main.tf` (`appcatalog_regional_deployment`), and `App-Core/terraform-manifests/main.tf` (`appcore_regional_deployment_health`).
+  - Added declarative `removed` blocks in `Shared-Infra` (`05-microsoft-defender.tf`) and `AKS` (`01-main.tf`) to safely retire deprecated `azurerm_security_center_auto_provisioning`, `azurerm_security_center_subscription_pricing.mdc_containerregistry`, `azurerm_resource_provider_registration.aks_cluster`, and `random_pet.aksrandom` resources from state without destructive operations.
+  - Added `App-Catalog/terraform-manifests/outputs.tf` exposing regional module outputs using modern `[0]` indexing.
+  - Added Azure Recovery Services Vault (`azurerm_recovery_services_vault`), `azurerm_backup_policy_file_share`, `azurerm_backup_container_storage_account`, and `azurerm_backup_protected_file_share` in `App-Catalog` (`08-file-share.tf`) to enforce file share backup governance.
+  - Added optional Zero-Trust MFA `azuread_conditional_access_policy` in `App-Users` (`12-conditional-access-policy.tf`) controlled by `var.enable_conditional_access_policy`.
+  - Added `provider.tf` with explicit `required_version` and `required_providers` constraints across all child modules (`sharedinfra_microsoft_defender_cloud`, `sharedinfra_dns_module`, `sharedinfra_managed_prometheus`, `sharedinfra_aks_module`, `day2_ops_module`, `appanalysis_module`, `appcore_module`, and `dns_top_level_domain_module`).
+- **Enhanced Mermaid Diagram Quality Auditor (`scripts/validate_mermaid.py`)**:
+  - Added validation for decision/rhombus nodes (`ID{"..."}`) against the 24-character line-length limit and dotted relationship chaining (`-.->` with `&`).
+
+### Changed
+- **Complete AzureRM v4.0 Schema Modernization**:
+  - Configured `resource_provider_registrations = "none"` across all `provider "azurerm"` blocks in `Shared-Infra`, `AKS`, `Day2-ops`, `App-Users`, `App-Catalog`, `App-Core`, and `terraform-sandbox` (replacing deprecated `skip_provider_registration = true`).
+  - Migrated AKS cluster and all 4 node pools (`default`, `infra`, `ml-jobs`, `poc-autoscaler`, `spot`) from `enable_auto_scaling = true` to `auto_scaling_enabled = true`, removed deprecated `public_network_access_enabled` and `managed = true` on `azurerm_kubernetes_cluster`, and migrated `web_app_routing.dns_zone_id` to `dns_zone_ids = [...]`.
+  - Upgraded default `kubernetes_version` in `Shared-Infra` and `AKS` from retired `1.26.3` to `1.30`.
+  - Migrated Storage Account flags to `https_traffic_only_enabled = true`, `min_tls_version = "TLS1_2"`, and `allow_nested_items_to_be_public = true` (where public blob containers are provisioned).
+  - Migrated `azurerm_storage_container` and `azurerm_storage_share` in `App-Catalog` and `App-Core` from deprecated `storage_account_name` to `storage_account_id`.
+  - Migrated Key Vault RBAC flags from `enable_rbac_authorization` to `rbac_authorization_enabled` across `App-Catalog` and `App-Core`, and guarded client Key Vault names with `substr(lower(...), 0, 24)` to enforce the 24-character limit.
+  - Migrated all 8 `azurerm_linux_web_app` resources in `App-Catalog` (`11-app-service.tf`) and `App-Core` (`17-`, `18-`, `19-`, `20-`) from removed `docker_image` + `docker_image_tag` to `docker_image_name = "${image}:${tag}"` and `docker_registry_url` inside `application_stack`, and hardened `ftps_state` from `"AllAllowed"` to `"Disabled"`.
+  - Upgraded Application Gateway WAF `firewall_mode` from `"Detection"` to `"Prevention"`, replaced versioned Key Vault certificate secret IDs with `versionless_secret_id` for automatic rotation, and attached health probes in `App-Core` (`21-app-gateway.tf`) and `App-Catalog` (`12-app-gateway.tf`).
+  - Migrated Cosmos DB PoC (`29-cosmosdb-mongodb.tf`) from `enable_automatic_failover = true` to `automatic_failover_enabled = true`, upgraded `mongo_server_version` from `"4.2"` to `"7.0"`, and replaced deprecated `connection_strings[0]` with `primary_mongodb_connection_string`.
+  - Added mandatory `name = "default"` attribute to `azurerm_security_center_contact` in `Shared-Infra` (`05-microsoft-defender.tf`).
+- **Complete Microsoft Entra ID (AzureAD v3.0) Schema Modernization**:
+  - Migrated all `.application_id` references on `azuread_application` and `azuread_service_principal` resources and data sources to `.client_id` across `Day2-ops`, `App-Catalog`, and `App-Core`.
+  - Updated `azuread_application_password` resources in `Day2-ops`, `App-Catalog`, and `App-Core` to use `application_id = azuread_application.<name>.id` instead of removed `application_object_id`.
+  - Updated `azuread_application_pre_authorized` in `App-Core` (`12-app-register-back-api.tf`) to use `application_id = ...id` and `authorized_client_id = ...client_id`.
+  - Updated `azuread_user`, `azuread_group`, and `azuread_service_principal` references in Azure RBAC role assignments, AKS admin groups, Kubernetes RBAC bindings, and group memberships to use `.object_id` (raw GUID) rather than `.id` (Graph resource URI).
+- **MongoDB Atlas v1.25+ & Kubernetes/Helm Provider Modernization**:
+  - Upgraded `mongodb_atlas_mongodbversion` defaults to `"7.0"` and wired `mongo_db_major_version = var.mongodb_atlas_mongodbversion` and `retain_backups_enabled = true` into `mongodbatlas_advanced_cluster` across `App-Catalog` and `App-Core`.
+  - Upgraded `kubelogin` exec plugin configurations in `Day2-ops` and `App-Core` from removed `client.authentication.k8s.io/v1beta1` to `client.authentication.k8s.io/v1` and fixed bare `"AzurePublicCloud"` CLI arguments to `"--environment", "AzurePublicCloud"`.
+  - Removed broken `ansible/ansible` provider from `Day2-ops/terraform-manifests/providers.tf` and `main.tf`.
+  - Replaced archived `hashicorp/template` (`data "template_file"`) in `App-Core` with Terraform's native `templatefile()` function and replaced static expired SAS timestamps with `time_rotating` (30-day rotation).
+
+### Fixed
+- **Critical Terraform Logic & Resource Bugs**:
+  - **Shared-Infra (`05-microsoft-defender.tf`)**: Fixed invalid capitalized `data "azurerm_policy_Set_definition"`, replaced placeholder `00000000-...` role definition ID with `role_definition_name = "Security Admin"`, and split `Severity == "High"` and `Severity == "Medium"` into separate `rule_set` blocks (OR logic instead of impossible AND logic).
+  - **AKS (`sharedinfra_aks_module`)**: Fixed `acr_name` local expression, added missing `Network Contributor` role assignment on the pods subnet (`14-rbac.tf`), replaced fragile `data.azuread_service_principal.webapprouting` display-name lookup with direct exported `web_app_routing_identity[0].object_id`, and normalized `Enterprise` namespace to RFC 1123 lowercase `enterprise`.
+  - **Day2-ops (`day2_ops_module`)**: Removed duplicate `00000000-0000-0000-0000-000000000000` `required_resource_access` blocks in Grafana, Kubeapps, and Skooner app registrations; replaced hardcoded placeholder tenant IDs in OIDC issuer URLs with `${data.azuread_client_config.current.tenant_id}`; moved OIDC secrets to `set_sensitive`; and added `restartPolicy: Never` to `job-nodeselector-appspool002-appanalysis-demo.yml`.
+  - **App-Users (`terraform-manifests` & `App-Users-Config`)**: Fixed copy-paste bug in `06-locals.tf` line 117 (`load_yaml_internal_users`), fixed duplicate-email `for_each` key collisions for external users across multiple environments/roles (`03-`, `09-`, `10-`, `80-`), wired up `app-analysis_admin` and `app-analysis_users` group memberships (`02-`, `08-`), fixed invalid YAML anchor syntax (`role: &role001 admin`) in `50-external-users-mainbranch.yaml`, and deduplicated usernames in `30-internal-users-mainbranch.yaml`.
+  - **App-Catalog (`appanalysis_module`)**: Fixed multi-region hostname collision bug in `11-app-service.tf` and `12-app-gateway.tf` where `${var.location_code}` was omitted from backend pool FQDNs and `SERVICE_METRICS_PLATFORM_LIST_COMPONENT1_VALUE`, and included `${var.location_code}` in the Application Gateway Key Vault name (`13-key-vault.tf`).
+  - **App-Core (`appcore_module`)**: Fixed `retention_monthly` copy-paste bug in `10-file-share-clients-backup-policy.tf` (was using `var.backup_policy_retention_weekly`), added missing `local.azure_portal_url_with_resource_group` in `03-locals.tf` (fixing undeclared local crash in `40-outputs.tf`), fixed `app-analysis_viewer_fqdn` URLs in `03-locals.tf` and `11-app-register-front-spa.tf`, fixed `secret_namespace` in `32-k8s.tf`, and guarded EULA/Privacy PDF blob uploads in `08-storage-account-clients.tf` with `fileexists(...)` fallback content.
+- **Azure DevOps Pipelines & Integration-Service Remediation**:
+  - Upgraded all pipeline templates from `TerraformInstaller@0` / `TerraformTaskV3@3` / `KubernetesManifest@0` to `TerraformInstaller@1` / `TerraformTaskV4@4` / `KubernetesManifest@1` and `TERRAFORM_VERSION: '1.10.5'`.
+  - Replaced invalid `trigger: - manual` syntax with `trigger: none` across 20 pipeline definitions.
+  - Fixed `06-users-list-pr-to-remote-branch` in `App-Users` and `App-Core` (wrapped loose `PowerShell@2` task in `jobs:` -> `steps:`), fixed `WITH_WITH` variable name typo across `App-Users`, `App-Catalog`, and `App-Core`, and removed secret-leaking `bash: env` / `powershell: 'ls env:'` steps across all pipelines.
+  - Fixed `Integration-Service` template paths, renamed invalid hyphenated Azure DevOps job/variable identifiers (`createIntegrationServiceExe`, `integrationServiceRelease`), fixed Jinja2 syntax bugs and missing semicolons in `innoSetupScript.j2`, and replaced the corrupted `jdk-127.0.0.1%2B1` JRE download URL with valid Eclipse Temurin 17 (`jdk-17.0.7%2B7`).
+- **Documentation Integrity & Vision 2026 Governance Compliance**:
+  - Removed accidental `<br/>` corruptions outside Mermaid diagrams in `docs/343-MONGODB_ATLAS_MODERNIZATION.md` (`mongodbatlas_advanced_cluster`, `auto_scaling_disk_gb_enabled`) and `docs/411-AZURE_DEVOPS_PIPELINES_ORCHESTRATION.md`.
+  - Brought `docs/113-ARCHITECTURE_2026_AGENTIC.md`, `docs/214-TERRAFORM_MODERNIZATION_GUIDE.md`, `docs/325-ZERO_TRUST_AND_PIPELINE_SECURITY.md`, and `docs/343-MONGODB_ATLAS_MODERNIZATION.md` into 100% `GEMINI.md` compliance with `## 📑 Table of Contents`, strict numerical header hierarchies, `## 📚 Validated Reference Library (Official and Community)`, and deduplicated footers.
+  - Updated technical references in `docs/214`, `docs/323`, `docs/341`, `docs/342`, `docs/911`, `docs/999`, and `docs/121`.
+
 ## [2.0.0-agentic] - 2026-09-03
 
 ### Added

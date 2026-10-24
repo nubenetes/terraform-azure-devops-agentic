@@ -22,14 +22,14 @@ jobs:
         ######################################################
         # Terraform Install
         ######################################################
-        - task: TerraformInstaller@0
+        - task: TerraformInstaller@1
           displayName: Terraform Install
           inputs:
             terraformVersion: $(TERRAFORM_VERSION)
         ######################################################
         # Terraform Init
         ######################################################
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           displayName: Terraform Init
           inputs:
             provider: 'azurerm'
@@ -43,7 +43,7 @@ jobs:
         ######################################################
         # Terraform Destroy
         ######################################################
-        - task: TerraformTaskV3@3
+        - task: TerraformTaskV4@4
           condition: ne(variables['Build.SourceBranchName'],'main')
           # develop & other development branches
           displayName: Terraform Destroy Develop(s) Dev/QA/UAT/Pre/Dem/Pro/Res (Enterprise DevOps Subscr)
@@ -54,8 +54,9 @@ jobs:
             environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
             commandOptions: >
               -var gitbranch=$(GIT_BRANCH)
-        - task: TerraformTaskV3@3
-          condition: and(and(ne(variables['TERRAFORM_ENV'], 'pro'),ne(variables['TERRAFORM_ENV'], 'dem')),eq(variables['Build.SourceBranchName'],'main'))
+              -var environment=${{ parameters.environment }}
+        - task: TerraformTaskV4@4
+          condition: and(and(ne('${{ parameters.environment }}', 'pro'),ne('${{ parameters.environment }}', 'dem')),eq(variables['Build.SourceBranchName'],'main'))
           displayName: Terraform Destroy Main Dev/QA/UAT/Pre (Enterprise DevTest Subscr)
           inputs:
             provider: 'azurerm'
@@ -64,9 +65,10 @@ jobs:
             environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
             commandOptions: >
               -var gitbranch=$(GIT_BRANCH)
-        - task: TerraformTaskV3@3
+              -var environment=${{ parameters.environment }}
+        - task: TerraformTaskV4@4
           displayName: Terraform Destroy Main Dem/Pro/Res (Enterprise Core Subscr)
-          condition: and(or(eq(variables['TERRAFORM_ENV'], 'pro'),eq(variables['TERRAFORM_ENV'], 'dem'),eq(variables['TERRAFORM_ENV'], 'res')),eq(variables['Build.SourceBranchName'],'main'))
+          condition: and(or(eq('${{ parameters.environment }}', 'pro'),eq('${{ parameters.environment }}', 'dem'),eq('${{ parameters.environment }}', 'res')),eq(variables['Build.SourceBranchName'],'main'))
           inputs:
             provider: 'azurerm'
             command: 'destroy'
@@ -74,3 +76,4 @@ jobs:
             environmentServiceNameAzureRM: ${{ PARAMETERS.SERVICE_CONNECTION_NAME }}
             commandOptions: >
               -var gitbranch=$(GIT_BRANCH)
+              -var environment=${{ parameters.environment }}

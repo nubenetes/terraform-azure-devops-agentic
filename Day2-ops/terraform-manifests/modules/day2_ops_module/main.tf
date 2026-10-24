@@ -53,8 +53,8 @@ data "azuread_group" "aks_developers" {
 # https://github.com/hashicorp/terraform-provider-azuread/blob/main/docs/resources/service_principal.md
 ########################################################################################################################################
 resource "azuread_service_principal" "msgraph" {
-  application_id = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
-  use_existing   = true
+  client_id    = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
+  use_existing = true
   # (Optional) When true, any existing service principal linked to the same application will be automatically imported.
   # When false, an import error will be raised for any pre-existing service principal.
 }

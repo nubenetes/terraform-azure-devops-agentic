@@ -4,6 +4,23 @@
 
 # 325. Zero-Trust and Pipeline Security
 
+---
+
+## 📑 Table of Contents
+
+- [Security Architecture Overview](#1-security-architecture-overview)
+    - [Diagram Description and Zero-Trust Security Breakdown](#11-diagram-description-and-zero-trust-security-breakdown)
+    - [Summary and Key Takeaways](#12-summary-and-key-takeaways)
+    - [Conclusion](#13-conclusion)
+- [Security Vulnerabilities Identified in Base Architecture and Modernized Solutions](#2-security-vulnerabilities-identified-in-base-architecture-and-modernized-solutions)
+    - [Vulnerability 1: Plaintext Secrets in Command-Line Arguments](#21-vulnerability-1-plaintext-secrets-in-command-line-arguments)
+    - [Vulnerability 2: Long-Lived Service Principal Client Secrets](#22-vulnerability-2-long-lived-service-principal-client-secrets)
+    - [Vulnerability 3: Deprecated Pipeline Runner Operating Systems](#23-vulnerability-3-deprecated-pipeline-runner-operating-systems)
+    - [Vulnerability 4: Insecure Binary Downloads without Checksum Verification](#24-vulnerability-4-insecure-binary-downloads-without-checksum-verification)
+- [Least Privilege and Compound Authentication](#3-least-privilege-and-compound-authentication)
+    - [App-Plus-User Compound Identity Pattern](#31-app-plus-user-compound-identity-pattern)
+
+---
 
 ## 1. Security Architecture Overview
 
@@ -26,7 +43,7 @@ flowchart TD
         Approval["Approval Gate<br/>(ManualValidation@0)"]
     end
     subgraph Azure_Plane ["Azure Landing Zone"]
-        KeyVault["Azure Key Vault<br/>(RBAC & Purge Protect)"]
+        KeyVault["Azure Key Vault<br/>(RBAC and Purge)"]
         AKS["AKS Compute<br/>(Workload Identity)"]
         Storage["Storage Account<br/>(TLS 1.2+ Private Link)"]
     end
@@ -43,47 +60,47 @@ flowchart TD
 
 </details>
 
-#### Diagram Description & Zero-Trust Security Breakdown
+### 1.1 Diagram Description and Zero-Trust Security Breakdown
 *   **Identity Plane (Microsoft Entra ID)**: Manages `Federated Identity Credentials (OIDC)`, exchanging ephemeral tokens with `Managed Service Principals` and enforcing directory-level `Custom Security Attributes`.
 *   **Pipeline Plane (Azure DevOps)**: Executes on hardened `Ubuntu 24.04 LTS` runners, performs automated `Checkov` and `Trivy` static analysis, reads credentials strictly via masked `TF_VAR_*` environment variables, and halts at `ManualValidation@0` approval gates.
-*   **Azure Landing Zone Target**: Grants scoped, secretless access to `Azure Key Vault (RBAC & Purge Protection)`, `AKS Compute (Workload Identity)`, and `Azure Storage (TLS 1.2+ & Private Link)`.
+*   **Azure Landing Zone Target**: Grants scoped, secretless access to `Azure Key Vault (RBAC and Purge Protection)`, `AKS Compute (Workload Identity)`, and `Azure Storage (TLS 1.2+ and Private Link)`.
 
-#### Summary & Key Takeaways
+### 1.2 Summary and Key Takeaways
 *   **Zero Static Passwords**: Long-lived service principal client secrets are completely eliminated.
-*   **Automated Quality & Compliance Gates**: Static code scanning and human authorization block unauthorized modifications.
+*   **Automated Quality and Compliance Gates**: Static code scanning and human authorization block unauthorized modifications.
 *   **Cryptographic Workload Identity**: Short-lived OIDC tokens govern all deployment and runtime access.
 
-#### Conclusion
+### 1.3 Conclusion
 The modernized security framework establishes an auditable Zero-Trust baseline that eliminates credential leakage vectors and automates security governance across the entire infrastructure lifecycle.
 
 ---
 
-## 2. Security Vulnerabilities Identified in Base Architecture & Modernized Solutions
+## 2. Security Vulnerabilities Identified in Base Architecture and Modernized Solutions
 
-### Vulnerability 1: Plaintext Secrets in Command-Line Arguments
+### 2.1 Vulnerability 1: Plaintext Secrets in Command-Line Arguments
 *   **Base Repo Anti-Pattern**: In `templates/terraform-plan.yml` and `templates/terraform-apply.yml`, secrets were passed directly via `-var secret_...=$(...)` in `commandOptions`.
 *   **Security Risk**: Command-line arguments are stored in plaintext in the operating system's process table (`ps aux`, `/proc/<pid>/cmdline`), accessible to any compromised process or logging agent running on self-hosted runners. Furthermore, unmasked pipeline debug logs expose the secrets in task execution traces.
 *   **Modernized Solution**: All sensitive variables are mapped to the task `env:` block as `TF_VAR_secret_name: $(secret_variable)`. Terraform natively ingests `TF_VAR_*` variables directly into memory without exposing them on the command-line interface.
 
-### Vulnerability 2: Long-Lived Service Principal Client Secrets
+### 2.2 Vulnerability 2: Long-Lived Service Principal Client Secrets
 *   **Base Repo Anti-Pattern**: Service connections relied on static client secrets (`client_secret`), requiring ongoing password rotation, expiration tracking, and key vault storage.
 *   **Modernized Solution**: Implementation of **Workload Identity Federation (OIDC)** via `ARM_USE_OIDC: "true"`. The Azure DevOps pipeline agent requests a cryptographically signed OIDC token from Azure DevOps, which Microsoft Entra ID validates against configured federated credentials. Zero long-lived passwords exist in Azure DevOps.
 
-### Vulnerability 3: Deprecated Pipeline Runner Operating Systems
+### 2.3 Vulnerability 3: Deprecated Pipeline Runner Operating Systems
 *   **Base Repo Anti-Pattern**: All pipelines were pinned to `vmImage: 'ubuntu-20.04'`.
 *   **Security Risk**: Ubuntu 20.04 is End-of-Life (EOL), lacking security patches for core system utilities, OpenSSL, and kernel mitigations.
 *   **Modernized Solution**: Upgraded to `vmImage: 'ubuntu-latest'` (Ubuntu 24.04 LTS), guaranteeing access to modern TLS 1.3 libraries, active security patching, and modern container runtimes.
 
-### Vulnerability 4: Insecure Binary Downloads without Checksum Verification
+### 2.4 Vulnerability 4: Insecure Binary Downloads without Checksum Verification
 *   **Base Repo Anti-Pattern**: Pipeline steps downloaded external binaries via `wget $(KUBELOGIN_DOWNLOAD_URL) && unzip && sudo mv /usr/bin`.
 *   **Security Risk**: Vulnerable to man-in-the-middle attacks or DNS hijacking, allowing arbitrary remote code execution on CI/CD agents.
 *   **Modernized Solution**: Shifted to official Azure DevOps task installers or verified package managers with cryptographic hash checks.
 
 ---
 
-## 3. Least Privilege & Compound Authentication
+## 3. Least Privilege and Compound Authentication
 
-### App-Plus-User Compound Identity Pattern
+### 3.1 App-Plus-User Compound Identity Pattern
 In [`App-Core/terraform-manifests/modules/appcore_module/23-key-vault-clients.tf`](../App-Core/terraform-manifests/modules/appcore_module/23-key-vault-clients.tf), access to client-specific Key Vaults is governed by compound identity rules:
 ```hcl
 access_policy {
@@ -101,7 +118,13 @@ access_policy {
 
 ---
 
-*Enterprise Architecture Blueprint | Vision 2026*
+## 📚 Validated Reference Library (Official and Community)
+
+*   **[Microsoft Entra Workload ID Federation Overview](https://learn.microsoft.com/en-us/entra/workload-id/workload-identity-federation)**: Official architecture guide for secretless OIDC token exchange between external CI/CD platforms and Azure.
+*   **[Azure DevOps Service Connections using Workload Identity Federation](https://learn.microsoft.com/en-us/azure/devops/pipelines/library/connect-to-azure)**: Configuring passwordless Azure Resource Manager service connections in Azure Pipelines.
+*   **[HashiCorp Terraform Environment Variables (TF_VAR_*)](https://developer.hashicorp.com/terraform/cli/config/environment-variables#tf_var_name)**: Passing sensitive variables securely into Terraform memory without CLI process table exposure.
+*   **[Azure Key Vault Access Policy Compound Identity](https://learn.microsoft.com/en-us/azure/key-vault/general/assign-access-policy)**: Implementing App-plus-User compound authentication with `application_id` and `object_id`.
+*   **[Checkov Static Code Analysis for Terraform](https://www.checkov.io/)**: Policy-as-Code scanning for Azure and Kubernetes manifests in CI/CD pipelines.
 
 ---
 

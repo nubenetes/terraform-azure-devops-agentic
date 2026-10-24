@@ -36,8 +36,6 @@ jobs:
     clean: true
   - script: git config --system -l
     displayName: git config system wide
-  - bash: env
-    displayName: 'Show env'
   - bash: |
       echo "Bitbucket ref: $TOOLS_REF"
     displayName: Bitbucket ref    # https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/multi-repo-checkout
@@ -55,11 +53,11 @@ jobs:
       targetPath: $(FOLDER_WITH_TERRAFORM_FILES)
       artifactName: $(ARTIFACTS_FOLDER_WITH_TERRAFORM_FILES)
       artifactType: 'pipeline'
-  - task: TerraformInstaller@0
+  - task: TerraformInstaller@1
     displayName: Terraform Install
     inputs:
       terraformVersion: $(TERRAFORM_VERSION)
-  - task: TerraformTaskV3@3
+  - task: TerraformTaskV4@4
     displayName: Terraform Init
     inputs:
       provider: 'azurerm'
@@ -70,7 +68,7 @@ jobs:
       backendAzureRmContainerName: $(CONTAINER_NAME)
       backendAzureRmKey: '$(INFRA_NAME)-$(GIT_BRANCH)branch-base.tfstate'
       workingDirectory: $(FOLDER_WITH_TERRAFORM_FILES)
-  - task: TerraformTaskV3@3
+  - task: TerraformTaskV4@4
     displayName: Terraform Validate
     inputs:
       provider: 'azurerm'

@@ -12,11 +12,11 @@
 # Azure Provider source and version being used
 
 terraform {
-  #required_version = ">= 1.9.0, < 2.0.0"  #"1.2.8" 
+  required_version = ">= 1.9.0, < 2.0.0"
   required_providers {
     azurerm = {
-      source = "hashicorp/azurerm"
-      #version = ">= 3.22"  #"3.20.0" #"3.21.1" #"3.15.0"
+      source  = "hashicorp/azurerm"
+      version = "~> 4.0"
       # https://docs.microsoft.com/en-us/azure/developer/terraform/provider-version-history-azurerm
     }
   }

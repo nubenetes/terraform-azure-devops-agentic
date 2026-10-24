@@ -7,10 +7,14 @@
 # Enabling the default Azure Security Benchmark Policy initiative
 ####################################################################
 
+data "azurerm_policy_set_definition" "cis_benchmark" {
+  display_name = "Microsoft cloud security benchmark"
+}
+
 resource "azurerm_subscription_policy_assignment" "asb_assignment" {
   name                 = "azuresecuritybenchmark"
   display_name         = "Azure Security Benchmark"
-  policy_definition_id = "/providers/Microsoft.Authorization/policySetDefinitions/00000000-0000-0000-0000-000000000000"
+  policy_definition_id = data.azurerm_policy_set_definition.cis_benchmark.id
   subscription_id      = data.azurerm_subscription.current.id
 }
 
@@ -22,6 +26,7 @@ resource "azurerm_security_center_subscription_pricing" "mdc_arm" {
   #tier          = "Standard"
   tier          = "Free"
   resource_type = "Arm"
+  subplan       = "PerTransaction"
 }
 
 resource "azurerm_security_center_subscription_pricing" "mdc_appservices" {
@@ -30,22 +35,25 @@ resource "azurerm_security_center_subscription_pricing" "mdc_appservices" {
   resource_type = "AppServices"
 }
 
-resource "azurerm_security_center_subscription_pricing" "mdc_containerregistry" {
-  #tier          = "Standard"
-  tier          = "Free"
-  resource_type = "ContainerRegistry"
+removed {
+  from = azurerm_security_center_subscription_pricing.mdc_containerregistry
+  lifecycle {
+    destroy = false
+  }
 }
 
 resource "azurerm_security_center_subscription_pricing" "mdc_keyvaults" {
   #tier          = "Standard"
   tier          = "Free"
   resource_type = "KeyVaults"
+  subplan       = "PerKeyVault"
 }
 
 resource "azurerm_security_center_subscription_pricing" "mdc_storageaccounts" {
   #tier          = "Standard"
   tier          = "Free"
   resource_type = "StorageAccounts"
+  subplan       = "DefenderForStorageV2"
 }
 
 resource "azurerm_security_center_subscription_pricing" "mdc_containers" {
@@ -73,6 +81,7 @@ resource "azurerm_security_center_setting" "setting_mde" {
 ################################
 
 resource "azurerm_security_center_contact" "mdc_contact" {
+  name                = "default"
   email               = "cloud-admin@example.com"
   phone               = "+34620898686"
   alert_notifications = true
@@ -83,8 +92,11 @@ resource "azurerm_security_center_contact" "mdc_contact" {
 # Enabling Log Analytics agent auto-provisioning
 ###################################################
 
-resource "azurerm_security_center_auto_provisioning" "auto-provisioning" {
-  auto_provision = "On"
+removed {
+  from = azurerm_security_center_auto_provisioning.auto-provisioning
+  lifecycle {
+    destroy = false
+  }
 }
 
 
@@ -95,7 +107,7 @@ resource "azurerm_security_center_auto_provisioning" "auto-provisioning" {
 resource "azurerm_subscription_policy_assignment" "va-auto-provisioning" {
   name                 = "mdc-va-autoprovisioning"
   display_name         = "Configure machines to receive a vulnerability assessment provider"
-  policy_definition_id = "/providers/Microsoft.Authorization/policyDefinitions/00000000-0000-0000-0000-000000000000"
+  policy_definition_id = data.azurerm_policy_set_definition.cis_benchmark.id
   subscription_id      = data.azurerm_subscription.current.id
   identity {
     type = "SystemAssigned"
@@ -108,9 +120,9 @@ PARAMS
 }
 
 resource "azurerm_role_assignment" "va-auto-provisioning-identity-role" {
-  scope              = data.azurerm_subscription.current.id
-  role_definition_id = "/providers/Microsoft.Authorization/roleDefinitions/00000000-0000-0000-0000-000000000000"
-  principal_id       = azurerm_subscription_policy_assignment.va-auto-provisioning.identity[0].principal_id
+  scope                = data.azurerm_subscription.current.id
+  role_definition_name = "Security Admin"
+  principal_id         = azurerm_subscription_policy_assignment.va-auto-provisioning.identity[0].principal_id
 }
 
 
@@ -123,6 +135,7 @@ resource "azurerm_log_analytics_workspace" "la_workspace" {
   location            = azurerm_resource_group.sharedinfra_mdc_rg.location
   resource_group_name = azurerm_resource_group.sharedinfra_mdc_rg.name
   sku                 = "PerGB2018"
+  tags                = local.tags
 }
 
 resource "azurerm_security_center_workspace" "la_workspace" {
@@ -138,6 +151,7 @@ resource "azurerm_security_center_automation" "la-exports" {
   name                = "ExportToWorkspace"
   location            = azurerm_resource_group.sharedinfra_mdc_rg.location
   resource_group_name = azurerm_resource_group.sharedinfra_mdc_rg.name
+  tags                = local.tags
 
   action {
     type        = "loganalytics"
@@ -153,6 +167,8 @@ resource "azurerm_security_center_automation" "la-exports" {
         expected_value = "High"
         property_type  = "String"
       }
+    }
+    rule_set {
       rule {
         property_path  = "Severity"
         operator       = "Equals"

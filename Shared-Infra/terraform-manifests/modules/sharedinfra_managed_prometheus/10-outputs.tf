@@ -26,14 +26,6 @@ output "dns_zone" {
   value = local.dns_zone
 }
 
-output "dns_zone_name_servers" {
-  value = azurerm_dns_zone.my_dns.name_servers
-}
-
-output "dns_zone_id" {
-  value = data.azurerm_dns_zone.my_dns.id
-}
-
 ####################################
 # data.azurerm_subscription
 ####################################

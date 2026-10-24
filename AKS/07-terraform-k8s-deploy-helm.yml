@@ -9,8 +9,7 @@
 # https://learnk8s.io/templating-yaml-with-code
 # https://github.com/learnk8s/templating-kubernetes/blob/master/java/README.md
 
-trigger:
-- manual
+trigger: none
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -35,15 +34,12 @@ variables:
 stages:
 - stage: ManifestBuild
   displayName: Build stage
-  # dependsOn: 
-  #   - TerraformENG
-  #   - TerraformPRO
-  condition: or(succeeded('TerraformENG'), succeeded('TerraformPRO'))
+  condition: or(${{ parameters.aksENGday2 }}, ${{ parameters.aksPROday2 }})
   jobs:  
   - job: Build
     displayName: Build job
-    # pool:
-    #   vmImage: $(vmImageName)
+    pool:
+      vmImage: 'ubuntu-latest'
     steps:
     - task: PublishPipelineArtifact@1
       inputs:
@@ -51,7 +47,7 @@ stages:
         path: 'manifests'
 - stage: aksDENG
   dependsOn: ManifestBuild
-  condition: and(succeeded('TerraformENG'),eq(variables['Build.SourceBranchName'], 'develop'))
+  condition: and(succeeded('ManifestBuild'), ${{ parameters.aksENGday2 }}, eq(variables['Build.SourceBranchName'], 'develop'))
   displayName: Deploy manifests aks DENG
   jobs:
   - deployment: Deploy
@@ -61,12 +57,12 @@ stages:
       runOnce:
         deploy:
           steps:
-          # https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/kubernetes-manifest-v0
+          # https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/kubernetes-manifest-v1
           - task: DownloadPipelineArtifact@2
             inputs:
               artifactName: 'manifests'
               downloadPath: '$(System.ArtifactsDirectory)/manifests'
-          - task: KubernetesManifest@0 
+          - task: KubernetesManifest@1 
             displayName: Deploy to K8s
             inputs:
               kubernetesServiceConnection: 'aks-dneeng'
@@ -101,7 +97,7 @@ stages:
           #     namespace: monitoring
 - stage: aksENG
   dependsOn: ManifestBuild
-  condition: and(succeeded('TerraformENG'),eq(variables['Build.SourceBranchName'], 'main'))
+  condition: and(succeeded('ManifestBuild'), ${{ parameters.aksENGday2 }}, eq(variables['Build.SourceBranchName'], 'main'))
   displayName: Deploy manifests aks ENG
   jobs:
   - deployment: Deploy
@@ -115,7 +111,7 @@ stages:
             inputs:
               artifactName: 'manifests'
               downloadPath: '$(System.ArtifactsDirectory)/manifests'
-          - task: KubernetesManifest@0
+          - task: KubernetesManifest@1
             displayName: Deploy to K8s
             inputs:
               kubernetesServiceConnection: 'aks-neeng'
@@ -125,12 +121,12 @@ stages:
                 $(System.ArtifactsDirectory)/manifests/namespace.yml
 - stage: aksPRO
   dependsOn: ManifestBuild
-  condition: succeeded('TerraformPRO')
+  condition: and(succeeded('ManifestBuild'), ${{ parameters.aksPROday2 }})
   displayName: Deploy manifests aks PRO
   jobs:
   - deployment: Deploy
     displayName: Deploy job
-    environment: ${{ variables.ENG_ENVIRONMENT }}
+    environment: ${{ variables.PRO_ENVIRONMENT }}
     strategy:
       runOnce:
         deploy:
@@ -139,7 +135,7 @@ stages:
             inputs:
               artifactName: 'manifests'
               downloadPath: '$(System.ArtifactsDirectory)/manifests'
-          - task: KubernetesManifest@0
+          - task: KubernetesManifest@1
             displayName: Deploy to K8s
             inputs:
               kubernetesServiceConnection: 'aks-nepro'
@@ -147,6 +143,5 @@ stages:
               #namespace: "Enterprise" #$(k8sNamespace)
               manifests: |
                 $(System.ArtifactsDirectory)/manifests/namespace.yml
-                
 
 

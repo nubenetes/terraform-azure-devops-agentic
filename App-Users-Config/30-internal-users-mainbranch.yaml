@@ -69,7 +69,8 @@
   department: Education
   job-title: English Teacher
   city: Madrid
-  email: cloud-admin@example.com
+  username: testinternaluser001
+  email: testinternaluser001@example.com
   center: &center001 Enterprise # defines anchor label &center001
   appcore-admin-role: &role001
     - nedev
@@ -79,7 +80,8 @@
   department: Sales
   job-title: Sales Manager
   city: Valencia
-  email: cloud-admin@example.com
+  username: testinternaluser002
+  email: testinternaluser002@example.com
   center: Enterprise
   appcore-admin-role:
     - nedev
@@ -89,7 +91,8 @@
   department: &department001 Engineering
   job-title: &job001 Engineer
   city: Bilbao
-  email: cloud-admin@example.com
+  username: testinternaluser003
+  email: testinternaluser003@example.com
   center: Enterprise
   appcore-admin-role:
     - nedev
@@ -99,74 +102,101 @@
   department: *department001
   job-title: *job001
   city: Barcelona
-  email: cloud-admin@example.com
+  username: testinternaluser004
+  email: testinternaluser004@example.com
   center: *center001 # refers to the 1st center (with anchor &center001)
   appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
 - first-name: testinternaluser005
-  email: cloud-admin@example.com
+  username: testinternaluser005
+  email: testinternaluser005@example.com
   center: *center001 # refers to the 1st center (with anchor &center001)
   appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
-- email: cloud-admin@example.com
+- username: testinternaluser006
+  email: testinternaluser006@example.com
   center: *center001 # refers to the 1st center (with anchor &center001)
   appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
-- email: cloud-admin@example.com
+- username: testinternaluser007
+  email: testinternaluser007@example.com
   center: *center001 # refers to the 1st center (with anchor &center001)
   appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
-- email: cloud-admin@example.com
+- username: testinternaluser008
+  email: testinternaluser008@example.com
   center: *center001 # refers to the 1st center (with anchor &center001)
   appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
-- email: cloud-admin@example.com
+- username: testinternaluser009
+  email: testinternaluser009@example.com
   center: *center001 # refers to the 1st center (with anchor &center001)
   appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
-- email: cloud-admin@example.com
+- username: testinternaluser010
+  email: testinternaluser010@example.com
   center: *center001 # refers to the 1st center (with anchor &center001)
   appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
-- email: cloud-admin@example.com
+- username: testinternaluser011
+  email: testinternaluser011@example.com
   center: *center001 # refers to the 1st center (with anchor &center001)
   appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
-- email: cloud-admin@example.com
+- username: testinternaluser012
+  email: testinternaluser012@example.com
   center: *center001 # refers to the 1st center (with anchor &center001)
   appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
-- email: cloud-admin@example.com
+- username: testinternaluser013
+  email: testinternaluser013@example.com
   center: *center001 # refers to the 1st center (with anchor &center001)
   appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
-- email: cloud-admin@example.com
+- username: testinternaluser014
+  email: testinternaluser014@example.com
   center: *center001 # refers to the 1st center (with anchor &center001)
   appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
-- email: cloud-admin@example.com
+- username: testinternaluser015
+  email: testinternaluser015@example.com
   center: *center001 # refers to the 1st center (with anchor &center001)
   appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
-- email: cloud-admin@example.com
+- username: testinternaluser016
+  email: testinternaluser016@example.com
   center: *center001 # refers to the 1st center (with anchor &center001)
   appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
-- email: cloud-admin@example.com
+- username: testinternaluser017
+  email: testinternaluser017@example.com
   center: *center001 # refers to the 1st center (with anchor &center001)
   appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
-- email: cloud-admin@example.com
+- username: testinternaluser018
+  email: testinternaluser018@example.com
   center: *center001 # refers to the 1st center (with anchor &center001)
   appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
-- email: cloud-admin@example.com
+- username: testinternaluser019
+  email: testinternaluser019@example.com
   center: *center001 # refers to the 1st center (with anchor &center001)
   appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
-- email: cloud-admin@example.com
+- username: testinternaluser020
+  email: testinternaluser020@example.com
   center: *center001 # refers to the 1st center (with anchor &center001)
   appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
-- email: cloud-admin@example.com
+- username: testinternaluser021
+  email: testinternaluser021@example.com
   center: *center001 # refers to the 1st center (with anchor &center001)
   appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
-- email: cloud-admin@example.com
+- username: testinternaluser022
+  email: testinternaluser022@example.com
   center: *center001 # refers to the 1st center (with anchor &center001)
   appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
-- email: cloud-admin@example.com
+- username: testinternaluser023
+  email: testinternaluser023@example.com
   center: *center001 # refers to the 1st center (with anchor &center001)
   appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
-- email: cloud-admin@example.com
+- username: testinternaluser024
+  email: testinternaluser024@example.com
   center: *center001 # refers to the 1st center (with anchor &center001)
   appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
-- email: cloud-admin@example.com
+- username: testinternaluser025
+  email: testinternaluser025@example.com
   center: *center001 # refers to the 1st center (with anchor &center001)
   appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
-- email: cloud-admin@example.com
-  center: &center002 client-anon  # defines anchor label &center002
+- username: testinternaluser026
+  email: testinternaluser026@example.com
+  center: *center001 # refers to the 1st center (with anchor &center001)
+  appcore-admin-role: *role001 # refers to the 1st role (with anchor &role001)
+- username: testinternaluser027
+  email: testinternaluser027@example.com
+  center: &center002 client-anon # defines anchor label &center002
   appcore-admin-role:
     - nedev

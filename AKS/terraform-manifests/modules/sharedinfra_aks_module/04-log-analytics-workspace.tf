@@ -7,6 +7,7 @@ resource "azurerm_log_analytics_workspace" "aks_cluster" {
   resource_group_name = azurerm_resource_group.rg_aks.name
   sku                 = "PerGB2018"
   retention_in_days   = 30
+  tags                = local.tags
   #daily_quota_gb      = 10 #(Optional) The workspace daily quota for ingestion in GB. Defaults to -1 (unlimited) if omitted.
 }
 
@@ -33,6 +34,7 @@ resource "azurerm_log_analytics_solution" "aks_cluster_container_insights" {
   resource_group_name   = azurerm_resource_group.rg_aks.name
   workspace_resource_id = azurerm_log_analytics_workspace.aks_cluster.id
   workspace_name        = azurerm_log_analytics_workspace.aks_cluster.name
+  tags                  = local.tags
 
   plan {
     publisher = "Microsoft"

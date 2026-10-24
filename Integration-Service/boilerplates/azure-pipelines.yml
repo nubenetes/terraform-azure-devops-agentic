@@ -1,5 +1,4 @@
-trigger:
-  - manual
+trigger: none
 
 pool:
     vmImage: 'windows-2022'
@@ -40,7 +39,7 @@ variables:
     POM_FILE: "pom-azure-pipelines.xml"        # "pom-azure-pipelines.xml" (recommended in Azure DevOps) , "pom.xml"
     # Download URLs of Public Artifacts
     WINSW_DOWNLOAD_URL: 'https://github.com/winsw/winsw/releases/download/v2.12.0/WinSW-x64.exe'
-    JRE_DOWNLOAD_URL: 'https://github.com/adoptium/temurin11-binaries/releases/download/jdk-127.0.0.1%2B1/OpenJDK11U-jre_x64_windows_hotspot_11.0.14.1_1.zip'
+    JRE_DOWNLOAD_URL: 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.7%2B7/OpenJDK17U-jre_x64_windows_hotspot_17.0.7_7.zip'
     MAVEN_DOWNLOAD_URL: "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.6.3/apache-maven-3.6.3-bin.zip"
     # Conditions
     enableConditionOptionalStages: 'false' # true/false  - do we enable all the optional stages ?
@@ -187,11 +186,11 @@ stages:
             [xml]$pomXml = Get-Content $filePath
             $projectVersion = $pomXml.project.version
             Write-Host "Current Project Version (integration-service release) grabbed from POM file: $projectVersion"
-            Write-Host "Setup gobal variable needed by the next task: integration-serviceRelease"
-            Write-Host "##vso[task.setvariable variable=integration-serviceRelease]$projectVersion"
-            Write-Host "setup output variable needed by the next stage: integration-serviceReleaseOutput"
-            Write-Host "##vso[task.setvariable variable=integration-serviceReleaseOutput;isOutput=true]$projectVersion"
-          name: ProduceVarintegration-serviceRelease
+            Write-Host "Setup gobal variable needed by the next task: integrationServiceRelease"
+            Write-Host "##vso[task.setvariable variable=integrationServiceRelease]$projectVersion"
+            Write-Host "setup output variable needed by the next stage: integrationServiceReleaseOutput"
+            Write-Host "##vso[task.setvariable variable=integrationServiceReleaseOutput;isOutput=true]$projectVersion"
+          name: ProduceVarIntegrationServiceRelease
         # Download Apache Maven Binary
         - task: UniversalPackages@0
           displayName: 'Download Maven from internal repo'
@@ -260,7 +259,7 @@ stages:
             Contents: '**/target/*.?(jar|exe)'
             TargetFolder: $(Build.ArtifactStagingDirectory)
         - task: PublishPipelineArtifact@1
-          displayName: 'Publish integration-service-onpremise-$(integration-serviceRelease).jar & integration-service-onpremise-$(integration-serviceRelease).exe Artifacts in drop folder'
+          displayName: 'Publish integration-service-onpremise-$(integrationServiceRelease).jar & integration-service-onpremise-$(integrationServiceRelease).exe Artifacts in drop folder'
           inputs:
             targetPath: $(Build.ArtifactStagingDirectory)/target/
             artifactName: 'drop'
@@ -270,20 +269,20 @@ stages:
     displayName: InnoSetup Build # - Upload integration-service Installer to Storage Container - Create Download URL with SAS token
     dependsOn: [getKeysFromVault_startMessage,registerAppInAAD,JavaBuild]
     jobs:
-    - job: createintegration-serviceExe
+    - job: createIntegrationServiceExe
       timeoutInMinutes: 25 # how long to run the job before automatically cancelling
       cancelTimeoutInMinutes: 0 # how much time to give 'run always even if cancelled tasks' before stopping them
       variables:
         storageAccount: $[ stageDependencies.getKeysFromVault_startMessage.sendMessage.outputs['ProduceVarStorageAccount.storageAccountOutput'] ]
         appRegisterTimestamp: $[ stageDependencies.registerAppInAAD.registerAppWithCustomSecAttributes.outputs['ProduceVarAppReg.appRegisterTimestampOutput'] ]
         spName: $[ stageDependencies.registerAppInAAD.registerAppWithCustomSecAttributes.outputs['ProduceVarAppReg.spNameOutput'] ]
-        integration-serviceRelease: $[ stageDependencies.JavaBuild.mavenBuild.outputs['ProduceVarintegration-serviceRelease.integration-serviceReleaseOutput'] ]
+        integrationServiceRelease: $[ stageDependencies.JavaBuild.mavenBuild.outputs['ProduceVarIntegrationServiceRelease.integrationServiceReleaseOutput'] ]
       steps:
       # Download winSW.exe
       # https://javadeveloperzone.com/spring-boot/spring-boot-as-windows-service/
       # https://github.com/winsw/winsw
       # https://github.com/winsw/winsw/releases/download/v2.12.0/WinSW-x64.exe
-      - powershell: Invoke-WebRequest -Uri $(WINSW_DOWNLOAD_URL) -OutFile 'resources/integration-service-onpremise-$(integration-serviceRelease)-service.exe'
+      - powershell: Invoke-WebRequest -Uri $(WINSW_DOWNLOAD_URL) -OutFile 'resources/integration-service-onpremise-$(integrationServiceRelease)-service.exe'
         displayName: 'Download winSW.exe fron Internet'
         condition:  eq(variables['enableConditionDownloadFromInternet'], 'true')
       - task: UniversalPackages@0
@@ -299,14 +298,14 @@ stages:
       - script: ls -l $(Build.SourcesDirectory)\publicArtifacts
         displayName: 'ls -l Build.SourcesDirectory\publicArtifacts'
         condition:  eq(variables['enableConditionDownloadFromInternet'], 'false')
-      - powershell: Rename-Item -Path $(Build.SourcesDirectory)\publicArtifacts\WinSW-x64.exe -NewName integration-service-onpremise-$(integration-serviceRelease)-service.exe
+      - powershell: Rename-Item -Path $(Build.SourcesDirectory)\publicArtifacts\WinSW-x64.exe -NewName integration-service-onpremise-$(integrationServiceRelease)-service.exe
         displayName: 'rename winSW.exe'
         condition:  eq(variables['enableConditionDownloadFromInternet'], 'false')
       - script: ls -l $(Build.SourcesDirectory)\publicArtifacts
         displayName: 'ls -l Build.SourcesDirectory\publicArtifacts'
         condition:  eq(variables['enableConditionDownloadFromInternet'], 'false')
       - task: CopyFiles@2
-        displayName: 'Copy integration-service winSW.exe renamed as integration-service-onpremise-$(integration-serviceRelease)-service.exe to resources folder'
+        displayName: 'Copy integration-service winSW.exe renamed as integration-service-onpremise-$(integrationServiceRelease)-service.exe to resources folder'
         condition:  eq(variables['enableConditionDownloadFromInternet'], 'false')
         inputs:
           SourceFolder: '$(Build.SourcesDirectory)\publicArtifacts'
@@ -349,18 +348,18 @@ stages:
         inputs:
           version: '6.2.1'
       - task: DownloadPipelineArtifact@2
-        displayName: Grab integration-service-onpremise-$(integration-serviceRelease).jar, integration-service-onpremise-$(integration-serviceRelease).exe & innoSetupScript.iss Artifacts generated in previous stage
+        displayName: Grab integration-service-onpremise-$(integrationServiceRelease).jar, integration-service-onpremise-$(integrationServiceRelease).exe & innoSetupScript.iss Artifacts generated in previous stage
         inputs:
           source: 'current'
           path: $(Build.ArtifactStagingDirectory)
       - task: CopyFiles@2
-        displayName: 'Copy integration-service-onpremise-$(integration-serviceRelease).jar file from artifact staging directory to resources/ folder'
+        displayName: 'Copy integration-service-onpremise-$(integrationServiceRelease).jar file from artifact staging directory to resources/ folder'
         inputs:
           SourceFolder: $(Build.ArtifactStagingDirectory)/drop
           Contents: '*.?(war|jar)'
           TargetFolder: $(System.DefaultWorkingDirectory)/resources/
       - task: CopyFiles@2
-        displayName: 'Copy integration-service-onpremise-$(integration-serviceRelease).exe file from artifact staging directory to resources/ folder'
+        displayName: 'Copy integration-service-onpremise-$(integrationServiceRelease).exe file from artifact staging directory to resources/ folder'
         inputs:
           SourceFolder: $(Build.ArtifactStagingDirectory)/drop
           Contents: '*.exe'
@@ -370,7 +369,7 @@ stages:
         displayName: 'Setting up jinja2-cli'
       # Rendering innoSetupScript.j2 template in resources/ folder
       - script: >
-          jinja2 -D integration-serviceRelease=$(integration-serviceRelease)
+          jinja2 -D integrationServiceRelease=$(integrationServiceRelease)
           templates/innoSetupScript.j2 --outfile=$(System.DefaultWorkingDirectory)/resources/innoSetupScript.iss
         displayName: 'Rendering Jinja2 template: innoSetupScript.iss'
       # Rendered files:
@@ -378,12 +377,12 @@ stages:
         displayName: 'cat rendered resources/innoSetupScript.iss'
       # Rendering innoSetup-service.j2 template in resources/ folder
       - script: >
-          jinja2 -D integration-serviceRelease=$(integration-serviceRelease)
-          templates/innoSetup-service.j2 --outfile=$(System.DefaultWorkingDirectory)/resources/integration-service-onpremise-$(integration-serviceRelease)-service.xml
-        displayName: 'Rendering Jinja2 template: integration-service-onpremise-$(integration-serviceRelease)-service.xml'
+          jinja2 -D integrationServiceRelease=$(integrationServiceRelease)
+          templates/innoSetup-service.j2 --outfile=$(System.DefaultWorkingDirectory)/resources/integration-service-onpremise-$(integrationServiceRelease)-service.xml
+        displayName: 'Rendering Jinja2 template: integration-service-onpremise-$(integrationServiceRelease)-service.xml'
       # Rendered files:
-      - script: cat resources/integration-service-onpremise-$(integration-serviceRelease)-service.xml
-        displayName: 'cat resources/integration-service-onpremise-$(integration-serviceRelease)-service.xml'
+      - script: cat resources/integration-service-onpremise-$(integrationServiceRelease)-service.xml
+        displayName: 'cat resources/integration-service-onpremise-$(integrationServiceRelease)-service.xml'
       - script: ls -l $(System.DefaultWorkingDirectory)\resources
         displayName: 'ls -l $(System.DefaultWorkingDirectory)\resources'
       - task: Build@1 # Innosetup Build .
@@ -420,7 +419,7 @@ stages:
       variables:
           # Use outputs in a different stage (pass variables between stages):
           # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=azure-devops&tabs=yaml%2Cbatch#use-outputs-in-a-different-stage
-          BlobFileDownloadUrl: $[ stageDependencies.InnoSetupBuildUploadintegration-serviceToStorageContainer.createintegration-serviceExe.outputs['ProduceVarBlobFileDownloadUrlOutput.BlobFileDownloadUrlOutput'] ]
+          BlobFileDownloadUrl: $[ stageDependencies.InnoSetupBuildUploadintegration-serviceToStorageContainer.createIntegrationServiceExe.outputs['ProduceVarBlobFileDownloadUrlOutput.BlobFileDownloadUrlOutput'] ]
           storageAccount: $[ stageDependencies.getKeysFromVault_startMessage.sendMessage.outputs['ProduceVarStorageAccount.storageAccountOutput'] ]
       steps:
           - task: AzureCLI@2

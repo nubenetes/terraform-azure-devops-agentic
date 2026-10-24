@@ -42,7 +42,8 @@ terraform {
 
 # 2. Terraform Provider Block for AzureRM - North Europe
 provider "azurerm" {
-  subscription_id = "00000000-0000-0000-0000-000000000000"
+  subscription_id                 = var.azure_subscription
+  resource_provider_registrations = "none"
   #region = "northeurope"
   features {
     key_vault {

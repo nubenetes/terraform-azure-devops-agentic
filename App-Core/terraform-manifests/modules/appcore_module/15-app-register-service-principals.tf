@@ -17,8 +17,8 @@
 # https://github.com/hashicorp/terraform-provider-azuread/blob/main/docs/resources/service_principal.md
 ########################################################################################################################################
 resource "azuread_service_principal" "msgraph" {
-  application_id = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
-  use_existing   = true
+  client_id    = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
+  use_existing = true
   # (Optional) When true, any existing service principal linked to the same application will be automatically imported.
   # When false, an import error will be raised for any pre-existing service principal.
 }
@@ -27,13 +27,13 @@ resource "azuread_service_principal" "msgraph" {
 # Frotends - SPA
 ##################################
 resource "azuread_service_principal" "appcore_front_spa" {
-  application_id               = azuread_application.appcore_front_spa.application_id
+  client_id                    = azuread_application.appcore_front_spa.client_id
   app_role_assignment_required = false
   # (Optional) Whether this service principal requires an app role assignment to a user or group before Azure AD will issue a user or access token to the application. Defaults to false
   owners = [data.azurerm_client_config.current.object_id]
 }
 resource "azuread_service_principal" "app-analysis_viewer_front_spa" {
-  application_id               = azuread_application.app-analysis_viewer_front_spa.application_id
+  client_id                    = azuread_application.app-analysis_viewer_front_spa.client_id
   app_role_assignment_required = false
   # (Optional) Whether this service principal requires an app role assignment to a user or group before Azure AD will issue a user or access token to the application. Defaults to false
   owners = [data.azurerm_client_config.current.object_id]
@@ -43,18 +43,18 @@ resource "azuread_service_principal" "app-analysis_viewer_front_spa" {
 # Backends - API
 ##################################
 resource "azuread_service_principal" "appcore_back_api" {
-  application_id               = azuread_application.appcore_back_api.application_id
+  client_id                    = azuread_application.appcore_back_api.client_id
   app_role_assignment_required = true
   owners                       = [data.azurerm_client_config.current.object_id]
 }
 resource "azuread_service_principal" "app-analysis_viewer_back_api_myclient" {
   for_each                     = toset(var.client_names)
-  application_id               = azuread_application.app-analysis_viewer_back_api_myclient[each.key].application_id
+  client_id                    = azuread_application.app-analysis_viewer_back_api_myclient[each.key].client_id
   app_role_assignment_required = false
   owners                       = [data.azurerm_client_config.current.object_id]
 }
 resource "azuread_service_principal" "applink_cloud_api" {
-  application_id               = azuread_application.applink_cloud_api.application_id
+  client_id                    = azuread_application.applink_cloud_api.client_id
   app_role_assignment_required = false
   owners                       = [data.azurerm_client_config.current.object_id]
 }
@@ -63,7 +63,7 @@ resource "azuread_service_principal" "applink_cloud_api" {
 # Backend - PDF Renderer
 ##################################
 resource "azuread_service_principal" "pdf_renderer" {
-  application_id               = azuread_application.pdf_renderer.application_id
+  client_id                    = azuread_application.pdf_renderer.client_id
   app_role_assignment_required = false
   owners                       = [data.azurerm_client_config.current.object_id]
 }

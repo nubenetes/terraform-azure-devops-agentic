@@ -70,7 +70,13 @@ variable "rg_prefix" {
 variable "environment" {
   type        = string
   description = "This variable defines the Environment"
+  nullable    = false
   #default = "eng" 
+
+  validation {
+    condition     = contains(["eng", "pro"], var.environment)
+    error_message = "The environment must be either 'eng' or 'pro'."
+  }
 }
 
 #################################
@@ -80,6 +86,12 @@ variable "gitbranch" {
   description = "This variable defines the git branch name on Azure DevOps Repo"
   type        = string
   default     = "develop"
+  nullable    = false
+
+  validation {
+    condition     = contains(["develop", "main"], var.gitbranch)
+    error_message = "The gitbranch must be either 'develop' or 'main'."
+  }
 }
 
 ###################
@@ -100,6 +112,11 @@ variable "vnet_cidr" {
   type        = string
   #default = "10.20.0.0/24"
   default = "10.10.0.0/24"
+
+  validation {
+    condition     = can(cidrhost(var.vnet_cidr, 0))
+    error_message = "The vnet_cidr value must be a valid IPv4 CIDR block."
+  }
 }
 
 variable "subnet_cidr" {
@@ -107,6 +124,11 @@ variable "subnet_cidr" {
   type        = string
   #default = "10.20.0.0/27"
   default = "10.10.0.0/27"
+
+  validation {
+    condition     = can(cidrhost(var.subnet_cidr, 0))
+    error_message = "The subnet_cidr value must be a valid IPv4 CIDR block."
+  }
 }
 
 #######################
@@ -116,6 +138,20 @@ variable "dns_parent_zone" {
   description = "DNS Parent Zone"
   type        = string
   default     = "enterprise.com" # Don't change this
+}
+variable "dns_child_zone" {
+  description = "DNS Child Zone override from environment .tfvars"
+  type        = string
+  default     = ""
+
+  validation {
+    condition = (
+      var.dns_child_zone == "" ||
+      (var.gitbranch == "develop" && var.dns_child_zone == "deng") ||
+      (var.gitbranch == "main" && contains(["eng", "apps"], var.dns_child_zone))
+    )
+    error_message = "On 'develop' branch dns_child_zone must be 'deng'; on 'main' branch it must be 'eng' or 'apps'."
+  }
 }
 variable "dns_child_zone_eng" {
   description = "DNS Child Zone"
@@ -153,7 +189,7 @@ variable "Enterprise_product" {
 
 variable "kubernetes_version" {
   type        = string
-  default     = "1.26.3" #"1.26.0" #"1.25.5"
+  default     = "1.30"
   description = "This variable defines the kubernetes version in AKS"
 }
 
@@ -166,13 +202,15 @@ variable "kubernetes_version" {
 # Azure Resource Group Name
 # variable "aks_resource_group_name" {
 #   type = string
-#   description = "This variable defines the Resource Group"
+#   description = "Azure Resource Group Name"
 #   default = "rg-aks"
 # }
 # AKS Input Variables
 variable "ssh_public_key" {
   #default = "~/.ssh/aks-prod-sshkeys-terraform/aksprodsshkey.pub"
   description = "This variable defines the SSH Public Key for Linux k8s Worker nodes"
+  type        = string
+  default     = ""
 }
 
 variable "secret_aks_kube_config_host_europe" {
@@ -207,7 +245,7 @@ variable "secret_aks_kube_config_host_unitedstates" {
   description = "aks_kube_config_host"
   type        = string
   sensitive   = true
-  default     = "rg-sharedinfra-aks-neeng-16e7a689.hcp.northeurope.azmk8s.io:443"
+  default     = "rg-sharedinfra-aks-cuseng-16e7a689.hcp.centralus.azmk8s.io:443"
 }
 
 variable "secret_aks_kube_admin_config_client_certificate_unitedstates" {
@@ -255,7 +293,6 @@ variable "aks_administrators" {
   type        = list(string)
   default = [
     "cloud-admin@example.com",
-    "cloud-admin@example.com",
   ]
 }
 
@@ -263,7 +300,6 @@ variable "aks_developers" {
   description = "List of Developers with access to AKS (admin role to development namespaces)"
   type        = list(string)
   default = [
-    "cloud-admin@example.com",
     "cloud-admin@example.com",
   ]
 }

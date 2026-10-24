@@ -5,8 +5,7 @@
 # This pipeline is not completed yet
 #####################################
 
-trigger:
-- manual
+trigger: none
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -17,15 +16,18 @@ variables:
 
 stages:
 - stage: prListClients
-  displayName: PR List of Cients
+  displayName: PR List of Clients
 
   jobs:
+    - job: PRListOfClients
+      displayName: Create PR for List of Clients
+      steps:
+        - task: PowerShell@2
+          inputs:
+            targetType: inline
+            Script: 'az repos pr create -r <YOUR_REPO> -s <SOURCE_BRANCH> -t <TARGET_BRANCH> --title "Auto PR: XXX" --delete-source-branch true -d  "Created by $(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildID)" --merge-commit-message "Integration [skip ci]" --org $(System.CollectionUri) -p $(System.TeamProject)'
+          displayName: Create PR
+          name: CreatePR
+          env:
+            AZURE_DEVOPS_EXT_PAT: $(System.AccessToken)
 
-    - task: PowerShell@2
-      inputs:
-        targetType: inline
-        Script: 'az repos pr create -r <YOUR_REPO> -s <SOURCE_BRANCH> -t <TARGET_BRANCH> --title "Auto PR: XXX" --delete-source-branch true -d  "Created by $(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildID)" --merge-commit-message "Integration [skip ci]" --org $(System.CollectionUri) -p $(System.TeamProject)'
-      displayName: Create PR
-      name: CreatePR
-      env:
-        AZURE_DEVOPS_EXT_PAT: $(System.AccessToken)

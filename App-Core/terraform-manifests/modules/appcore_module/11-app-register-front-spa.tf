@@ -132,7 +132,7 @@ resource "azuread_application" "appcore_front_spa" {
     # https://learn.microsoft.com/en-us/azure/app-service/configure-authentication-provider-aad#-create-an-app-registration-in-azure-ad-for-your-app-service-app
     # Redirect URI (reply URL) restrictions and limitations: https://learn.microsoft.com/en-us/azure/active-directory/develop/reply-url
     #redirect_uris = concat(["https://${local.appcore_fqdn}/","https://${local.appcore_fqdn}/core","https://${local.appcore_fqdn}/pvf","https://${local.app_name_appcore_back_api}.azurewebsites.net/.auth/login/aad/callback","https://${local.app_name_applink_cloud_api}.azurewebsites.net/.auth/login/aad/callback"],local.list_of_client_login_pages)
-    redirect_uris = concat(["https://${local.appcore_fqdn}/", "https://${local.appcore_fqdn}/login", "https://${local.appcore_fqdn}/core", "https://${local.app-analysis_viewer_dns_name}/pvf"], local.list_of_client_pages, local.list_of_client_login_pages, local.list_redirect_uris_debug_appcore_front_spa_nedev)
+    redirect_uris = concat(["https://${local.appcore_fqdn}/", "https://${local.appcore_fqdn}/login", "https://${local.appcore_fqdn}/core", "https://${local.app-analysis_viewer_fqdn}/pvf"], local.list_of_client_pages, local.list_of_client_login_pages, local.list_redirect_uris_debug_appcore_front_spa_nedev)
     # (Optional) A set of URLs where user tokens are sent for sign-in, or the redirect URIs where OAuth 2.0 authorization codes and access tokens are sent. Must be a valid https URL.
   }
   #######################################################################################################################################
@@ -168,7 +168,7 @@ resource "azuread_application" "app-analysis_viewer_front_spa" {
     gallery    = true # (Optional) Whether this application represents a gallery application for linked service principals. Enabling this will assign the WindowsAzureActiveDirectoryGalleryApplicationNonPrimaryV1 tag.
   }
   # required_resource_access {
-  #    resource_app_id =  azuread_application.app-analysis_viewer_back_api_myclient.application_id # appr-viewer-backend
+  #    resource_app_id =  azuread_application.app-analysis_viewer_back_api_myclient.client_id # appr-viewer-backend
   #   resource_access {
   #     id   = "00000000-0000-0000-0000-000000000000" # access_as_user
   #     type = "Scope"
@@ -179,9 +179,9 @@ resource "azuread_application" "app-analysis_viewer_front_spa" {
     for_each = var.client_names
     iterator = viewer_instance
     content {
-      resource_app_id = azuread_application.app-analysis_viewer_back_api_myclient[viewer_instance.value].application_id # appr-viewer-backend
+      resource_app_id = azuread_application.app-analysis_viewer_back_api_myclient[viewer_instance.value].client_id # appr-viewer-backend
       dynamic "resource_access" {
-        for_each = azuread_application.app-analysis_viewer_back_api_myclient[viewer_instance.value].api.0.oauth2_permission_scope
+        for_each = azuread_application.app-analysis_viewer_back_api_myclient[viewer_instance.value].api[0].oauth2_permission_scope
         iterator = scope
         content {
           id   = scope.value.id
@@ -219,7 +219,7 @@ resource "azuread_application" "app-analysis_viewer_front_spa" {
   ################
   single_page_application {
     #redirect_uris = concat(["https://${local.appcore_fqdn}/","https://${local.appcore_fqdn}:4200/"],local.list_of_viewers_4200,local.list_of_app-analysis_viewer_back_redirect_uris)
-    redirect_uris = concat(["https://${local.appcore_fqdn}/", "https://${local.app-analysis_viewer_dns_name}/"], local.list_of_viewers_redirect_uris)
+    redirect_uris = concat(["https://${local.appcore_fqdn}/", "https://${local.app-analysis_viewer_fqdn}/"], local.list_of_viewers_redirect_uris)
   }
   #######################################################################################################################################
   # Other SPA Settings ('web' block):

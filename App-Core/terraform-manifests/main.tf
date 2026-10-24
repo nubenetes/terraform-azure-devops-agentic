@@ -44,9 +44,10 @@ module "europe" {
   # If 'true', provision 1 of this resource
   # If 'false', don't provision this
   providers = {
-    azurerm      = azurerm.europe
-    mongodbatlas = mongodbatlas.europe
-    kubernetes   = kubernetes.europe
+    azurerm             = azurerm.europe
+    azurerm.manualinfra = azurerm.manualinfra
+    mongodbatlas        = mongodbatlas.europe
+    kubernetes          = kubernetes.europe
   }
   # Defined in variables.tf :
   # vpc_cidr                                                                       = "10.1.0.0/16" # example
@@ -143,9 +144,10 @@ module "us" {
   # If 'true', provision 1 of this resource
   # If 'false', don't provision this
   providers = {
-    azurerm      = azurerm.us
-    mongodbatlas = mongodbatlas.us
-    kubernetes   = kubernetes.us
+    azurerm             = azurerm.us
+    azurerm.manualinfra = azurerm.manualinfra
+    mongodbatlas        = mongodbatlas.us
+    kubernetes          = kubernetes.us
   }
   # Defined in variables.tf :
   # vpc_cidr                                                                       = "10.1.0.0/16" # example
@@ -233,4 +235,11 @@ module "us" {
   backup_policy_retention_weekly                                                                 = var.backup_policy_retention_weekly
   backup_policy_retention_monthly                                                                = var.backup_policy_retention_monthly
   #backup_policy_retention_yearly                                                  = var.backup_policy_retention_yearly
+}
+
+check "appcore_regional_deployment_health" {
+  assert {
+    condition     = local.deploy_Europe || local.deploy_United_States
+    error_message = "At least one regional deployment (deploy_Europe or deploy_United_States) must be enabled."
+  }
 }

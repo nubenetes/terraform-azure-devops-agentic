@@ -368,7 +368,7 @@ parameters:
 | **App-Core** | [`01-provision-AppCore.yml`](../App-Core/01-terraform-provision-appcore-pipeline.yml) | [`App-Core/templates/`](../App-Core/templates/) | [`App-Core/scripts/`](../App-Core/scripts/) |
 | **App-Catalog** | [`01-provision-catalog3.yml`](../App-Catalog/01-terraform-provision-catalog3-pipeline.yml) | [`App-Catalog/templates/`](../App-Catalog/templates/) | [`App-Catalog/scripts/`](../App-Catalog/scripts/) |
 | **Shared-Infra** | [`01-provision-shared.yml`](../Shared-Infra/01-terraform-provision-sharedinfra-pipeline.yml) | [`Shared-Infra/templates/`](../Shared-Infra/templates/) | [`Shared-Infra/scripts/`](../Shared-Infra/scripts/) |
-| **App-Users** | [`01-provision-<br/>AppUsers.yaml`](../App-Users/01-terraform-provision-appcore-users-pipeline.yaml) | [`App-Users/templates/`](../App-Users/templates/) | [`App-Users-Config/`](../App-Users-Config/) |
+| **App-Users** | [`01-provision-AppUsers.yaml`](../App-Users/01-terraform-provision-appcore-users-pipeline.yaml) | [`App-Users/templates/`](../App-Users/templates/) | [`App-Users-Config/`](../App-Users-Config/) |
 
 ### 6.2 Configuration and Variable Management Inventory (Global Variable Groups)
 Each module maintains its own configuration set, mimicking the Azure DevOps Library (Variable Groups).

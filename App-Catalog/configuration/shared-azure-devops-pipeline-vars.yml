@@ -2,7 +2,8 @@
 
 # Define Variables for Environments
 variables:
-  TERRAFORM_VERSION: '1.4.5' #'latest'
+  TERRAFORM_VERSION: '1.10.5' #'latest'
+  ARM_USE_OIDC: 'true'
   INFRA_NAME: 'appanalysis'
   RESOURCE_GROUP_NAME_TERRAFORM_STATE: 'rg-azuredevops-pro'
   STORAGE_ACCOUNT_NAME: 'sttfstateEnterprisepro'
@@ -47,11 +48,11 @@ variables:
     #   env: pro
     #   Environment: production
   CONTAINER_NAME: 'citfstatefilespro'
-  FOLDER_WITH_TERRAFORM_FILES: '$(System.DefaultWorkingDirectory)/App-Catalog-azure-devops-iac/terraform-manifests'
+  FOLDER_WITH_TERRAFORM_FILES: '$(System.DefaultWorkingDirectory)/App-Catalog/terraform-manifests'
   ARTIFACTS_FOLDER_WITH_TERRAFORM_FILES: 'terraform-manifests-out'
   FOLDER_WITH_TERRAFORM_FILES_AFTER_VALIDATION_STAGE: '$(Pipeline.Workspace)/$(ARTIFACTS_FOLDER_WITH_TERRAFORM_FILES)'
   ARTIFACTS_FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN: 'generated-terraform-plan'
-  FOLDER_WITH_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE: '$(Pipeline.Workspace)/$(ARTIFACTS_FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN)'
+  FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN_AFTER_PLAN_STAGE: '$(Pipeline.Workspace)/$(ARTIFACTS_FOLDER_WITH_TERRAFORM_FILES_AND_GENERATED_TERRAFORM_PLAN)'
   DEV_ENVIRONMENT: 'dev'  # Development & Development Test
   QA_ENVIRONMENT: 'qa'    # Integration Test
   UAT_ENVIRONMENT: 'uat'  # User Acceptance Test

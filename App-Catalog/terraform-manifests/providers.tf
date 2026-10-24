@@ -33,6 +33,10 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "~> 2.32.0"
     }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.12.0"
+    }
   }
   # Terraform State Storage to Azure Storage Container
   # https://www.terraform.io/language/settings/backends/configuration
@@ -53,8 +57,9 @@ terraform {
 # 1. Terraform Provider Block for AzureRM with Default Enterprise Infrastructure Subscription
 # https://samcogan.com/deploying-to-multiple-azure-subscriptions-with-terraform/
 provider "azurerm" {
-  alias           = "manualinfra"
-  subscription_id = "00000000-0000-0000-0000-000000000000" # Enterprise Infrastructure Subscription
+  alias                           = "manualinfra"
+  subscription_id                 = "00000000-0000-0000-0000-000000000000" # Enterprise Infrastructure Subscription
+  resource_provider_registrations = "none"
   #region            = "northeurope"
   features {
     # resource_group behavior managed via AzureRM v4 lifecycle rules
@@ -65,8 +70,9 @@ provider "azurerm" {
 
 # 2. Terraform Provider Block for AzureRM - North Europe
 provider "azurerm" {
-  alias           = "europe"
-  subscription_id = var.azure_subscription_europe
+  alias                           = "europe"
+  subscription_id                 = var.azure_subscription_europe
+  resource_provider_registrations = "none"
   #region = "northeurope"
   features {
     key_vault {
@@ -79,8 +85,9 @@ provider "azurerm" {
 
 # 3. Terraform Provider Block for AzureRM - Central US
 provider "azurerm" {
-  alias           = "us"
-  subscription_id = var.azure_subscription_unitedstates
+  alias                           = "us"
+  subscription_id                 = var.azure_subscription_unitedstates
+  resource_provider_registrations = "none"
   #region = "centralus"
   features {
     key_vault {

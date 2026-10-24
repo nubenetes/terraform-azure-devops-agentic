@@ -12,18 +12,36 @@
 # Azure Provider source and version being used
 
 terraform {
+  required_version = ">= 1.9.0, < 2.0.0"
   required_providers {
-    helm = {
-      source = "hashicorp/helm"
+    azurerm = {
+      source                = "hashicorp/azurerm"
+      version               = "~> 4.0"
+      configuration_aliases = [azurerm, azurerm.manualinfra]
     }
-    kubectl = {
-      source = "gavinbunney/kubectl"
-    }
-    ansible = {
-      source = "ansible/ansible"
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "~> 3.0"
     }
     kubernetes = {
-      source = "hashicorp/kubernetes"
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.32.0"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.15.0"
+    }
+    kubectl = {
+      source  = "gavinbunney/kubectl"
+      version = "~> 1.14.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.6.2"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.12.0"
     }
   }
 }

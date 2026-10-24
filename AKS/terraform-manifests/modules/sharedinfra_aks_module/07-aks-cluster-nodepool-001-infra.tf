@@ -9,7 +9,7 @@
 # Create Linux Azure AKS Node Pool
 resource "azurerm_kubernetes_cluster_node_pool" "infra" {
   # availability_zones    = [1, 2, 3] #  An argument named "availability_zones" is not expected here
-  enable_auto_scaling = true
+  auto_scaling_enabled = true
   # https://learn.microsoft.com/en-us/azure/aks/cluster-autoscaler
   kubernetes_cluster_id = azurerm_kubernetes_cluster.aks_cluster.id
   max_count             = 6

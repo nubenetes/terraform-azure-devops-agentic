@@ -52,7 +52,7 @@ resource "helm_release" "kubeapps" {
   create_namespace = true # (Optional) Create the namespace if it does not yet exist. Defaults to false.
 
   values = [
-    "${file("./helm/kubeapps/values.yaml")}"
+    file("${path.root}/helm/kubeapps/values.yaml")
   ]
 
   # set {
@@ -133,15 +133,15 @@ resource "helm_release" "kubeapps" {
   }
   set {
     name  = "authProxy.clientID"
-    value = azuread_application.kubeapps_login.application_id
+    value = azuread_application.kubeapps_login.client_id
     type  = "string"
   }
-  set {
+  set_sensitive {
     name  = "authProxy.clientSecret"
     value = azuread_application_password.kubeapps_login.value
     type  = "string"
   }
-  set {
+  set_sensitive {
     # https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview/#generating-a-cookie-secret
     name  = "authProxy.cookieSecret"
     value = random_password.cookie_secret.result
@@ -165,7 +165,7 @@ resource "helm_release" "kubeapps" {
     name = "authProxy.extraFlags"
     #value = "{--oidc-issuer-url=https://login.microsoftonline.com/00000000-0000-0000-0000-000000000000/v2.0,--scope=openid email,--resource=00000000-0000-0000-0000-000000000000/.default}" # https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider/#azure-auth-provider
     # OK
-    value = "{--oidc-issuer-url=https://login.microsoftonline.com/00000000-0000-0000-0000-000000000000/v2.0,--resource=00000000-0000-0000-0000-000000000000/.default,--azure-tenant=ac1b4-8cf-ffda-4abf-8176-8d5f00c1a643}" # https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider/#azure-auth-provider
+    value = "{--oidc-issuer-url=https://login.microsoftonline.com/${data.azuread_client_config.current.tenant_id}/v2.0,--resource=00000000-0000-0000-0000-000000000000/.default,--azure-tenant=${data.azuread_client_config.current.tenant_id}}" # https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider/#azure-auth-provider
     # NOK:
     #value = "{--oidc-issuer-url=https://login.microsoftonline.com/00000000-0000-0000-0000-000000000000/v2.0,--scope=openid email 00000000-0000-0000-0000-000000000000/user.read}" # required for azure, exactly this string without modification
     # AADSTS70011: The provided request must include a 'scope' input parameter. The provided value for the input parameter 'scope' is not valid. The scope openid email 00000000-0000-0000-0000-000000000000/user.read https://graph.microsoft.com/.default is not valid. .default scope can't be combined with resource-specific scopes.
@@ -332,7 +332,7 @@ resource "kubernetes_role_binding_v1" "kubeapps" {
   # }
   subject {
     kind      = "Group"
-    name      = data.azuread_group.aks_developers.id
+    name      = data.azuread_group.aks_developers.object_id
     api_group = "rbac.authorization.k8s.io"
   }
   depends_on = [helm_release.kubeapps]

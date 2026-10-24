@@ -4,10 +4,25 @@
 
 # 343. MongoDB Atlas Modernization Guide
 
+---
+
+## 📑 Table of Contents
+
+- [Overview](#1-overview)
+- [Architectural Differences: Legacy vs. Advanced Cluster](#2-architectural-differences-legacy-vs-advanced-cluster)
+    - [Diagram Description and Schema Modernization Breakdown](#21-diagram-description-and-schema-modernization-breakdown)
+    - [Summary and Key Takeaways](#22-summary-and-key-takeaways)
+    - [Conclusion](#23-conclusion)
+- [Code Implementation Comparison](#3-code-implementation-comparison)
+    - [Legacy Implementation (Base Repo)](#31-legacy-implementation-base-repo)
+    - [Modernized Implementation (Agentic Repo)](#32-modernized-implementation-agentic-repo)
+- [Key Advantages of mongodbatlas_advanced_cluster](#4-key-advantages-of-mongodbatlas_advanced_cluster)
+
+---
 
 ## 1. Overview
 
-In modern MongoDB Atlas Terraform provider releases ($>1.14$ through $1.25+$), the legacy `mongodbatlas_cluster` resource has been deprecated. This document explains the complete modernization to `Atlas Advanced<br/>Cluster Resource` implemented in [`nubenetes/terraform-azure-devops-agentic`](https://github.com/nubenetes/terraform-azure-devops-agentic).
+In modern MongoDB Atlas Terraform provider releases ($>1.14$ through $1.25+$), the legacy `mongodbatlas_cluster` resource has been deprecated. This document explains the complete modernization to `mongodbatlas_advanced_cluster` implemented in [`nubenetes/terraform-azure-devops-agentic`](https://github.com/nubenetes/terraform-azure-devops-agentic).
 
 ---
 
@@ -29,7 +44,7 @@ flowchart LR
         M_Cluster["Atlas Advanced<br/>Cluster Resource"]
         M_Specs["replication_specs"]
         M_Regions["region_configs"]
-        M_Electable["electable_specs<br/>(size & count)"]
+        M_Electable["electable_specs<br/>(size and count)"]
         M_Adv["advanced_config<br/>(oplog_size_mb)"]
         M_Backup["backup_enabled = true<br/>(Continuous Backup)"]
         M_Cluster --> M_Specs
@@ -42,29 +57,29 @@ flowchart LR
 
 </details>
 
-#### Diagram Description & Schema Modernization Breakdown
+### 2.1 Diagram Description and Schema Modernization Breakdown
 *   **Legacy `mongodbatlas_cluster` (Left Column - Deprecated)**:
-    *   Relied on monolithic, inflexible parameters (`num_shards`, `regions_config`, `auto_scaling_<br/>disk_gb_enabled`).
+    *   Relied on monolithic, inflexible parameters (`num_shards`, `regions_config`, `auto_scaling_disk_gb_enabled`).
     *   Lacked granular multi-cloud region tiering and flexible electable node configurations.
     *   Deprecated in modern releases of the MongoDB Atlas Terraform provider ($>1.14$ through $1.25+$).
-*   **Modern `Atlas Advanced<br/>Cluster Resource` (Right Column - 2026 Standard)**:
+*   **Modern `mongodbatlas_advanced_cluster` (Right Column - 2026 Standard)**:
     *   Decomposes cluster architecture into modular nested blocks: `replication_specs`, `region_configs`, and `electable_specs`.
     *   Explicitly configures instance sizing (`M10`), node counts (`3`), and failover priorities (`7`).
     *   Enables granular `advanced_configuration` (e.g., `oplog_size_mb`) and continuous cloud backup (`backup_enabled = true`).
 
-#### Summary & Key Takeaways
+### 2.2 Summary and Key Takeaways
 *   **Architectural Flexibility**: Supports multi-region replica sets with independent node counts and priorities per geographic region.
 *   **Provider Compliance**: Eliminates deprecation warnings and future-proofs provider upgrade paths.
 *   **Integrated Data Protection**: Directly binds automated continuous cloud backups and Point-in-Time Restore (PITR) policies.
 
-#### Conclusion
-Migrating from `mongodbatlas_cluster` to `Atlas Advanced<br/>Cluster Resource` transforms the persistence layer into a resilient, enterprise-grade database deployment aligned with modern cloud standards.
+### 2.3 Conclusion
+Migrating from `mongodbatlas_cluster` to `mongodbatlas_advanced_cluster` transforms the persistence layer into a resilient, enterprise-grade database deployment aligned with modern cloud standards.
 
 ---
 
 ## 3. Code Implementation Comparison
 
-### Legacy Implementation (Base Repo):
+### 3.1 Legacy Implementation (Base Repo)
 ```hcl
 # ❌ DEPRECATED RESOURCE
 resource "mongodbatlas_cluster" "cluster" {
@@ -87,10 +102,10 @@ resource "mongodbatlas_cluster" "cluster" {
 }
 ```
 
-### Modernized Implementation (Agentic Repo):
+### 3.2 Modernized Implementation (Agentic Repo)
 ```hcl
 # ✅ MODERN SEPTEMBER 2026 STANDARD
-resource "Atlas Advanced<br/>Cluster Resource" "cluster" {
+resource "mongodbatlas_advanced_cluster" "cluster" {
   project_id   = mongodbatlas_project.project.id
   name         = "${var.Enterprise_product}-${local.instance_environment}"
   cluster_type = "REPLICASET"
@@ -127,16 +142,22 @@ resource "Atlas Advanced<br/>Cluster Resource" "cluster" {
 
 ---
 
-## 4. Key Advantages of `Atlas Advanced<br/>Cluster Resource`
+## 4. Key Advantages of `mongodbatlas_advanced_cluster`
 
-1.  **Multi-Cloud & Cross-Region Replica Sets**: Enables complex multi-region and multi-cloud topology configurations within a single declarative resource.
+1.  **Multi-Cloud and Cross-Region Replica Sets**: Enables complex multi-region and multi-cloud topology configurations within a single declarative resource.
 2.  **Dedicated Node Sizing**: Dedicated electable, read-only, and analytics nodes can each have independent instance sizes.
 3.  **Continuous Cloud Backup**: Integrated directly via `backup_enabled = true` without external snapshot policies.
 4.  **Native Private Link Integration**: Directly binds with Azure Private Endpoint connections for zero-trust traffic routing.
 
 ---
 
-*Enterprise Architecture Blueprint | Vision 2026*
+## 📚 Validated Reference Library (Official and Community)
+
+*   **[MongoDB Atlas Terraform Provider Documentation](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs)**: Official HashiCorp Registry reference for the MongoDB Atlas provider (`~> 1.25.0`).
+*   **[Resource: mongodbatlas_advanced_cluster](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/advanced_cluster)**: Schema specification for multi-region `replication_specs`, `region_configs`, and `electable_specs`.
+*   **[Migration Guide: cluster to advanced_cluster](https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/guides/cluster-to-advanced-cluster-migration-guide)**: Official step-by-step migration guide from `mongodbatlas_cluster` to `mongodbatlas_advanced_cluster`.
+*   **[MongoDB Atlas Private Endpoints on Microsoft Azure](https://www.mongodb.com/docs/atlas/security-private-endpoint/)**: Architectural guidance for Azure Private Link integration with Atlas clusters.
+*   **[MongoDB Atlas Cloud Backup and Point-in-Time Restore](https://www.mongodb.com/docs/atlas/backup/cloud-backup/overview/)**: Continuous cloud backup and oplog retention configuration.
 
 ---
 

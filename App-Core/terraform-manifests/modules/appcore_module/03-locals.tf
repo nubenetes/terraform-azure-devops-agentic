@@ -35,6 +35,7 @@ locals {
   appcore_dns_name             = "${var.dns_prefix}${local.gitbranch}${var.dns_location_code}${local.env_generator}"
   app-analysis_viewer_dns_name = "${var.dns_prefix_viewer}${local.gitbranch}${var.dns_location_code}${local.env_generator}"
   appcore_fqdn                 = "${local.appcore_dns_name}.${local.dns_zone}"
+  app-analysis_viewer_fqdn     = "${local.app-analysis_viewer_dns_name}.${local.dns_zone}"
   # Storage Account:
   # Storage account names must be between 3 and 24 characters in length and may contain numbers and lowercase letters only.
   # Your storage account name must be unique within Azure. No two storage accounts can have the same name.
@@ -64,9 +65,9 @@ locals {
   # https://www.terraform.io/language/expressions/for
   ######################################################
   # List of Viewers (backends, one per client)
-  list_of_viewers = tolist([for e in var.client_names : "${e}-${local.app-analysis_viewer_dns_name}"])
+  list_of_viewers = tolist([for e in var.client_names : "${e}-${local.app-analysis_viewer_fqdn}"])
   # List of Viewers with specific DNS name (one per client)
-  list_of_viewers_redirect_uris = tolist([for e in var.client_names : "https://${e}-${local.app-analysis_viewer_dns_name}/"])
+  list_of_viewers_redirect_uris = tolist([for e in var.client_names : "https://${e}-${local.app-analysis_viewer_fqdn}/"])
   # List of client pages (one per client)
   list_of_client_pages = tolist([for e in var.client_names : "https://${e}-${local.appcore_fqdn}/"])
   # List of client login pages (one per client)
@@ -77,6 +78,7 @@ locals {
   # List of Clients (AETitle)
   list_of_client_names = tolist([for e in var.client_names : e])
   # Azure Portal URLs
+  azure_portal_url_with_resource_group = "https://portal.azure.com/#@${data.azuread_domains.aad_domains.domains[0].domain_name}/resource/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${azurerm_resource_group.appcore_rg.name}/overview"
   # MongoDB Atlas Portal URLs
   mongodb_portal_url_with_clusters_in_project = "https://cloud.mongodb.com/v2/${mongodbatlas_project.project.id}#clusters " # Leave a whitespace before the last quotation mark to make the generated URL clickable and valid
   # AKS RBAC:

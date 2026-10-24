@@ -55,7 +55,7 @@ resource "azurerm_backup_policy_file_share" "policy" {
   }
 
   retention_monthly {
-    count    = var.backup_policy_retention_weekly #7
+    count    = var.backup_policy_retention_monthly #7
     weekdays = ["Sunday", "Wednesday"]
     weeks    = ["First", "Last"]
   }

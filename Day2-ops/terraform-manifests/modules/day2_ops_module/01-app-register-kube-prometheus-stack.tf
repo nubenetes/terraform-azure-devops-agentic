@@ -52,13 +52,6 @@ resource "azuread_application" "grafana_login" {
       type = "Role" # Application
     }
   }
-  required_resource_access {
-    resource_app_id = "00000000-0000-0000-0000-000000000000" # Azure Kubernetes Service AAD Server
-    resource_access {
-      id   = "00000000-0000-0000-0000-000000000000" # user.read
-      type = "Scope"                                # Delegated
-    }
-  }
   ################
   # SPA settings:
   ################
@@ -92,8 +85,8 @@ resource "time_rotating" "grafana" {
 # Secrets
 ##############
 resource "azuread_application_password" "grafana_login" {
-  display_name          = "grafana-auth-proxy-secret"
-  application_object_id = azuread_application.grafana_login.object_id
+  display_name   = "grafana-auth-proxy-secret"
+  application_id = azuread_application.grafana_login.id
   rotate_when_changed = {
     rotation = time_rotating.grafana.id
   }

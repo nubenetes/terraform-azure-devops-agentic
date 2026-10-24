@@ -1,10 +1,10 @@
 #define MyAppName "integration-service"
-#define MyAppVersion "{{ integration-serviceRelease }}"
+#define MyAppVersion "{{ integrationServiceRelease }}"
 #define MyAppPublisher "enterprise"
 #define MyAppURL "https://www.enterprise.com/"
-#define MyAppServiceExeName "integration-service-onpremise-{{ integration-serviceRelease }}-service.exe"
-#define MyAppServiceXmlName "integration-service-onpremise-{{ integration-serviceRelease }}-service.xml"
-#define MyAppExeName "integration-service-{{ integration-serviceRelease }}.exe"
+#define MyAppServiceExeName "integration-service-onpremise-{{ integrationServiceRelease }}-service.exe"
+#define MyAppServiceXmlName "integration-service-onpremise-{{ integrationServiceRelease }}-service.xml"
+#define MyAppExeName "integration-service-{{ integrationServiceRelease }}.exe"
 #define MyAppAssocName MyAppName + " File"
 #define MyAppAssocExt ".myp"
 #define MyAppAssocKey StringChange(MyAppAssocName, " ", "") + MyAppAssocExt
@@ -86,7 +86,7 @@ begin
   ServiceRadioButton.Width := CustomPage.SurfaceWidth;
   ServiceRadioButton.Font.Style := [fsBold];
   ServiceRadioButton.Font.Size := 9;
-  ServiceRadioButton.Caption := 'Run as a service'
+  ServiceRadioButton.Caption := 'Run as a service';
   ServiceDescLabel := TLabel.Create(WizardForm);
   ServiceDescLabel.Parent := CustomPage.Surface;
   ServiceDescLabel.Left := 8;
@@ -102,7 +102,7 @@ begin
   ExecRadioButton.Width := CustomPage.SurfaceWidth;
   ExecRadioButton.Font.Style := [fsBold];
   ExecRadioButton.Font.Size := 9;
-  ExecRadioButton.Caption := 'Run by executable file'
+  ExecRadioButton.Caption := 'Run by executable file';
   ExecDescLabel := TLabel.Create(WizardForm);
   ExecDescLabel.Parent := CustomPage.Surface;
   ExecDescLabel.Left := 8;
@@ -170,7 +170,7 @@ begin
       begin
         sUnInstallString := GetUninstallString();
         sUnInstallString :=  RemoveQuotes(sUnInstallString);
-        Exec(ExpandConstant(sUnInstallString), '', '', SW_SHOW, ewWaitUntilTerminated, iResultCode)
+        Exec(ExpandConstant(sUnInstallString), '', '', SW_SHOW, ewWaitUntilTerminated, iResultCode);
         Result := True; { if you want to proceed after uninstall }
       end
       else
@@ -178,8 +178,6 @@ begin
     end
   end;
 end;
-
-{% raw %}
 
 procedure TaskKill(fileName: String);
 var

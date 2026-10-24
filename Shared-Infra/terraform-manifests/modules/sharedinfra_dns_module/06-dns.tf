@@ -30,9 +30,7 @@
 resource "azurerm_dns_zone" "my_dns" {
   name                = local.dns_zone
   resource_group_name = azurerm_resource_group.sharedinfra_rg.name
-  tags = {
-    Environment = "${local.gitbranch}${var.environment}"
-  }
+  tags                = local.tags
   # soa_record {
   #   #email = "adminit.${local.dns_zone}"
   #   email = "adminit.enterprise.com"  # required      
@@ -56,9 +54,7 @@ resource "azurerm_dns_txt_record" "example" {
   zone_name           = azurerm_dns_zone.my_dns.name
   resource_group_name = azurerm_resource_group.sharedinfra_rg.name
   ttl                 = 300
-  tags = {
-    Environment = "${local.gitbranch}${var.environment}"
-  }
+  tags                = local.tags
   record {
     value = "${local.dns_zone} subdomain - ${var.environment} environment"
   }

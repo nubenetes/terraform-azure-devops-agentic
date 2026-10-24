@@ -38,13 +38,6 @@ resource "azuread_application" "skooner_login" {
       type = "Scope"                                                                # Delegated
     }
   }
-  required_resource_access {
-    resource_app_id = "00000000-0000-0000-0000-000000000000" # Azure Kubernetes Service AAD Server
-    resource_access {
-      id   = "00000000-0000-0000-0000-000000000000" # user.read
-      type = "Scope"                                # Delegated
-    }
-  }
   ################
   # SPA settings:
   ################
@@ -89,8 +82,8 @@ resource "time_rotating" "skooner" {
 # Secrets
 ##############
 resource "azuread_application_password" "skooner_login" {
-  display_name          = "skooner-auth-secret"
-  application_object_id = azuread_application.skooner_login.object_id
+  display_name   = "skooner-auth-secret"
+  application_id = azuread_application.skooner_login.id
   rotate_when_changed = {
     rotation = time_rotating.skooner.id
   }

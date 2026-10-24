@@ -67,7 +67,7 @@ Following the **Zero Trust** model, Storage Accounts are strictly governed to pr
 
 *   **Implementation**: [`07-storage-account.tf`](../App-Core/terraform-manifests/modules/appcore_module/07-storage-account.tf).
 *   **Security Pillars**:
-    *   **HTTPS Only**: Enforced via `enable_https_traffic_only = true`.
+    *   **HTTPS and TLS 1.2+ Only**: Enforced via `https_traffic_only_enabled = true` and `min_tls_version = "TLS1_2"`.
     *   **Private Connectivity**: Integration with VNet-specific settings.
     *   **Trusted Services Bypass**: Allowed to bypass network rules for backup and monitoring purposes.
 

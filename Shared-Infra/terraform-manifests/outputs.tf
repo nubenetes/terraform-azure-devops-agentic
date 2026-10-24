@@ -28,7 +28,7 @@ output "deploy_United_States" {
 # Resource Group - DNS Global Service
 ######################################
 output "myResourceGroupDNS" {
-  value = module.dns.0.myResourceGroup
+  value = module.dns[0].myResourceGroup
   depends_on = [
     # https://www.terraform.io/language/values/outputs#depends_on-explicit-output-dependencies
     # when a parent module accesses an output value exported by one of its child modules, the dependencies of that output value allow Terraform to correctly determine
@@ -41,13 +41,13 @@ output "myResourceGroupDNS" {
 # DNS module - data.azurerm_client_config
 ###########################################
 output "myAzureSubscriptionDNS" {
-  value = module.dns.0.myAzureSubscription
+  value = module.dns[0].myAzureSubscription
   depends_on = [
     module.dns,
   ]
 }
 output "myAzureTenantIdDNS" {
-  value = module.dns.0.myAzureTenantId
+  value = module.dns[0].myAzureTenantId
   depends_on = [
     module.dns,
   ]
@@ -57,7 +57,7 @@ output "myAzureTenantIdDNS" {
 # DNS Module - DNS Zone
 ####################################
 output "dns_zone" {
-  value = module.dns.0.dns_zone
+  value = module.dns[0].dns_zone
   depends_on = [
     module.dns,
   ]
@@ -67,43 +67,43 @@ output "dns_zone" {
 # DNS Module - data.azurerm_subscription
 #########################################
 output "myAzureSubscription_idDNS" {
-  value = module.dns.0.myAzureSubscription_id
+  value = module.dns[0].myAzureSubscription_id
   depends_on = [
     module.dns,
   ]
 }
 output "myAzureSubscription_display_nameDNS" {
-  value = module.dns.0.myAzureSubscription_display_name
+  value = module.dns[0].myAzureSubscription_display_name
   depends_on = [
     module.dns,
   ]
 }
 output "myAzureSubscription_tenant_idDNS" {
-  value = module.dns.0.myAzureSubscription_tenant_id
+  value = module.dns[0].myAzureSubscription_tenant_id
   depends_on = [
     module.dns,
   ]
 }
 output "myAzureSubscription_stateDNS" {
-  value = module.dns.0.myAzureSubscription_state
+  value = module.dns[0].myAzureSubscription_state
   depends_on = [
     module.dns,
   ]
 }
 output "myAzureSubscription_location_placement_idDNS" {
-  value = module.dns.0.myAzureSubscription_location_placement_id
+  value = module.dns[0].myAzureSubscription_location_placement_id
   depends_on = [
     module.dns,
   ]
 }
 output "myAzureSubscription_quota_idDNS" {
-  value = module.dns.0.myAzureSubscription_quota_id
+  value = module.dns[0].myAzureSubscription_quota_id
   depends_on = [
     module.dns,
   ]
 }
 output "myAzureSubscription_spending_limitDNS" {
-  value = module.dns.0.myAzureSubscription_spending_limit
+  value = module.dns[0].myAzureSubscription_spending_limit
   depends_on = [
     module.dns,
   ]
@@ -113,7 +113,7 @@ output "myAzureSubscription_spending_limitDNS" {
 # DNS Module - gitbranch
 #############################
 output "gitbranchDNS" {
-  value = module.dns.0.gitbranch
+  value = module.dns[0].gitbranch
   depends_on = [
     module.dns,
   ]

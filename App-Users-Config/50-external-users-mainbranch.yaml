@@ -5,22 +5,22 @@
 # - email: cloud-admin@example.com
 #   center: &center001 Enterprise  # defines anchor label &center001
 #   env: nedev
-#   roles: admin &role001 # defines anchor label &role001
+#   role: &role001 admin # defines anchor label &role001
 # - email: cloud-admin@example.com
 #   center: client-anon
 #   env: nedev
-#   roles: user &role002 # defines anchor label &role002
+#   role: &role002 user # defines anchor label &role002
 # - email: cloud-admin@example.com
 #   center: *center001 # refers to the first center (with anchor &center001)
 #   env: neuat
-#   roles: *role001
+#   role: *role001
 # - email: cloud-admin@example.com
 #   center: Enterprise # refers to the first center (with anchor &center001)
 #   env: nedev
-#   roles: admin
+#   role: admin
 # - email: cloud-admin@example.com
 #   center: Enterprise # refers to the first center (with anchor &center001)
 #   env: neuat
-#   roles: user
+#   role: user
 ---
 []

@@ -33,6 +33,10 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "~> 2.32.0"
     }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.12.0"
+    }
   }
   # Terraform State Storage to Azure Storage Container
   # https://www.terraform.io/language/settings/backends/configuration
@@ -53,8 +57,9 @@ terraform {
 # 1. Terraform Provider Block for AzureRM with Default Enterprise Infrastructure Subscription
 # https://samcogan.com/deploying-to-multiple-azure-subscriptions-with-terraform/
 provider "azurerm" {
-  alias           = "manualinfra"
-  subscription_id = "00000000-0000-0000-0000-000000000000" # Enterprise Infrastructure Subscription
+  alias                           = "manualinfra"
+  subscription_id                 = "00000000-0000-0000-0000-000000000000" # Enterprise Infrastructure Subscription
+  resource_provider_registrations = "none"
   #region            = "northeurope"
   features {
     # resource_group behavior managed via AzureRM v4 lifecycle rules
@@ -65,8 +70,9 @@ provider "azurerm" {
 
 # 2. Terraform Provider Block for AzureRM - North Europe
 provider "azurerm" {
-  alias           = "europe"
-  subscription_id = var.azure_subscription_europe
+  alias                           = "europe"
+  subscription_id                 = var.azure_subscription_europe
+  resource_provider_registrations = "none"
   #region = "northeurope"
   features {
     key_vault {
@@ -79,8 +85,9 @@ provider "azurerm" {
 
 # 3. Terraform Provider Block for AzureRM - Central US
 provider "azurerm" {
-  alias           = "us"
-  subscription_id = var.azure_subscription_unitedstates
+  alias                           = "us"
+  subscription_id                 = var.azure_subscription_unitedstates
+  resource_provider_registrations = "none"
   #region = "centralus"
   features {
     key_vault {
@@ -177,13 +184,14 @@ provider "kubernetes" {
   cluster_ca_certificate = local.deploy_Europe ? base64decode(var.secret_aks_kube_config_cluster_ca_certificate_europe) : null
   # using kubelogin to get an AAD token for the cluster.
   exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
+    api_version = "client.authentication.k8s.io/v1"
     command     = "/usr/bin/kubelogin"
     args = [
       "get-token",
+      "--environment",
       "AzurePublicCloud",
       "--server-id",
-      data.azuread_service_principal.aks_aad_server.application_id, # Note: The AAD server app ID of AKS Managed AAD is always 00000000-0000-0000-0000-000000000000 in any environments.
+      data.azuread_service_principal.aks_aad_server.client_id, # Note: The AAD server app ID of AKS Managed AAD is always 00000000-0000-0000-0000-000000000000 in any environments.
       "--client-id",
       data.azuread_client_config.current.client_id,
       #data.azuread_service_principal.azure_devops_sp.application_id,
@@ -211,13 +219,14 @@ provider "kubernetes" {
   cluster_ca_certificate = local.deploy_United_States ? base64decode(var.secret_aks_kube_config_cluster_ca_certificate_unitedstates) : null
   # using kubelogin to get an AAD token for the cluster.
   exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
+    api_version = "client.authentication.k8s.io/v1"
     command     = "/usr/bin/kubelogin"
     args = [
       "get-token",
+      "--environment",
       "AzurePublicCloud",
       "--server-id",
-      data.azuread_service_principal.aks_aad_server.application_id, # Note: The AAD server app ID of AKS Managed AAD is always 00000000-0000-0000-0000-000000000000 in any environments.
+      data.azuread_service_principal.aks_aad_server.client_id, # Note: The AAD server app ID of AKS Managed AAD is always 00000000-0000-0000-0000-000000000000 in any environments.
       "--client-id",
       data.azuread_client_config.current.client_id,
       #data.azuread_service_principal.azure_devops_sp.application_id,
@@ -231,5 +240,3 @@ provider "kubernetes" {
     ]
   }
 }
-
-provider "null" {}

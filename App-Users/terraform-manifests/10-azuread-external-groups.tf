@@ -5,14 +5,15 @@
 # https://learn.microsoft.com/en-us/azure/active-directory/external-identities/faq
 ##################################################################################
 
-resource "azuread_group_member" "appcore_external_user" {
+resource "azuread_group_member" "external" {
   for_each = {
-    for external_user in local.yaml_external_users : "${external_user.email}" => external_user
+    for external_user in local.yaml_external_users : "${external_user.email}-${external_user.env}-${external_user.role}-${external_user.client}" => external_user
   }
-  group_object_id  = data.azuread_group.appcore_external_users["${each.value.email}"].id
-  member_object_id = data.azuread_user.appcore_external["${each.value.email}"].object_id
+  group_object_id  = data.azuread_group.external_users[each.key].id
+  member_object_id = azuread_invitation.external[each.value.email].user_id
   depends_on = [
-    data.azuread_group.appcore_external_users,
-    data.azuread_user.appcore_external,
+    data.azuread_group.external_users,
+    azuread_invitation.external,
   ]
 }
+

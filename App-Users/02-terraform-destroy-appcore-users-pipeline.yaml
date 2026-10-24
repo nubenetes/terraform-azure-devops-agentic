@@ -1,5 +1,4 @@
-trigger:
-- manual
+trigger: none
 
 pool:
   vmImage: 'ubuntu-latest' #'ubuntu-20.04'
@@ -23,5 +22,9 @@ stages:
     - template: templates/terraform-destroy.yaml
       parameters:
         environment: ${{ variables.ENVIRONMENT }}
-        SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_DEV }}
+        ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+          SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_PRO }}
+        ${{ else }}:
+          SERVICE_CONNECTION_NAME: ${{ variables.SERVICE_CONNECTION_NAME_DEV }}
         SERVICE_CONNECTION_NAME_TFSTATE: ${{ variables.SERVICE_CONNECTION_NAME_TFSTATE }}
+

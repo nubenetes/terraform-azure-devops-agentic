@@ -34,7 +34,7 @@ def parse_diagram(diag_text):
         if line.strip() == '' and idx > 0 and idx < len(raw_lines) - 1:
             syntax_errors.append(f"Line {idx+1}: Blank line inside mermaid block")
             
-        if re.search(r'-->\s*[^&]+&\s*[^&]+', line) or re.search(r'==>\s*[^&]+&\s*[^&]+', line):
+        if re.search(r'(?:-->|==>|\-\.->)\s*[^&"\'|]+&\s*[^&"\'|]+', line):
             syntax_errors.append(f"Line {idx+1}: Chained relationship with '&' is forbidden (split across lines)")
             
     lines = [l for l in raw_lines if not l.strip().startswith('%%')]
@@ -44,11 +44,11 @@ def parse_diagram(diag_text):
     for m in re.finditer(r'(\b\w+\b)\s*\[\(\s*["\']?(.*?)["\']?\s*\)\]', clean_text):
         cylinders.append((m.group(1), m.group(2)))
         
-    # 2. Nodes: ID["..."], ID(["..."]), ID[["..."]]
+    # 2. Nodes: ID["..."], ID(["..."]), ID[["..."]], ID{"..."}, ID{{"..."}}
     for line in lines:
         if line.strip().startswith('subgraph '):
             continue
-        for m in re.finditer(r'(\b\w+\b)\s*(\[|\(\[|\[\[)\s*["\']?(.*?)["\']?\s*(\]|\)\]|\]\])', line):
+        for m in re.finditer(r'(\b\w+\b)\s*(\[|\(\[|\[\[|\{\{|\{)\s*["\']?(.*?)["\']?\s*(\]|\)\]|\]\]|\}\}|\})', line):
             nid = m.group(1)
             raw_text = m.group(3)
             if nid.lower() in ('direction', 'subgraph', 'end', 'class', 'classdef', 'style'):

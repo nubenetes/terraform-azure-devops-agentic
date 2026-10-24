@@ -11,7 +11,7 @@ resource "azurerm_key_vault" "appanalysis3_keyvault" {
   purge_protection_enabled   = false
   soft_delete_retention_days = 7
   sku_name                   = "standard"
-  enable_rbac_authorization  = true
+  rbac_authorization_enabled = true
   tags = merge(local.tags, {
     Client = "${each.key}"
     }

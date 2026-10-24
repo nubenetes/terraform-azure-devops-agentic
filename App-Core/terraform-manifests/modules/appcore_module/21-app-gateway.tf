@@ -73,7 +73,7 @@ resource "azurerm_application_gateway" "appcore_agw" {
   }
   waf_configuration {
     enabled          = true
-    firewall_mode    = "Detection"
+    firewall_mode    = "Prevention"
     rule_set_type    = "OWASP"
     rule_set_version = "3.2"
   }
@@ -119,7 +119,7 @@ resource "azurerm_application_gateway" "appcore_agw" {
   ssl_certificate {
     # https://www.anycodings.com/questions/terraform-how-to-attach-ssl-certificate-stored-in-azure-keyvault-to-an-application-gateway
     name                = azurerm_key_vault_certificate.Enterprise_wildcard.name
-    key_vault_secret_id = azurerm_key_vault_certificate.Enterprise_wildcard.secret_id
+    key_vault_secret_id = azurerm_key_vault_certificate.Enterprise_wildcard.versionless_secret_id
     #password            = var.secret_certificate_passphrase
   }
   identity {
@@ -414,6 +414,7 @@ resource "azurerm_application_gateway" "appcore_agw" {
     path                                = "/"
     pick_host_name_from_backend_address = true
     port                                = 443
+    probe_name                          = "hp-viewer"
     protocol                            = "Https"
     request_timeout                     = 1800
   }
@@ -426,6 +427,7 @@ resource "azurerm_application_gateway" "appcore_agw" {
       path                                = "/" #"/pvb/${backend_http_settings.value}/"
       pick_host_name_from_backend_address = true
       port                                = 443
+      probe_name                          = "hp-viewer-back-${backend_http_settings.value}"
       protocol                            = "Https"
       request_timeout                     = 1800
     }

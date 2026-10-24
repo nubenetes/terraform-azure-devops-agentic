@@ -32,7 +32,7 @@ resource "azurerm_application_gateway" "App-Catalog_agw" {
   }
   waf_configuration {
     enabled          = true
-    firewall_mode    = "Detection"
+    firewall_mode    = "Prevention"
     rule_set_type    = "OWASP"
     rule_set_version = "3.2"
   }
@@ -58,7 +58,7 @@ resource "azurerm_application_gateway" "App-Catalog_agw" {
   }
   backend_address_pool {
     name  = var.backend_address_pool_name
-    fqdns = ["app-omni-${var.Enterprise_product}-${each.value}-${local.gitbranch}${var.environment}.azurewebsites.net"]
+    fqdns = ["app-omni-${var.Enterprise_product}-${each.value}-${local.gitbranch}${var.location_code}${var.environment}.azurewebsites.net"]
   }
   backend_http_settings {
     name                                = var.backend_http_settings_name
@@ -120,14 +120,13 @@ resource "azurerm_application_gateway" "App-Catalog_agw" {
     unhealthy_threshold                       = 3
     match {
       body        = ""
-      status_code = []
+      status_code = ["200-399"]
     }
   }
   ssl_certificate {
     # https://www.anycodings.com/questions/terraform-how-to-attach-ssl-certificate-stored-in-azure-keyvault-to-an-application-gateway
     name                = azurerm_key_vault_certificate.Enterprise_wildcard[each.key].name
-    key_vault_secret_id = azurerm_key_vault_certificate.Enterprise_wildcard[each.key].secret_id
-    password            = ""
+    key_vault_secret_id = azurerm_key_vault_certificate.Enterprise_wildcard[each.key].versionless_secret_id
   }
   identity {
     identity_ids = [azurerm_user_assigned_identity.App-Catalog_agw[each.key].id]

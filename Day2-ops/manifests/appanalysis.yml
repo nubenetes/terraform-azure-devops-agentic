@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: ivan-r-immune-orig-pembro-base-3
-  namespace: Enterprise
+  namespace: enterprise
 spec:
   parallelism: 1
   completions: 1

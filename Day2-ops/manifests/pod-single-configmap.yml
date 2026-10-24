@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: special-config
-  namespace: Enterprise
+  namespace: enterprise
 data:
   special.how: very
   special.type: charm

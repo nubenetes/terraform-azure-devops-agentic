@@ -1,13 +1,11 @@
 # File: templates/include-innosetup-build-steps.yml
 
 steps:
-- powershell: 'ls env:'
-  displayName: 'Show env'
 # Download winSW.exe
 # https://javadeveloperzone.com/spring-boot/spring-boot-as-windows-service/
 # https://github.com/winsw/winsw
 # https://github.com/winsw/winsw/releases/download/v2.12.0/WinSW-x64.exe
-- powershell: Invoke-WebRequest -Uri $(WINSW_DOWNLOAD_URL) -OutFile 'resources/integration-service-onpremise-$(integration-serviceRelease)-service.exe'
+- powershell: Invoke-WebRequest -Uri $(WINSW_DOWNLOAD_URL) -OutFile 'resources/integration-service-onpremise-$(integrationServiceRelease)-service.exe'
   displayName: 'Download winSW.exe from Internet'
   condition:  eq(variables['enableConditionAzureArtifacts'], 'false')
 - task: UniversalPackages@0
@@ -23,14 +21,14 @@ steps:
 - script: ls -l $(Build.SourcesDirectory)\publicArtifacts
   displayName: 'ls -l Build.SourcesDirectory\publicArtifacts'
   condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
-- powershell: Rename-Item -Path $(Build.SourcesDirectory)\publicArtifacts\WinSW$(winswRelease).exe -NewName integration-service-onpremise-$(integration-serviceRelease)-service.exe
+- powershell: Rename-Item -Path $(Build.SourcesDirectory)\publicArtifacts\WinSW$(winswRelease).exe -NewName integration-service-onpremise-$(integrationServiceRelease)-service.exe
   displayName: 'rename winSW.exe'
   condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
 - script: ls -l $(Build.SourcesDirectory)\publicArtifacts
   displayName: 'ls -l Build.SourcesDirectory\publicArtifacts'
   condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
 - task: CopyFiles@2
-  displayName: 'Copy integration-service winSW.exe renamed as integration-service-onpremise-$(integration-serviceRelease)-service.exe to resources folder'
+  displayName: 'Copy integration-service winSW.exe renamed as integration-service-onpremise-$(integrationServiceRelease)-service.exe to resources folder'
   condition:  eq(variables['enableConditionAzureArtifacts'], 'true')
   inputs:
     SourceFolder: '$(Build.SourcesDirectory)\publicArtifacts'
@@ -73,18 +71,18 @@ steps:
   inputs:
     version: '6.2.1'
 - task: DownloadPipelineArtifact@2
-  displayName: Grab integration-service-onpremise-$(integration-serviceRelease).jar, integration-service-onpremise-$(integration-serviceRelease).exe & innoSetupScript.iss Artifacts generated in previous stage
+  displayName: Grab integration-service-onpremise-$(integrationServiceRelease).jar, integration-service-onpremise-$(integrationServiceRelease).exe & innoSetupScript.iss Artifacts generated in previous stage
   inputs:
     source: 'current'
     path: $(Build.ArtifactStagingDirectory)
 - task: CopyFiles@2
-  displayName: 'Copy integration-service-onpremise-$(integration-serviceRelease).jar file from artifact staging directory to resources/ folder'
+  displayName: 'Copy integration-service-onpremise-$(integrationServiceRelease).jar file from artifact staging directory to resources/ folder'
   inputs:
     SourceFolder: $(Build.ArtifactStagingDirectory)/drop
     Contents: '*.?(war|jar)'
     TargetFolder: $(System.DefaultWorkingDirectory)/resources/
 - task: CopyFiles@2
-  displayName: 'Copy integration-service-onpremise-$(integration-serviceRelease).exe file from artifact staging directory to resources/ folder'
+  displayName: 'Copy integration-service-onpremise-$(integrationServiceRelease).exe file from artifact staging directory to resources/ folder'
   inputs:
     SourceFolder: $(Build.ArtifactStagingDirectory)/drop
     Contents: '*.exe'
@@ -98,7 +96,7 @@ steps:
   displayName: 'Setting up jinja2-cli'
 # Rendering innoSetupScript.j2 template in resources/ folder
 - script: >
-    jinja2 -D integration-serviceRelease=$(integration-serviceRelease)
+    jinja2 -D integrationServiceRelease=$(integrationServiceRelease)
     templates/innoSetupScript.j2 --outfile=$(System.DefaultWorkingDirectory)/resources/innoSetupScript.iss
   displayName: 'Rendering Jinja2 template: innoSetupScript.iss'
 # Rendered files:
@@ -106,12 +104,12 @@ steps:
   displayName: 'cat rendered resources/innoSetupScript.iss'
 # Rendering innoSetup-service.j2 template in resources/ folder
 - script: >
-    jinja2 -D integration-serviceRelease=$(integration-serviceRelease)
-    templates/innoSetup-service.j2 --outfile=$(System.DefaultWorkingDirectory)/resources/integration-service-onpremise-$(integration-serviceRelease)-service.xml
-  displayName: 'Rendering Jinja2 template: integration-service-onpremise-$(integration-serviceRelease)-service.xml'
+    jinja2 -D integrationServiceRelease=$(integrationServiceRelease)
+    templates/innoSetup-service.j2 --outfile=$(System.DefaultWorkingDirectory)/resources/integration-service-onpremise-$(integrationServiceRelease)-service.xml
+  displayName: 'Rendering Jinja2 template: integration-service-onpremise-$(integrationServiceRelease)-service.xml'
 # Rendered files:
-- script: cat resources/integration-service-onpremise-$(integration-serviceRelease)-service.xml
-  displayName: 'cat resources/integration-service-onpremise-$(integration-serviceRelease)-service.xml'
+- script: cat resources/integration-service-onpremise-$(integrationServiceRelease)-service.xml
+  displayName: 'cat resources/integration-service-onpremise-$(integrationServiceRelease)-service.xml'
 - script: ls -l resources/
   displayName: 'ls -l resources/'
 - task: Build@1 # Innosetup Build .
@@ -130,11 +128,11 @@ steps:
     contents: '*.exe'
     targetFolder: '$(Build.ArtifactStagingDirectory)'
 - task: AzureCLI@2
-  displayName: 'run scripts/09-createStorageContainer-upload-integration-service-OnPremInstaller-createURL.ps1'
+  displayName: 'run scripts/09-createStorageContainer-upload-App-Link-OnPremInstaller-createURL.ps1'
   inputs:
     azureSubscription: $(serviceConnection)
     scriptType: 'ps'
     scriptLocation: 'scriptPath'
-    scriptPath: 'scripts/09-createStorageContainer-upload-integration-service-OnPremInstaller-createURL.ps1'
+    scriptPath: 'scripts/09-createStorageContainer-upload-App-Link-OnPremInstaller-createURL.ps1'
     arguments: '$(resourceGroup) $(rgLocation) $(storageAccount) $(storageContainerName) $(blobName) $(storageAccountTags) $(spName) $(Build.ArtifactStagingDirectory) $(appRegisterTimestamp)'
   name: ProduceVarBlobFileDownloadUrlOutput

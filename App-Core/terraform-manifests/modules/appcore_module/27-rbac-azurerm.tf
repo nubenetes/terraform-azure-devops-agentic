@@ -219,7 +219,7 @@ resource "azurerm_role_assignment" "aad_developers_group_storage_blob_data_reade
 ####################################################################################################
 resource "azurerm_role_assignment" "appcore_front_storage_blob_data_reader" {
   role_definition_name = "Storage Blob Data Reader" # Built-in role: Allows for read access to Azure Storage blob containers and data.
-  principal_id         = azuread_service_principal.appcore_front_spa.id
+  principal_id         = azuread_service_principal.appcore_front_spa.object_id
   scope                = azurerm_storage_container.appcore.resource_manager_id
 }
 
@@ -228,7 +228,7 @@ resource "azurerm_role_assignment" "appcore_front_storage_blob_data_reader" {
 ####################################################################################################
 resource "azurerm_role_assignment" "applink_cloud_storage_blob_data_reader" {
   role_definition_name = "Storage Blob Data Reader" # Built-in role: Allows for read access to Azure Storage blob containers and data.
-  principal_id         = azuread_service_principal.applink_cloud_api.id
+  principal_id         = azuread_service_principal.applink_cloud_api.object_id
   scope                = azurerm_storage_container.appcore.resource_manager_id
 }
 
@@ -241,7 +241,7 @@ resource "azurerm_role_assignment" "appcore_back_api" {
   #for_each             = toset(var.client_names)
   role_definition_name = "Log Analytics Contributor"
   # Built-in role: Log Analytics Contributor can read all monitoring data and edit monitoring settings. Editing monitoring settings includes adding the VM extension to VMs; reading storage account keys to be able to configure collection of logs from Azure Storage; adding solutions; and configuring Azure diagnostics on all Azure resources.
-  principal_id = azuread_service_principal.appcore_back_api.id
+  principal_id = azuread_service_principal.appcore_back_api.object_id
   #scope                = azurerm_log_analytics_workspace.appcore_myclient[each.key].id
   scope = azurerm_log_analytics_workspace.appcore_back.id
 }
@@ -250,7 +250,7 @@ resource "azurerm_role_assignment" "applink_cloud" {
   #for_each             = toset(var.client_names)
   role_definition_name = "Log Analytics Contributor"
   # Built-in role: Log Analytics Contributor can read all monitoring data and edit monitoring settings. Editing monitoring settings includes adding the VM extension to VMs; reading storage account keys to be able to configure collection of logs from Azure Storage; adding solutions; and configuring Azure diagnostics on all Azure resources.
-  principal_id = azuread_service_principal.applink_cloud_api.id
+  principal_id = azuread_service_principal.applink_cloud_api.object_id
   #scope                = azurerm_log_analytics_workspace.appcore_myclient[each.key].id
   scope = azurerm_log_analytics_workspace.applink_cloud.id
 }

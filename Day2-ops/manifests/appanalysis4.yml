@@ -1,8 +1,8 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: Enterprise-Enterpriseapp-analysis-63f7dac2
-  namespace: Enterprise
+  name: enterprise-enterpriseapp-analysis-63f7dac2
+  namespace: enterprise
   labels:     
     jobgroup: jobapp-analysisexample
     app: appcore  

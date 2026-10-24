@@ -10,17 +10,17 @@
 # (for example at the Container or Blob level) — and not that all resources within this Storage Account are public by default.
 
 resource "azurerm_storage_account" "appcore" {
-  name                     = local.storage_account_name
-  location                 = local.location
-  resource_group_name      = azurerm_resource_group.appcore_rg.name
-  account_replication_type = var.storage_account_replication_type #"RAGRS" #"LRS"
-  account_tier             = var.storage_account_tier             #"Standard"
-  account_kind             = "StorageV2"
-  min_tls_version          = "TLS1_2"
-  access_tier              = "Hot"
-  #allow_nested_items_to_be_public = true
-  public_network_access_enabled = true # (Optional) Whether the public network access is enabled? Defaults to true.
-  tags                          = local.tags
+  name                            = local.storage_account_name
+  location                        = local.location
+  resource_group_name             = azurerm_resource_group.appcore_rg.name
+  account_replication_type        = var.storage_account_replication_type #"RAGRS" #"LRS"
+  account_tier                    = var.storage_account_tier             #"Standard"
+  account_kind                    = "StorageV2"
+  min_tls_version                 = "TLS1_2"
+  access_tier                     = "Hot"
+  allow_nested_items_to_be_public = true
+  public_network_access_enabled   = true # (Optional) Whether the public network access is enabled? Defaults to true.
+  tags                            = local.tags
   share_properties {
     cors_rule {
       allowed_origins = ["*"] # Not secure, origins are each customer addr  (Required) A list of origin domains that will be allowed by CORS.
@@ -40,8 +40,8 @@ resource "azurerm_storage_account" "appcore" {
   ]
 }
 resource "azurerm_storage_container" "appcore" {
-  name                 = "co-${var.Enterprise_product}-${local.instance_environment}"
-  storage_account_name = azurerm_storage_account.appcore.name
+  name               = "co-${var.Enterprise_product}-${local.instance_environment}"
+  storage_account_id = azurerm_storage_account.appcore.id
   #container_access_type = "private"
   container_access_type = "blob"
 }
@@ -55,7 +55,12 @@ resource "azurerm_storage_blob" "appcore_front_angular_settings" {
   storage_container_name = azurerm_storage_container.appcore.name
   type                   = "Block"
   content_type           = "text/plain"
-  source_content         = data.template_file.template_appcore_front_angular_settings.rendered
+  source_content = templatefile("${path.root}/template-appcore-front-angular-settings.json", {
+    clientId     = azuread_application.appcore_front_spa.client_id
+    beScope      = local.appr_name_appcore_back_api
+    applinkScope = local.appr_name_applink_cloud_api
+    url          = local.appcore_fqdn
+  })
 }
 
 ################################################################

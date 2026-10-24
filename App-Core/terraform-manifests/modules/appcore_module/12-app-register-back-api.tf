@@ -207,7 +207,7 @@ resource "azuread_application" "appcore_back_api" {
     requested_access_token_version = 2
     # Manifest blade - Sets accessTokenAcceptedVersion property to 2 - https://github.com/hashicorp/terraform-provider-azuread/issues/188
     # https://learn.microsoft.com/en-gb/azure/active-directory/develop/reference-app-manifest#accesstokenacceptedversion-attribute
-    known_client_applications = [azuread_application.appcore_front_spa.application_id]
+    known_client_applications = [azuread_application.appcore_front_spa.client_id]
     # (Optional) A set of application IDs (client IDs), used for bundling consent if you have a solution that contains two parts: a client app and a custom web API app.
     # Configure knownClientApplications for service app https://github.com/Azure-Samples/ms-identity-javascript-tutorial/blob/main/4-AdvancedGrants/1-call-api-graph/README.md#configure-knownclientapplications-for-service-app
     # For a middle tier Web API to be able to call a downstream Web API, the middle tier app needs to be granted the required permissions as well. However, since the middle tier cannot interact with the signed-in user, it needs
@@ -409,9 +409,9 @@ resource "azuread_application" "applink_cloud_api" {
     #mapped_claims_enabled          = true #(Optional) Allows an application to use claims mapping without specifying a custom signing key. Defaults to false.
     #requested_access_token_version = 2
     # https://learn.microsoft.com/en-gb/azure/active-directory/develop/reference-app-manifest#accesstokenacceptedversion-attribute
-    known_client_applications = [azuread_application.appcore_front_spa.application_id, azuread_application.appcore_back_api.application_id]
-    #known_client_applications = [azuread_application.appcore_front_spa.application_id]
-    #known_client_applications = [azuread_application.appcore_back_api.application_id]
+    known_client_applications = [azuread_application.appcore_front_spa.client_id, azuread_application.appcore_back_api.client_id]
+    #known_client_applications = [azuread_application.appcore_front_spa.client_id]
+    #known_client_applications = [azuread_application.appcore_back_api.client_id]
     # Configure knownClientApplications for service app https://github.com/Azure-Samples/ms-identity-javascript-tutorial/blob/main/4-AdvancedGrants/1-call-api-graph/README.md#configure-knownclientapplications-for-service-app
     # For a middle tier Web API to be able to call a downstream Web API, the middle tier app needs to be granted the required permissions as well. However, since the middle tier cannot interact with the signed-in user, it needs
     # to be explicitly bound to the client app in its Azure AD registration. This binding merges the permissions required by both the client and the middle tier Web Api and presents it to the end user in a single consent dialog.
@@ -548,7 +548,7 @@ resource "azuread_application" "app-analysis_viewer_back_api_myclient" {
     requested_access_token_version = 2 # Manifest blade - Sets accessTokenAcceptedVersion property to 2 - https://github.com/hashicorp/terraform-provider-azuread/issues/188
     # known_client_applications = [
     #   # Configure knownClientApplications for service app https://github.com/Azure-Samples/ms-identity-javascript-tutorial/blob/main/4-AdvancedGrants/1-call-api-graph/README.md#configure-knownclientapplications-for-service-app
-    #   azuread_application.app-analysis_viewer_front_spa.application_id,
+    #   azuread_application.app-analysis_viewer_front_spa.client_id,
     # ]
     ##################################################################################
     # PERMISSION SCOPES (oauth2_permission_scope) - Delegated Permissions (Scope)
@@ -676,27 +676,27 @@ resource "azuread_application" "app-analysis_viewer_back_api_myclient" {
 #     To enable this behavior, the resource’s application registration must include the client’s App ID as a knownClientApplications in its application manifest.
 ########################################################################################################################################################
 resource "azuread_application_pre_authorized" "appcore_back_api" {
-  application_object_id = azuread_application.appcore_back_api.object_id
-  authorized_app_id     = azuread_application.appcore_front_spa.application_id
-  permission_ids        = [azuread_application.appcore_back_api.oauth2_permission_scope_ids["user_impersonation"]]
+  application_id       = azuread_application.appcore_back_api.id
+  authorized_client_id = azuread_application.appcore_front_spa.client_id
+  permission_ids       = [azuread_application.appcore_back_api.oauth2_permission_scope_ids["user_impersonation"]]
   depends_on = [
     azuread_application.appcore_back_api,
     azuread_application.appcore_front_spa,
   ]
 }
 resource "azuread_application_pre_authorized" "applink_cloud_api" {
-  application_object_id = azuread_application.applink_cloud_api.object_id
-  authorized_app_id     = azuread_application.appcore_front_spa.application_id
-  permission_ids        = [azuread_application.applink_cloud_api.oauth2_permission_scope_ids["General"]]
+  application_id       = azuread_application.applink_cloud_api.id
+  authorized_client_id = azuread_application.appcore_front_spa.client_id
+  permission_ids       = [azuread_application.applink_cloud_api.oauth2_permission_scope_ids["General"]]
 }
 resource "azuread_application_pre_authorized" "appcore_back_api_applink_cloud_api" {
-  application_object_id = azuread_application.applink_cloud_api.object_id
-  authorized_app_id     = azuread_application.appcore_back_api.application_id
-  permission_ids        = [azuread_application.applink_cloud_api.oauth2_permission_scope_ids["General"]]
+  application_id       = azuread_application.applink_cloud_api.id
+  authorized_client_id = azuread_application.appcore_back_api.client_id
+  permission_ids       = [azuread_application.applink_cloud_api.oauth2_permission_scope_ids["General"]]
 }
 
 # resource "azuread_application_pre_authorized" "applink_cloud_api" {
-#   application_object_id       = azuread_application.applink_cloud_api.object_id
-#   authorized_app_id           = azuread_application.appcore_front_spa.application_id
-#   permission_ids              = [azuread_application.applink_cloud_api.oauth2_permission_scope_ids["user_impersonation"]]
+#   application_id       = azuread_application.applink_cloud_api.id
+#   authorized_client_id = azuread_application.appcore_front_spa.client_id
+#   permission_ids       = [azuread_application.applink_cloud_api.oauth2_permission_scope_ids["user_impersonation"]]
 # }

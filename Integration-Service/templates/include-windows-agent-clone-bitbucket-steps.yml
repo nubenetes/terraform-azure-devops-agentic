@@ -9,8 +9,6 @@ steps:
     autocrlf: true      # CRLF issue (see details in README file). We leave this enabled just in case .gitattributes is not setup on bitbucket repo.
 - script: git config --system -l 
   displayName: git config system wide   
-- powershell: 'ls env:'
-  displayName: 'Show env'
 - bash: |
     echo "Bitbucket ref: $TOOLS_REF"
   displayName: Bitbucket ref   # https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/multi-repo-checkout

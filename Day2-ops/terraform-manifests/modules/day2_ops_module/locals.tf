@@ -19,7 +19,7 @@ locals {
   appr_name_grafana_apps_login          = "appr-aks-grafana-${local.environment_with_location_code}"
   aad_group_aks_developers_name         = "AAD_AKS_Developers_${local.environment_with_location_code}"
   mylist_wildcard_certs                 = data.azurerm_key_vault_secrets.wildcards_Enterprise_com.names
-  secret_name_in_akv_with_wildcard_cert = one([for item in local.mylist_wildcard_certs : item if can(regex("-${local.dns_child_zone}-", item))]) # https://stackoverflow.com/questions/71052674/get-item-contains-substring-terraform
+  secret_name_in_akv_with_wildcard_cert = try(tolist([for item in local.mylist_wildcard_certs : item if can(regex("-${local.dns_child_zone}-", item))])[0], "") # https://stackoverflow.com/questions/71052674/get-item-contains-substring-terraform
   aks_cluster_name                      = "aks-${local.environment_with_location_code}"
   aks_resource_group_name               = "rg-sharedinfra-aks-${local.environment_with_location_code}"
   appr_name_prometheus_login            = "appr-aks-prometheus-${local.environment_with_location_code}"

@@ -17,8 +17,8 @@ resource "azurerm_key_vault" "appcore_keyvault_agw" {
   # You can create a new key vault with soft delete off for a limited time using CLI / PowerShell / REST API.
   # The ability to create a key vault with soft delete disabled will be fully deprecated by the end of the year (2022).
   # It can be configured to between 7 to 90 days. Once it has been set, it cannot be changed or removed.
-  tags                      = local.tags
-  enable_rbac_authorization = true
+  tags                       = local.tags
+  rbac_authorization_enabled = true
   depends_on = [
     azurerm_resource_group.appcore_rg,
   ]

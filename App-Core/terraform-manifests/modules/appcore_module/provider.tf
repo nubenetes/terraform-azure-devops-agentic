@@ -12,28 +12,34 @@
 # Azure Provider source and version being used
 
 terraform {
-  #required_version = ">= 1.9.0, < 2.0.0"  #"1.2.8"
+  required_version = ">= 1.9.0, < 2.0.0"
   required_providers {
     azurerm = {
-      source = "hashicorp/azurerm"
-      #version = ">= 3.22"  #"3.20.0" #"3.21.1" #"3.15.0"
+      source                = "hashicorp/azurerm"
+      version               = "~> 4.0"
+      configuration_aliases = [azurerm.manualinfra]
       # https://docs.microsoft.com/en-us/azure/developer/terraform/provider-version-history-azurerm
     }
     # Configure the Azure Active Directory Provider
     azuread = {
-      source = "hashicorp/azuread"
-      #version = ">= 2.28" #"2.28.1" #"~> 2.7.0"   #"2.26.1"
+      source  = "hashicorp/azuread"
+      version = "~> 3.0"
     }
-    # random = {
-    #   source  = "hashicorp/random"
-    #   version = "~> 3.4" #"~> 3.0"
-    # }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.6.2"
+    }
     mongodbatlas = {
-      source = "mongodb/mongodbatlas"
-      #version     = "~> 1.4" #"~> 0.9.1"
+      source  = "mongodb/mongodbatlas"
+      version = "~> 1.25.0"
     }
     kubernetes = {
-      source = "hashicorp/kubernetes"
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.32.0"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.12.0"
     }
   }
 }
